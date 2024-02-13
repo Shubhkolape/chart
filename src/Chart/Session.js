@@ -27,7 +27,7 @@ function Session() {
     },
   };
 
-      const labels = ["Session1", "Session2","Session3","Session4","Session5", "Session6"];
+      const labels = ["Session1", "Session2","Session3","Session4","Session5", "Session6", "Session7"];
     
 
     //  function for convert time format 
@@ -45,7 +45,7 @@ function Session() {
     const createdArray = data1.map(obj => obj.created)
     const endedArray = data1.map(obj => obj.ended)
     var getstartTime = createdArray.map(timestamp => convertToNormalTime(timestamp));
-    console.log("getstartTime", getstartTime);
+    // console.log("getstartTime", getstartTime);
 
     var getendTime = endedArray.map(timestamp => convertToNormalTime(timestamp));
 
@@ -73,7 +73,7 @@ function Session() {
     var diff = getTimeDiff(startTime, endTime, 'm'); // Calculate difference
     diffs.push(diff); // Push the difference to the diffs array
 }
-        console.log("diffs", diffs);
+        // console.log("diffs", diffs);
 
 
         const data = {
@@ -90,7 +90,7 @@ function Session() {
         };
     
       return (
-        <div>
+        <div className='session'>
             <Line options={options} data={data} />
         </div>
     );
