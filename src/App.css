@@ -13,18 +13,46 @@
   color: white;
 }
 
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-
 .session{
   height: 20%;
   width: 900px;
+}
+
+ form .user-details{
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-left: 400px;
+ }
+
+
+form .user-details .input-box{
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+form .button{
+  display: inline;
+}
+
+table {
+  padding: 30px;
+  margin: auto;
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+}
+
+td, th {
+  text-align: center;
+  border: 1px solid #dddddd;
+  padding: 8px;
+}
+
+
+.pagination{
+  margin-top: 30px;
+  margin-left: 410px;
+  display: flex;
+  list-style-type: none;
 }

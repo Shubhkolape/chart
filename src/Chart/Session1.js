@@ -1,4 +1,4 @@
-import CobrowseAPI from "cobrowse-agent-sdk";
+  import CobrowseAPI from "cobrowse-agent-sdk";
 import React, { useEffect } from "react";
 import config from "../utils/config";
 // import data1 from '../data1'
