@@ -9,30 +9,38 @@ function AgentData() {
   const [APIdata, setAPIdata] = useState([]);
   const [page, setPage] = useState(1);
   const [toDate, seToDate] = useState("");
-  const [formDate, setFormDate] = useState("");
+  const [fromDate, setFroDate] = useState("");
+
+
+
+  const today = new Date();
+  const formatToday = `${today.getFullYear()}/${("0" +(today.getMonth() + 1)).slice(-2)}/${("0" + today.getDate()).slice(-2)}`;
+  const previousDate = new Date(today);
+  previousDate.setDate(previousDate.getDate() - 10);
+  const formatPreviousDate = `${previousDate.getFullYear()}/${("0" +(previousDate.getMonth() + 1)).slice(-2)}/${("0" + previousDate.getDate()).slice(-2)}`;
 
   useEffect(() => {
     const fetchData = async () => {
       const agentToken = config.agentToken;
       const cobrowse = new CobrowseAPI(agentToken);
-
       try {
         const sessions = await cobrowse.sessions.list({
-          // activated_after: "2024-01-08",
-          // activated_before: "2024-02-10",
-          limit: 10,
+          activated_after: formatToday,
+          activated_before: formatPreviousDate,
+          limit: 10000,
         });
         const sessionIds = sessions.map((session) => session.id);
-        // const sessionlist = sessions.map(session => session.list);
         console.log("API list ----> ", JSON.stringify(sessions));
         setAPIdata(sessionIds);
-      } catch (error) {
+            } catch (error) {
         console.error("Error fetching cobrowse data:", error);
       }
     };
 
     fetchData();
-  }, []);
+  }, [formatToday, formatPreviousDate]);
+
+
 
   const convertAndFormatDate = (userInputDate) => {
     console.log("userInputDate-----", userInputDate);
@@ -52,25 +60,26 @@ function AgentData() {
     }
   };
 
-  async function finalDate(toDate, formDate) {
-    const abc = convertAndFormatDate(toDate);
-    console.log("formatedDate ----- ", abc);
 
-    const xyz = convertAndFormatDate(formDate);
-    console.log(xyz);
+  async function finalDate(toDate, fromDate) {
 
+    const userFromdate = convertAndFormatDate(fromDate);
+    console.log(userFromdate);
+    const UserInputDate = convertAndFormatDate(toDate);
+    console.log("formatedDate ----- ", UserInputDate);
     try {
       const agentToken = config.agentToken;
       const cobrowse = new CobrowseAPI(agentToken);
       const sessions = await cobrowse.sessions.list({
-        activated_after: abc,
-        activated_before: xyz,
+        activated_after: userFromdate,
+        activated_before: UserInputDate,
         limit: 1000,
       });
-
+      
       const sessionIds = sessions.map((session) => session.id);
+      // console.log(" all sessionIds ---->", sessionIds);
       const nhfg = sessions.map((session) => session);
-      console.log("Specific date data ---->", nhfg);
+      console.log("Specific date data ---->", JSON.stringify(nhfg));
       setAPIdata(sessionIds);
     } catch (error) {
       console.error("Error fetching cobrowse data:", error);
@@ -79,26 +88,13 @@ function AgentData() {
 
   const handleFormSubmit = (event) => {
     event.preventDefault();
-    if (toDate && formDate) {
-      finalDate(toDate, formDate);
-
-      const start = new Date(toDate);
-      const end = new Date(formDate);
-      const datesArray = [];
-      let currentDate = start;
-
-      while (currentDate <= end) {
-        datesArray.push(new Date(currentDate));
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-
-      setRenderedDates(datesArray);
+    if (toDate && fromDate) {
+      finalDate(fromDate, toDate);
     } else {
       console.error("Invalid date format");
     }
   };
 
-  const [renderedDates, setRenderedDates] = useState([]);
 
   const totalSerialNo = (page - 1) * itemsPerPage + 1;
   const handleChange = (event, newPage) => {
@@ -117,7 +113,7 @@ function AgentData() {
       <form onSubmit={handleFormSubmit}>
         <div className="user-details">
           <div className="input-box">
-            <span className="details">To</span>
+            <span className="details">From</span>
             <input
               type="date"
               required
@@ -128,13 +124,13 @@ function AgentData() {
             />
           </div>
           <div className="input-box">
-            <span className="details">From</span>
+            <span className="details">TO</span>
             <input
               type="date"
-              value={formDate}
+              value={fromDate}
               required
               onChange={(e) => {
-                setFormDate(e.target.value);
+                setFroDate(e.target.value);
               }}
             />
           </div>
@@ -149,23 +145,22 @@ function AgentData() {
           <thead>
             <tr>
               <th>S.N</th>
-              <th>Date</th>
               <th>ID</th>
+              <th>Date</th>
             </tr>
           </thead>
           <tbody>
-            {currentPageData.map((id, index) => {
-              const date = renderedDates[index]
-                ? renderedDates[index].toDateString()
-                : "";
-              return (
-                <tr key={index}>
-                  <td>{totalSerialNo + index}</td>
-                  <td>{date}</td>
-                  <td>{id}</td>
-                </tr>
-              );
-            })}
+            {currentPageData.map((id, index)=>{
+                 return (
+                      <tr key={index}>
+                        <td>
+                          {totalSerialNo + index}
+                        </td>
+                        {/* <td>{date}</td> */}
+                        <td>{id}</td>
+                      </tr>
+                    )
+                  })}
           </tbody>
         </table>
       </div>

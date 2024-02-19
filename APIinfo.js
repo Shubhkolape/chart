@@ -88,3 +88,89 @@
       //     });
       //     setAPIdata(abcd)
       //     console.log("APIdata ----> ", APIdata);
+
+
+
+      // 16-02-2014   5:32PM
+
+
+      
+
+
+      //  { 
+//                   currentPageData.map((id, index)=>{
+//                     const date = renderedDates[index] ? renderedDates[index].toDateString() : '' ;
+//                     return (
+//                       <tr key={index}>
+//                         <td>
+//                           {totalSerialNo + index}
+//                         </td>
+//                         <td>{date}</td>
+//                         <td>{id}</td>
+//                       </tr>
+//                     )
+//                   })
+//                 }
+
+
+
+
+                // <div>{APIdata.length === 0 ?( <p>No data Available from to {formatPreviousDate }  to {formatToday} </p>) :("")}</div>
+
+                // <div>
+                //           { 
+                //         APIdata.length === 0 ? (<p>No data Available from to {formatPreviousDate }  to {formatToday} </p>) : (
+                //           currentPageData.map((id, index)=>{
+                //             const date = renderedDates[index] ? renderedDates[index].toDateString() : '' ;
+                //             return (
+                //               <tr key={index}>
+                //                 <td>
+                //                   {totalSerialNo + index}
+                //                 </td>
+                //                 <td>{date}</td>
+                //                 <td>{id}</td>
+                //               </tr>
+                //             )
+                //           })
+                //         )
+                //           }
+
+
+
+
+
+                          // const sessionIds = sessions.map((session) => session.id);
+                          // console.log("API list ----> ", JSON.stringify(sessions));
+                          // setAPIdata(sessionIds);
+                          // const start = new Date(formatToday);
+                          // const end = new Date(formatPreviousDate);
+                          // const datesArray = [];
+                          // let currentDate = start;
+                    
+                          // while (currentDate <= end) {
+                          //   datesArray.push(new Date(currentDate));
+                          //   currentDate.setDate(currentDate.getDate() + 1);
+                          // }
+                    
+                          // setRenderedDates(datesArray);
+
+
+
+
+
+
+
+                        //   <tbody>
+                        //   {currentPageData.map((id, index) => {
+                        //     const date = renderedDates[index]
+                        //       ? renderedDates[index].toDateString()
+                        //       : "";
+                        //     return (
+                        //       <tr key={index}>
+                        //         <td>{totalSerialNo + index}</td>
+                        //         <td>{date}</td>
+                        //         <td>{id}</td>
+                        //       </tr>
+                        //     );
+                        //   })}
+                        // </tbody>
