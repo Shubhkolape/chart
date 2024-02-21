@@ -1,12 +1,14 @@
-import React from 'react'
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler, Legend,} from 'chart.js';
+import { CategoryScale, Chart as ChartJS, Filler, Legend, LineElement, LinearScale, PointElement, Title, Tooltip, } from 'chart.js';
+import React from 'react';
 import { Line } from 'react-chartjs-2';
-import data1 from '../data1'
+import data1 from '../../data1';
 ChartJS.register(CategoryScale,LinearScale,PointElement,LineElement,Title,Tooltip,Filler,Legend);
 
 
 
-function Session() {
+function SessionInTimeChart() {
+
+
   const options = {
     responsive: true,
     plugins: {
@@ -64,16 +66,17 @@ function Session() {
       }
       return diffMinutes;
   }
-  var diffs = []; 
 
-  
+
+
+  var diffs = []; 
   for (var i = 0; i < getstartTime.length; i++) {
-    var startTime = getstartTime[i].replace('.', ':'); // Replace '.' with ':'
-    var endTime = getendTime[i].replace('.', ':'); // Replace '.' with ':'
-    var diff = getTimeDiff(startTime, endTime, 'm'); // Calculate difference
-    diffs.push(diff); // Push the difference to the diffs array
+    var startTime = getstartTime[i].replace('.', ':'); 
+    var endTime = getendTime[i].replace('.', ':'); 
+    var diff = getTimeDiff(startTime, endTime, 'm'); 
+    diffs.push(diff); 
 }
-        // console.log("diffs", diffs);
+
 
 
         const data = {
@@ -97,4 +100,4 @@ function Session() {
   
 }
 
-export default Session
+export default SessionInTimeChart
