@@ -27,150 +27,67 @@
 
 // "6467482d346e69cb6c48919b"
 
+  //  <table>
+  //         <thead>
+  //           <tr>
+  //             <th>SessionNo</th>
+  //             <th>Date</th>
+  //             <th>Start Time</th>
+  //             <th>End Time</th>
+  //             <th>App Name</th>
+  //             <th>Device Timezone</th>
+  //           </tr>
+  //         </thead>
+  //         <tbody>
+  //           {data.map((session, index) => (
+  //             <tr key={session.id}>
+  //               <td>{generateSessionLabel(index)}</td>
 
+  //               <td>
+  //                 {session.toJSON().activated.toISOString().split("T")[0]}
+  //               </td>
+  //               <td>
+  //                 {
+  //                   session
+  //                     .toJSON()
+  //                     .activated.toISOString()
+  //                     .split("T")[1]
+  //                     .split("Z")[0]
+  //                 }
+  //               </td>
+  //               <td>
+  //                 {
+  //                   session
+  //                     .toJSON()
+  //                     .ended.toISOString()
+  //                     .split("T")[1]
+  //                     .split("Z")[0]
+  //                 }
+  //               </td>
+  //               <td>{session.device.app_name}</td>
+  //               <td>{session.device.device_timezone}</td>
+  //             </tr>
+  //           ))}
+  //         </tbody>
+  //       </table> 
 
-  // useEffect(() => {
-    //   const fetchData = async () => {
-    //     const agentToken = config.agentToken;
-    //     const cobrowse = new CobrowseAPI(agentToken);
-    //     try {
-    //       let data = await cobrowse.sessions.list({
-    //         activated_after: "2024-02-08",
-    //         activated_before: "2024-02-10",
-    //         limit: 10000,
-    //       });
-    //       console.log("API Data", JSON.stringify(data));
-    //       // setAPIdata(maindata);
-    //     } catch (error) {
-    //       console.error("Error fetching cobrowse data:", error);
-    //     }
-    //   };
-    //   fetchData();
-    // }, []);
-
-
-
-//     {groupedData.map((item) => (
-//       <tr key={item.date}>
-//           <td>{item.serialNo}</td>
-//           <td>{item.date}</td>
-//           <td>{item.numberOfRequests}</td>
-//       </tr>
-//   ))}
-
-// const groupedData = formattedData.reduce((acc, item) => {
-//    const existingGroup = acc.find(group => group.date === item.date);
-//    if (existingGroup) {
-//        existingGroup.numberOfRequests++;
-//    } else {
-//        acc.push(item);
-//    }
-//    return acc;
-// }, []);
-
-   // const formattedData = apiData.map((item, index) => ({
-      //   serialNo: index + 1,
-      //   // date: item.date,
-      //   // numberOfRequests: 0, 
-      // }));
-
-
-
-            //  let data = await cobrowse.sessions.list({
-      //       limit: 50,
-      //     });
-      //     let sessionJSON = [];
-      //     let count=0
-      //   let abcd =   data.forEach((ele) => {
-      //       count++
-      //       sessionJSON.push(ele.toJSON().id);
-      //       console.log(count ,'==',ele.toJSON().id);
-      //     });
-      //     setAPIdata(abcd)
-      //     console.log("APIdata ----> ", APIdata);
-
-
-
-      // 16-02-2014   5:32PM
-
-
-      
-
-
-      //  { 
-//                   currentPageData.map((id, index)=>{
-//                     const date = renderedDates[index] ? renderedDates[index].toDateString() : '' ;
-//                     return (
-//                       <tr key={index}>
-//                         <td>
-//                           {totalSerialNo + index}
-//                         </td>
-//                         <td>{date}</td>
-//                         <td>{id}</td>
-//                       </tr>
-//                     )
-//                   })
-//                 }
-
-
-
-
-                // <div>{APIdata.length === 0 ?( <p>No data Available from to {formatPreviousDate }  to {formatToday} </p>) :("")}</div>
-
-                // <div>
-                //           { 
-                //         APIdata.length === 0 ? (<p>No data Available from to {formatPreviousDate }  to {formatToday} </p>) : (
-                //           currentPageData.map((id, index)=>{
-                //             const date = renderedDates[index] ? renderedDates[index].toDateString() : '' ;
-                //             return (
-                //               <tr key={index}>
-                //                 <td>
-                //                   {totalSerialNo + index}
-                //                 </td>
-                //                 <td>{date}</td>
-                //                 <td>{id}</td>
-                //               </tr>
-                //             )
-                //           })
-                //         )
-                //           }
-
-
-
-
-
-                          // const sessionIds = sessions.map((session) => session.id);
-                          // console.log("API list ----> ", JSON.stringify(sessions));
-                          // setAPIdata(sessionIds);
-                          // const start = new Date(formatToday);
-                          // const end = new Date(formatPreviousDate);
-                          // const datesArray = [];
-                          // let currentDate = start;
-                    
-                          // while (currentDate <= end) {
-                          //   datesArray.push(new Date(currentDate));
-                          //   currentDate.setDate(currentDate.getDate() + 1);
-                          // }
-                    
-                          // setRenderedDates(datesArray);
-
-
-
-
-
-
-
-                        //   <tbody>
-                        //   {currentPageData.map((id, index) => {
-                        //     const date = renderedDates[index]
-                        //       ? renderedDates[index].toDateString()
-                        //       : "";
-                        //     return (
-                        //       <tr key={index}>
-                        //         <td>{totalSerialNo + index}</td>
-                        //         <td>{date}</td>
-                        //         <td>{id}</td>
-                        //       </tr>
-                        //     );
-                        //   })}
-                        // </tbody>
+  //  <table className=" Duration-table">
+  //       <thead>
+  //         <tr>
+  //           <th>SR</th>
+  //           <th>Date</th>
+  //           <th>Sessions</th>
+  //           <th>Duration (Min)</th>
+  //         </tr>
+  //       </thead>
+  //       <tbody>
+  //         {sessions.map((session, index) => (
+  //           <tr key={index}>
+  //             <td>{index + 1}</td>
+  //             <td>{formatDate(session.created)}</td>
+  //             <td>{generateSessionLabel(index)}</td>
+  //             <td>{calculateDuration(session.created, session.ended)}</td>
+  //           </tr>
+  //         ))}
+  //       </tbody>
+  //     </table> 

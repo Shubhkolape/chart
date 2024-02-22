@@ -1,3 +1,4 @@
+import { DataGrid } from "@mui/x-data-grid";
 import React from "react";
 
 function SessionDetailsModal({ data, onClose }) {
@@ -5,73 +6,47 @@ function SessionDetailsModal({ data, onClose }) {
     return `Session${index + 1}`;
   };
 
+  const columns = [
+    { field: "sessionNo", headerName: "SessionNo", width: 120 },
+    { field: "date", headerName: "Date", width: 120 },
+    { field: "startTime", headerName: "Start Time", width: 150 },
+    { field: "endTime", headerName: "End Time", width: 150 },
+    { field: "appName", headerName: "App Name", width: 150 },
+    { field: "deviceTimezone", headerName: "Device Timezone", width: 180 },
+  ];
+
+  const rows = data.map((session, index) => ({
+    id: session.id,
+    sessionNo: generateSessionLabel(index),
+    date: session.toJSON().activated.toISOString().split("T")[0],
+    startTime: session
+      .toJSON()
+      .activated.toISOString()
+      .split("T")[1]
+      .split("Z")[0],
+    endTime: session.toJSON().ended.toISOString().split("T")[1].split("Z")[0],
+    appName: session.device.app_name,
+    deviceTimezone: session.device.device_timezone,
+  }));
+
   return (
     <div className="modal">
       <div className="modal-content">
         <span className="close" onClick={onClose}></span>
         <h2>Session Details</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>SessionNo</th>
-              <th>Date</th>
-              <th>Start Time</th>
-              <th>End Time</th>
-              <th>App Name</th>
-              <th>Device Timezone</th>
-              {/* <th>Call Duration (in Min)</th> */}
-              {/* <th>App Name</th> */}
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((session, index) => (
-              <tr key={session.id}>
-                <td>{generateSessionLabel(index)}</td>
-                {/* {console.log(session.toJSON().activated.toISOString())} */}
-                {/* {console.log(
-                  session.toJSON().activated.toISOString()
-                )} */}
-                {/* {
-                // .split('T')[1].split('Z')[0]
-                console.log(
-                  "new session date -------", session.toJSON().activated.toISOString().split('T')[0]
-                )},
-                  {
-                console.log(
-                  "new session start time -------", session.toJSON().activated.toISOString().split('T')[1].split('Z')[0]
-                )},
-                 {
-                console.log(
-                  "new session app_name -------", session.app_name
-                )}  */}
 
-                <td>
-                  {session.toJSON().activated.toISOString().split("T")[0]}
-                </td>
-                <td>
-                  {
-                    session
-                      .toJSON()
-                      .activated.toISOString()
-                      .split("T")[1]
-                      .split("Z")[0]
-                  }
-                </td>
-                <td>
-                  {
-                    session
-                      .toJSON()
-                      .ended.toISOString()
-                      .split("T")[1]
-                      .split("Z")[0]
-                  }
-                </td>
-                <td>{session.device.app_name}</td>
-                <td>{session.device.device_timezone}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          initialState={{
+            pagination: {
+              paginationModel: { page: 0, pageSize: 5 },
+            },
+          }}
+          pageSizeOptions={[5, 10]}
+          checkboxSelection
+          disableSelectionOnClick
+        />
       </div>
     </div>
   );

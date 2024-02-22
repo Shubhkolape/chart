@@ -1,10 +1,13 @@
+import Button from "@mui/material/Button";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
+import { DataGrid } from "@mui/x-data-grid";
 import CobrowseAPI from "cobrowse-agent-sdk";
 import React, { useEffect, useMemo, useState } from "react";
 import config from "../../../utils/config";
 import ChartForDailySessionCountDate from "./ChartForDailySessionCountDate";
 import SessionDetailsModal from "./SessionDetailsModal";
+
 
 function DateWiseTable() {
   const today = useMemo(() => new Date(), []);
@@ -136,6 +139,8 @@ function DateWiseTable() {
     setSelectedSession(null);
   };
 
+  
+
   return (
     <div className="Agentdata2">
       <h1>Day wise data of agent </h1>
@@ -170,35 +175,45 @@ function DateWiseTable() {
       </form>
 
       <div className="dateTable1">
-        <table>
-          <thead>
-            <tr>
-              <th>Sr.No</th>
-              <th>Date</th>
-              <th>Session Handled</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* {currentDateCounts.map(([date, count], index) ))} */}
-
-            {currentDateCounts.map(([date, count], index) => {
-              console.log("fu----", currentDateCounts);
-              return (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td>{date}</td>
-                  <td>{count}</td>
-                  <td>
-                    <button onClick={() => handleKnowMore(date)}>
-                      Know More
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      
+        <DataGrid className="dateTable"
+          rows={currentDateCounts.map(([date, count], index) => ({
+            id: index + 1,
+            date: date,
+            sessionsHandled: count,
+          }))}
+          columns={[
+            { field: "id", headerName: "Sr.No", width: 100 },
+            { field: "date", headerName: "Date", width: 150 },
+            {
+              field: "sessionsHandled",
+              headerName: "Session Handled",
+              width: 100,
+            },
+            {
+              field: "action",
+              headerName: "Action",
+              width: 140,
+              renderCell: (params) => (
+                <Button
+                  onClick={() => handleKnowMore(params.row.date)}
+                  variant="contained"
+                  color="primary"
+                >
+                  Know More
+                </Button>
+              ),
+            },
+          ]}
+          initialState={{
+            pagination: {
+              paginationModel: { page: 0, pageSize: 5 },
+            },
+          }}
+          pageSizeOptions={[5, 10]}
+          checkboxSelection
+       
+        />
 
         <div className="date-stack">
           <Stack spacing={2}>

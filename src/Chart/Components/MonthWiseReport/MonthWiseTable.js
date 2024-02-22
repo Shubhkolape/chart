@@ -1,5 +1,5 @@
-import Pagination from "@mui/material/Pagination";
-import Stack from "@mui/material/Stack";
+import Button from "@mui/material/Button";
+import { DataGrid } from "@mui/x-data-grid";
 import CobrowseAPI from "cobrowse-agent-sdk";
 import React, { useEffect, useState } from "react";
 import config from "../../../utils/config";
@@ -11,10 +11,9 @@ function MonthWiseTable() {
   const [fromDate, setFroDate] = useState("");
   const [page, setPage] = useState(1);
 
-  const [detailedSessions, setDetailedSessions] = useState(null)
-  const [APIdata, setAPIdata] = useState([]);
+  // const [sessions, setSessions] = useState([]);
+  const [selectedSession, setSelectedSession] = useState(null);
 
-  // const [detailedSessions, setDetailedSessions] = useState(null);
   useEffect(() => {
     const today = new Date();
     const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
@@ -33,7 +32,7 @@ function MonthWiseTable() {
         activated_before: endDate,
         limit: 10000,
       });
-      setAPIdata(sessions);
+
       const monthly = {};
       sessions.forEach((item) => {
         const date = new Date(item.created);
@@ -47,6 +46,7 @@ function MonthWiseTable() {
           return bYear - aYear || bMonth - aMonth;
         })
       );
+      setMonthlyCounts(sortedMonthly);
       console.log("sortedMonthly----", sortedMonthly);
       setMonthlyCounts(sortedMonthly);
       // setAPIdata(sessions);
@@ -94,28 +94,47 @@ function MonthWiseTable() {
         activated_before: endDate,
         limit: 10000,
       });
-      setAPIdata(sessions);
+      setSelectedSession(sessions);
+
       console.log("button sesions are -----", sessions);
     } catch (error) {
       console.error("Error fetching detailed session data:", error);
     }
   };
 
-  const handleSessionDetails = async (monthYear) => {
-    try {
-      const detailedSessionsData = await fetchDetailedSessions(monthYear);
-      setDetailedSessions(detailedSessionsData);
-    } catch (error) {
-      console.error("Error fetching detailed session data:", error);
-    }
-  };
+  // const handleCloseModal = () => {
+  //   setAPIdata(null);
+  // };
 
-  const handleCloseModal = () => {
-    setAPIdata(null);
-  };
+  const columns = [
+    { field: "monthYear", headerName: "Month", width: 150 },
+    { field: "count", headerName: "Requests Handled", width: 200 },
+    {
+      field: "action",
+      headerName: "Action",
+      width: 150,
+      renderCell: (params) => (
+        <Button
+          onClick={() => fetchDetailedSessions(params.row.monthYear)}
+          variant="contained"
+          color="primary"
+        >
+          Know More
+        </Button>
+      ),
+    },
+  ];
+
+  const rows = Object.entries(monthlyCounts).map(
+    ([monthYear, count], index) => ({
+      id: index + 1,
+      monthYear,
+      count,
+    })
+  );
 
   return (
-    <div className="Agentmonth">
+    <div className="Agentmonth Agentmonth-table">
       <h2>Monthly Requests for the Selected Period</h2>
 
       <form onSubmit={handleFormSubmit}>
@@ -149,34 +168,20 @@ function MonthWiseTable() {
       </form>
 
       <div>
-        <table>
-          <thead>
-            <tr>
-              <th>Month</th>
-              <th>Requests Handled</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(monthlyCounts).map(([monthYear, count], index) => (
-              <tr key={index}>
-                <td>{monthYear}</td>
-                <td>{count}</td>
-                <td>
-                  <button
-                   onClick={() => handleSessionDetails(monthYear)}
-                   >
-                    {" "}
-                    Know More
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <DataGrid 
+        rows={rows}
+         columns={columns}
+         initialState={{
+          pagination: {
+            paginationModel: { page: 0, pageSize: 5 },
+          },
+        }}
+        pageSizeOptions={[5, 10]}
+        // checkboxSelection
+         />
       </div>
 
-      <Stack spacing={12}>
+      {/* <Stack spacing={12}>
         <Pagination
           // count={totalPages}
           page={page}
@@ -185,15 +190,23 @@ function MonthWiseTable() {
           showFirstButton
           showLastButton
         />
-      </Stack>
+      </Stack> */}
 
-     
-      {detailedSessions && (
-        <KnowMoreMonths data={detailedSessions} onClose={handleCloseModal} />
-      )}
+      {selectedSession && <KnowMoreMonths data={selectedSession} />}
     </div>
   );
 }
 
 export default MonthWiseTable;
 
+// <DataGrid
+// rows={rows}
+// columns={columns}
+// initialState={{
+//   pagination: {
+//     paginationModel: { page: 0, pageSize: 5 },
+//   },
+// }}
+// pageSizeOptions={[5, 10]}
+// checkboxSelection
+// />
