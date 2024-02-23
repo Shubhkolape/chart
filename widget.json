@@ -1,0 +1,10 @@
+{
+    "name": "cobrowse-reports-widget-react",
+    "description": "agent cobrowse reports widget",
+    "tags": ["cobrowse", "react", "agent","reports"],
+    "version": "1.0.0",
+    "element": "<cobrowse-reports-widget-react></cobrowse-reports-widget-react>",
+    "icon": "neo-icon-sort",
+    "files": ["/dist/Widget.js"],
+    "override_url": "https://cobrowse-reports-widget.lab.bravishma.com/"
+}

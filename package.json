@@ -1,50 +1,67 @@
 {
-  "name": "chart",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@emotion/react": "^11.11.3",
-    "@emotion/styled": "^11.11.0",
-    "@mui/icons-material": "^5.15.10",
-    "@mui/material": "^5.15.10",
-    "@mui/styles": "^5.15.10",
-    "@mui/x-data-grid": "^6.19.4",
-    "@mui/x-date-pickers": "^6.19.4",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "chart.js": "^4.4.1",
-    "cobrowse-agent-sdk": "^1.6.1",
-    "cobrowse-sdk-js": "^2.31.1",
-    "faker": "^6.6.6",
-    "react": "^18.2.0",
-    "react-chartjs-2": "^5.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+	"name": "chart",
+	"version": "0.1.0",
+	"private": true,
+	"dependencies": {
+		"@avaya/neo-react": "^1.0.4",
+		"@emotion/react": "^11.11.3",
+		"@emotion/styled": "^11.11.0",
+		"@mui/icons-material": "^5.15.10",
+		"@mui/material": "^5.15.10",
+		"@mui/styles": "^5.15.10",
+		"@mui/x-data-grid": "^6.19.4",
+		"@mui/x-date-pickers": "^6.19.4",
+		"@testing-library/jest-dom": "^5.17.0",
+		"@testing-library/react": "^13.4.0",
+		"@testing-library/user-event": "^13.5.0",
+		"chart.js": "^4.4.1",
+		"cobrowse-agent-sdk": "^1.6.1",
+		"cobrowse-sdk-js": "^2.31.1",
+		"faker": "^6.6.6",
+		"react": "^18.2.0",
+		"react-chartjs-2": "^5.2.0",
+		"react-dom": "^18.2.0",
+		"react-scripts": "5.0.1",
+		"web-vitals": "^2.1.4",
+		"webpack-cli": "^5.1.4"
+	},
+	"scripts": {
+		"start": "react-scripts start",
+		"build": "npm run build:react && npm run build:bundle",
+		"test": "react-scripts test",
+		"eject": "react-scripts eject",
+		"build:react": "react-scripts build",
+		"build:bundle": "webpack --config webpack.config.js",
+		"format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,css,md,json}\" --config ./.prettierrc",
+		"projectformat": "prettier --write \"**/*.{js,jsx,ts,tsx,css,md,json}\" --config ./.prettierrc"
+	},
+	"eslintConfig": {
+		"extends": [
+			"react-app",
+			"react-app/jest"
+		]
+	},
+	"browserslist": {
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
+	},
+	"devDependencies": {
+		"@babel/preset-react": "^7.23.3",
+		"@typescript-eslint/parser": "^5.62.0",
+		"eslint": "^8.53.0",
+		"eslint-config-prettier": "^9.0.0",
+		"eslint-import-resolver-typescript": "^3.6.1",
+		"eslint-plugin-import": "^2.29.0",
+		"eslint-plugin-prettier": "^5.0.1",
+		"eslint-plugin-react-hooks": "^4.6.0",
+		"prettier": "^3.0.3"
+	}
 }

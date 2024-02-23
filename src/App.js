@@ -1,19 +1,14 @@
-import "./App.css";
+import React from 'react';
+import './App.css';
+import '@avaya/neo-react/avaya-neo-react.css';
+import CobrowseReports from './pages/CobrowseReports';
 
-import DateWiseTable from "./Chart/Components/DateWiseReports/DateWiseTable";
-import DurationChart from "./Chart/Components/Duration/DurationChart";
-import SessionChart2 from "./Chart/Components/Duration/SessionChart2";
-import MonthSessionsChart from "./Chart/Components/MonthWiseReport/MonthSessionsChart";
-import MonthWiseTable from "./Chart/Components/MonthWiseReport/MonthWiseTable";
+
 
 function App() {
   return (
     <div className="App">
-      <SessionChart2 />
-      <DurationChart />
-      <DateWiseTable />
-      <MonthSessionsChart />
-      <MonthWiseTable />
+      <CobrowseReports interactionId='placeHolderInteractionID' />
     </div>
   );
 }
