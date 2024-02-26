@@ -15,7 +15,6 @@ import config from '../../../utils/config';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 function MonthSessionsChart() {
-
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
@@ -26,20 +25,19 @@ function MonthSessionsChart() {
         return formattedDate;
     };
 
-
     const formatedDate = (date) => {
         return date.toISOString().split('T')[0];
-      }
-    
+    };
+
     const today = new Date();
     const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
     const formattedTwoMonthsAgo = formatDate(twoMonthsAgo);
     const formattedToday = formatDate(today);
-    
+
     const [monthlyCounts, setMonthlyCounts] = useState({});
 
-    const [toDate, seToDate] = useState(formatedDate(twoMonthsAgo))
-    const [fromDate, setFroDate] =  useState(formatedDate(today));
+    const [toDate, seToDate] = useState(formatedDate(twoMonthsAgo));
+    const [fromDate, setFroDate] = useState(formatedDate(today));
 
     const fetchData = async (startDate, endDate) => {
         const agentToken = config.agentToken;
@@ -74,11 +72,8 @@ function MonthSessionsChart() {
     };
 
     useEffect(() => {
-       
         fetchData(formattedTwoMonthsAgo, formattedToday);
     }, []);
-
-
 
     const handleFormSubmit = (event) => {
         event.preventDefault();
@@ -92,8 +87,29 @@ function MonthSessionsChart() {
         //   setPage(1);
     };
 
-    const keys = Object.keys(monthlyCounts);
-    const values = Object.values(monthlyCounts);
+    const sortedKeys = Object.keys(monthlyCounts).sort((a, b) => {
+        const [monthA, yearA] = a.split('-').map(Number);
+        const [monthB, yearB] = b.split('-').map(Number);
+
+        // Sort by year in descending order
+        if (yearA !== yearB) {
+            return yearB - yearA;
+        }
+
+        // If years are equal, sort by month in descending order
+        return monthB - monthA;
+    });
+
+    sortedKeys.reverse();
+
+    // Construct a new object using the sorted keys
+    const sortedData = {};
+    sortedKeys.forEach((key) => {
+        sortedData[key] = monthlyCounts[key]; // Access monthlyCounts instead of data
+    });
+
+    const keys = Object.keys(sortedData);
+    const values = Object.values(sortedData);
 
     const labels = keys.map((key) => {
         const [month, year] = key.split('-');
@@ -129,35 +145,33 @@ function MonthSessionsChart() {
         <div>
             <div>
                 <form onSubmit={handleFormSubmit} className='dailycount1'>
-                
-                        <div>
-                            <label htmlFor='startDate'>From </label>
-                            <input
-                                type='date'
-                                required
-                                className="input"
-                                value={toDate}
-                                onChange={(e) => {
-                                    seToDate(e.target.value);
-                                }}
-                            />
-                        </div>
-                        <div>
-                            <label htmlFor='endDate'>To </label>
-                            <input
-                                type='date'
-                                value={fromDate}
-                                required
-                                className="input"
-                                onChange={(e) => {
-                                    setFroDate(e.target.value);
-                                }}
-                            />
-                        </div>
-                        <button type='submit' className='submit-button' value='Submit'>
-                            Submit
-                        </button>
-                    
+                    <div>
+                        <label htmlFor='startDate'>From </label>
+                        <input
+                            type='date'
+                            required
+                            className='input'
+                            value={toDate}
+                            onChange={(e) => {
+                                seToDate(e.target.value);
+                            }}
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor='endDate'>To </label>
+                        <input
+                            type='date'
+                            value={fromDate}
+                            required
+                            className='input'
+                            onChange={(e) => {
+                                setFroDate(e.target.value);
+                            }}
+                        />
+                    </div>
+                    <button type='submit' className='submit-button' value='Submit'>
+                        Submit
+                    </button>
                 </form>
             </div>
             <Line className='daywiseCount' options={options} data={data} />

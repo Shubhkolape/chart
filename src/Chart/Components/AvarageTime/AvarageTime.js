@@ -10,11 +10,11 @@ function AvarageTime() {
     const [TotalDuration, setTotalDuration] = useState(null);
 
 
+    const [API, setAPI] = useState([]);
+
     const formatedDate = (date) => {
         return date.toISOString().split('T')[0];
-      };
-
-      
+    };
 
     const today = useMemo(() => new Date(), []);
     const firstDateOfMonth = useMemo(
@@ -22,7 +22,7 @@ function AvarageTime() {
         [today],
     );
 
-    const [fromDate, setFromDate] = useState(formatedDate(firstDateOfMonth))
+    const [fromDate, setFromDate] = useState(formatedDate(firstDateOfMonth));
     const [toDate, setToDate] = useState(formatedDate(today));
 
     // function for convert date format mm-dd-yy to yyyy-mm-dd
@@ -60,13 +60,16 @@ function AvarageTime() {
                 activated_before: enddate,
                 limit: 100000,
             });
-            // setAPIdata(sessions);
+            // setAPI(sessions);
 
             const sessionDurations = sessions.map((session) => calculateSessionDuration(session));
 
             const totalDuration = sessionDurations.reduce((total, duration) => total + duration, 0);
             const averageDuration = (totalDuration / sessions.length).toFixed(2);
             const sessionlength = sessions.length;
+              
+
+           
 
             setSessionLength(sessionlength);
             setAvargeDuration(averageDuration);
@@ -75,17 +78,22 @@ function AvarageTime() {
             console.error('Error fetching cobrowse data:', error);
         }
     };
+    const agentNamesSet = new Set();
+
+    API.forEach(session => {
+    agentNamesSet.add(session.agent.name);
+  });
+let uniqueAgentNames = Array.from(agentNamesSet);
 
     useEffect(() => {
         fetchDataforAvageTime(formatedfirstDateOfMonth, formatedToday);
-        console.log('formatedfirstDateOfMonth----', formatedfirstDateOfMonth);
-        console.log('formatedToday----', formatedToday);
     }, [formatedfirstDateOfMonth, formatedToday]);
 
     const handleFormSubmit = (e) => {
         e.preventDefault();
         fetchDataforAvageTime(fromDate, toDate);
     };
+
 
     return (
         <div className='main-header'>
@@ -97,7 +105,7 @@ function AvarageTime() {
                         <input
                             type='date'
                             required
-                            className="input"
+                            className='input'
                             value={fromDate}
                             onChange={(e) => {
                                 setFromDate(e.target.value);
@@ -111,7 +119,7 @@ function AvarageTime() {
                             type='date'
                             value={toDate}
                             required
-                            className="input"
+                            className='input'
                             onChange={(e) => {
                                 setToDate(e.target.value);
                             }}
@@ -131,6 +139,8 @@ function AvarageTime() {
                         sessionsHandled: SessionLength,
                         'Total Duration': TotalDuration,
                         'Avarge Duration': AvargeDuration,
+                    
+                        
                     },
                 ]}
                 columns={[
@@ -148,6 +158,7 @@ function AvarageTime() {
                         headerName: 'Average Duration (In Min)',
                         width: 200,
                     },
+                  
                 ]}
                 initialState={{
                     pagination: {

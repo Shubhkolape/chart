@@ -13,6 +13,7 @@ function SessionDetailsModal({ data, onClose }) {
     { field: "endTime", headerName: "End Time", width: 150 },
     { field: "appName", headerName: "App Name", width: 150 },
     { field: "deviceTimezone", headerName: "Device Timezone", width: 180 },
+    { field: "AgentName", headerName: "Agent Name", width: 180 },
   ];
 
   const rows = data.map((session, index) => ({
@@ -27,6 +28,7 @@ function SessionDetailsModal({ data, onClose }) {
     endTime: session.toJSON().ended.toISOString().split("T")[1].split("Z")[0],
     appName: session.device.app_name,
     deviceTimezone: session.device.device_timezone,
+    AgentName :session.agent.name,
   }));
 
   return (

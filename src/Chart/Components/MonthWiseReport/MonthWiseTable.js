@@ -82,9 +82,9 @@ function MonthWiseTable() {
         fetchData(formattedFromDate, formattedToday);
         setPage(1);
     };
-    const handleChange = (event, newPage) => {
-        setPage(newPage);
-    };
+    // const handleChange = (event, newPage) => {
+    //     setPage(newPage);
+    // };
 
     const fetchDetailedSessions = async (monthYear) => {
         try {

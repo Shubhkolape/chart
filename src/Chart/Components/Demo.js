@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
 import * as React from 'react';
 import AvarageTime from './AvarageTime/AvarageTime';
@@ -25,7 +24,9 @@ function CustomTabPanel(props) {
         >
             {value === index && (
                 <Box sx={{ p: 3 }}>
-                    <Typography>{children}</Typography>
+                    {/* <Typography> */}
+                    {children}
+                    {/* </Typography> */}
                 </Box>
             )}
         </div>

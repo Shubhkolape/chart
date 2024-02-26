@@ -121,6 +121,8 @@ function ChartForDailySessionCountDate() {
     }
   };
 
+  chartData.sort((a, b) => new Date(b.date) - new Date(a.date))
+  // chartData.reverse();
   const labelsDetails = chartData.map((dataPoint) => dataPoint.date);
   const dataDetails = chartData.map((dataPoint) => dataPoint.count);
 
@@ -151,16 +153,14 @@ function ChartForDailySessionCountDate() {
   };
   return (
     <div>
-      <div >
-      <form onSubmit={handleSubmit} className="dailycount1">
+     <form onSubmit={handleSubmit} className="dailycount1">
         <div>
           <label htmlFor="startDate">From</label>
           <input className="input"
             type="date"
             id="startDate"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
+            onChange={(e) => setStartDate(e.target.value)}/>
         </div>
         <div>
           <label htmlFor="endDate">To  </label>
@@ -169,15 +169,14 @@ function ChartForDailySessionCountDate() {
             type="date"
             id="endDate"
             value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
+            onChange={(e) => setEndDate(e.target.value)}/>
         </div>
         <button type="submit" className="submit-button" >Submit</button>
       </form>
-      </div>
       <Line className="daywiseCount" options={options} data={data} />
     </div>
   );
 }
 
 export default ChartForDailySessionCountDate;
+
