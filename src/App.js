@@ -1,6 +1,6 @@
 import React from 'react';
 import './App.css';
-import '@avaya/neo-react/avaya-neo-react.css';
+// import '@avaya/neo-react/avaya-neo-react.css';
 import CobrowseReports from './pages/CobrowseReports';
 
 

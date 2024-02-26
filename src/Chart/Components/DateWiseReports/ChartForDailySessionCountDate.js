@@ -6,17 +6,24 @@ import config from "../../../utils/config";
 ChartJS.register(CategoryScale,LinearScale,PointElement,LineElement,Title,Tooltip,Legend);
 
 function ChartForDailySessionCountDate() {
+
+
+  const today = useMemo(() => new Date(), []);
+  const firstDateOfMonth = useMemo( () => new Date(today.getFullYear(), today.getMonth(), 1),[today]);
+
+
+  const formatedDate = (date) => {
+    return date.toISOString().split('T')[0];
+  };
+
+
   const [dateCounts, setDateCounts] = useState({});
   const [chartData, setChartData] = useState([]);
 
-  const [startDate, setStartDate] = useState();
-  const [endDate, setEndDate] = useState();
+  const [startDate, setStartDate] = useState(formatedDate(firstDateOfMonth))
+  const [endDate, setEndDate] = useState(formatedDate(today));
 
-  const today = useMemo(() => new Date(), []);
-  const firstDateOfMonth = useMemo(
-    () => new Date(today.getFullYear(), today.getMonth(), 1),
-    [today]
-  );
+
 
   const fetchData = async (startdate, enddate) => {
     const agentToken = config.agentToken;
@@ -147,8 +154,8 @@ function ChartForDailySessionCountDate() {
       <div >
       <form onSubmit={handleSubmit} className="dailycount1">
         <div>
-          <label htmlFor="startDate">From   </label>
-          <input
+          <label htmlFor="startDate">From</label>
+          <input className="input"
             type="date"
             id="startDate"
             value={startDate}
@@ -158,13 +165,14 @@ function ChartForDailySessionCountDate() {
         <div>
           <label htmlFor="endDate">To  </label>
           <input
+          className="input"
             type="date"
             id="endDate"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
           />
         </div>
-        <button type="submit">Submit</button>
+        <button type="submit" className="submit-button" >Submit</button>
       </form>
       </div>
       <Line className="daywiseCount" options={options} data={data} />

@@ -13,64 +13,8 @@
     height: 20%;
     width: 900px;
   }
-  
-  .Agentdata2{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: auto;
-    margin: auto;
-    margin-top: 30px;
-    /* height: 900px; */
-  }
-  
-  .Agentmonth{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: auto;
-    margin: auto;
-    /* margin-top: 90px; */
-    /* margin-bottom: 200px; */
-  }
-  
-  
-  .Piechart1{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: auto;
-    margin: auto;
-    /* margin-top: 190px; */
-    /* margin-bottom: 100px; */
-  }
-  
-  .Piechart1 .pie1{
-    width: 400px;
-    height: 400px;
-  }
-  
-   form .user-details{
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-    /* margin-left: 400px; */
-   }
-  
-  
-  form .user-details .input-box{
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-  }
-  
-  form .button{
-    display: inline;
-  }
-  
+
+
   table {
     padding: 30px;
     margin: auto;
@@ -83,7 +27,7 @@
     border: 1px solid #dddddd;
     padding: 8px;
   }
-  
+/*   
   
   .pagination{
     margin-top: 30px;
@@ -98,7 +42,7 @@
     margin-top: 30px;
     list-style-type: none;
     margin-bottom: 60px;
-  }
+  } */
   
   .daywiseCount{
     height: 500px;
@@ -112,6 +56,19 @@
     align-items: center;
     justify-content: center;
     gap: 30px;
+  }
+
+  .main-header{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+
+  .input{
+    margin: 10px;
+    padding: 10px;
   }
   
   
@@ -150,3 +107,50 @@
     align-items: center;
     justify-content: center;
   } 
+
+
+  .tab-button-1{
+    background-color: #FFFFFF;
+    border: 0;
+    margin: 10px;
+    border-radius: .5rem;
+    box-sizing: border-box;
+    color: #111827;
+    font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    font-size: .875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    padding: .75rem 1rem;
+    text-align: center;
+    text-decoration: none #D1D5DB solid;
+    text-decoration-thickness: auto;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+
+
+  .submit-button{
+    background-color: #FFFFFF;
+    border: 0;
+    margin: 10px;
+    border-radius: .5rem;
+    box-sizing: border-box;
+    color: #111827;
+    font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    font-size: .875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    padding: .75rem 1rem;
+    text-align: center;
+    text-decoration: none #D1D5DB solid;
+    text-decoration-thickness: auto;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+  
