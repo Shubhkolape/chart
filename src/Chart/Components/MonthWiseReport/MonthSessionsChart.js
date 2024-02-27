@@ -15,6 +15,8 @@ import config from '../../../utils/config';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 function MonthSessionsChart() {
+
+    
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
@@ -29,15 +31,19 @@ function MonthSessionsChart() {
         return date.toISOString().split('T')[0];
     };
 
+
     const today = new Date();
     const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
-    const formattedTwoMonthsAgo = formatDate(twoMonthsAgo);
-    const formattedToday = formatDate(today);
+
+    const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
+    const formattedToday = formatedDate(today);
+
 
     const [monthlyCounts, setMonthlyCounts] = useState({});
 
-    const [toDate, seToDate] = useState(formatedDate(twoMonthsAgo));
-    const [fromDate, setFroDate] = useState(formatedDate(today));
+    const [toDate, seToDate] = useState(formattedtwoMonthsAgo);
+    console.log("date is ss ---->", toDate);
+    const [fromDate, setFroDate] = useState(formattedToday);
 
     const fetchData = async (startDate, endDate) => {
         const agentToken = config.agentToken;
@@ -72,8 +78,8 @@ function MonthSessionsChart() {
     };
 
     useEffect(() => {
-        fetchData(formattedTwoMonthsAgo, formattedToday);
-    }, []);
+        fetchData(formattedtwoMonthsAgo, formattedToday);
+    }, [formattedtwoMonthsAgo, formattedToday]);
 
     const handleFormSubmit = (event) => {
         event.preventDefault();
@@ -124,7 +130,7 @@ function MonthSessionsChart() {
             },
             title: {
                 display: true,
-                text: 'Monthly Sessions handled by Agent',
+                text: 'Monthly Sessions handled',
             },
         },
     };
@@ -133,7 +139,7 @@ function MonthSessionsChart() {
         labels,
         datasets: [
             {
-                label: 'Monthly Sessions handled by Agent',
+                label: 'Monthly Sessions handled',
                 data: values,
                 borderColor: 'rgb(53, 162, 235)',
                 backgroundColor: 'rgba(53, 162, 235, 0.5)',

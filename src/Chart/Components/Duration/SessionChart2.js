@@ -10,7 +10,7 @@ import {
     Tooltip,
 } from 'chart.js';
 import CobrowseAPI from 'cobrowse-agent-sdk';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import config from '../../../utils/config';
 ChartJS.register(
@@ -28,20 +28,20 @@ function SessionChart2() {
 
 
     
-  const formatedDate = (date) => {
-    return date.toISOString().split('T')[0];
-  };
+    const formatedDate = (date) => {
+        return date.toISOString().split('T')[0];
+    };
 
 
-  const today = useMemo(() => new Date(), []);
-  const firstDateOfMonth = useMemo(
-      () => new Date(today.getFullYear(), today.getMonth(), 1),
-      [today],
-  );
+    const today = new Date();
+    const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
 
+    const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
+    const formattedToday = formatedDate(today);
+    
     const [sessions, setSessions] = useState([]);
-    const [fromDate, setFromDate] = useState(formatedDate(firstDateOfMonth))
-    const [toDate, setToDate] = useState(formatedDate(today));
+    const [fromDate, setFromDate] = useState(formattedtwoMonthsAgo)
+    const [toDate, setToDate] = useState(formattedToday);
 
     const options = {
         responsive: true,
@@ -72,7 +72,7 @@ function SessionChart2() {
             },
             title: {
                 display: true,
-                text: 'Agent Session data',
+                text: 'Session Duration',
             },
         },
     };
@@ -89,6 +89,8 @@ function SessionChart2() {
                 activated_before: endDate,
                 limit: 10000,
             });
+            sessionsData.reverse()
+            console.log("new sessionsData --", sessionsData);
             setSessions(sessionsData);
         } catch (error) {
             console.error('Error fetching cobrowse data:', error);
@@ -96,8 +98,8 @@ function SessionChart2() {
     };
 
     useEffect(() => {
-        fetchData(firstDateOfMonth, today);
-    }, [firstDateOfMonth, today]);
+        fetchData(formattedtwoMonthsAgo, formattedToday);
+    }, [formattedtwoMonthsAgo, formattedToday]);
 
     const getDurationInMinutes = (startTime, endTime) => {
         const start = new Date(startTime);
@@ -108,15 +110,20 @@ function SessionChart2() {
 
     const labels = sessions.map((session, index) => `Session ${index + 1}`);
 
+    const data1 = sessions.map((session) =>
+    getDurationInMinutes(session.created, session.ended))
+
+    console.log("data1 is ----->", data1);
+
+
+
     const data = {
         labels,
         datasets: [
             {
                 fill: true,
                 label: 'Session Data (In Min)',
-                data: sessions.map((session) =>
-                    getDurationInMinutes(session.created, session.ended),
-                ),
+                data: data1,
                 borderColor: 'rgb(53, 162, 235)',
                 backgroundColor: 'rgba(53, 162, 235, 0.5)',
             },

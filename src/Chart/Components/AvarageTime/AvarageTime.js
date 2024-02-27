@@ -1,6 +1,6 @@
 import { DataGrid } from '@mui/x-data-grid';
 import CobrowseAPI from 'cobrowse-agent-sdk';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import config from '../../../utils/config';
 
 function AvarageTime() {
@@ -16,14 +16,15 @@ function AvarageTime() {
         return date.toISOString().split('T')[0];
     };
 
-    const today = useMemo(() => new Date(), []);
-    const firstDateOfMonth = useMemo(
-        () => new Date(today.getFullYear(), today.getMonth(), 1),
-        [today],
-    );
 
-    const [fromDate, setFromDate] = useState(formatedDate(firstDateOfMonth));
-    const [toDate, setToDate] = useState(formatedDate(today));
+    const today = new Date();
+    const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
+
+    const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
+    const formattedToday = formatedDate(today);
+
+    const [fromDate, setFromDate] = useState(formattedtwoMonthsAgo);
+    const [toDate, setToDate] = useState(formattedToday);
 
     // function for convert date format mm-dd-yy to yyyy-mm-dd
 
@@ -37,7 +38,7 @@ function AvarageTime() {
         return formattedDate;
     };
 
-    const formatedfirstDateOfMonth = formatDate(firstDateOfMonth);
+    const formatedfirstDateOfMonth = formatDate(formattedtwoMonthsAgo);
     const formatedToday = formatDate(today);
 
     const calculateSessionDuration = (session) => {
@@ -97,7 +98,7 @@ let uniqueAgentNames = Array.from(agentNamesSet);
 
     return (
         <div className='main-header'>
-            <h1>Avarage Duration of Agent</h1>
+            <h1>Average Duration of Agent</h1>
             <div>
                 <form className='dailycount1' onSubmit={handleFormSubmit}>
                     <div>
@@ -138,8 +139,8 @@ let uniqueAgentNames = Array.from(agentNamesSet);
                         id: 1,
                         sessionsHandled: SessionLength,
                         'Total Duration': TotalDuration,
-                        'Avarge Duration': AvargeDuration,
-                    
+                        'Average Duration': AvargeDuration,
+                        // 'Agent Name' :  AgentName,
                         
                     },
                 ]}
@@ -154,10 +155,12 @@ let uniqueAgentNames = Array.from(agentNamesSet);
                     { field: 'Total Duration', headerName: 'Total Duration (In Min)', width: 200 },
 
                     {
-                        field: 'Avarge Duration',
+                        field: 'Average Duration',
                         headerName: 'Average Duration (In Min)',
                         width: 200,
                     },
+                    // { field: 'AgentName', headerName: 'Agent Name', width: 200 },
+
                   
                 ]}
                 initialState={{
@@ -166,7 +169,7 @@ let uniqueAgentNames = Array.from(agentNamesSet);
                     },
                 }}
                 pageSizeOptions={[5, 10]}
-                checkboxSelection
+             
             />
         </div>
     );

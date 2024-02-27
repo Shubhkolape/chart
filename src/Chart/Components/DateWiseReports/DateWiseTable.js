@@ -1,29 +1,42 @@
 import Button from '@mui/material/Button';
 import { DataGrid } from '@mui/x-data-grid';
 import CobrowseAPI from 'cobrowse-agent-sdk';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import config from '../../../utils/config';
 import SessionDetailsModal from './SessionDetailsModal';
 
 function DateWiseTable() {
 
-  const formatedDate = (date) => {
-    return date.toISOString().split('T')[0];
-  };
-    const today = useMemo(() => new Date(), []);
-    const firstDateOfMonth = useMemo(
-        () => new Date(today.getFullYear(), today.getMonth(), 1),
-        [today],
-    );
+
+    
+  
+
+    const formatedDate = (date) => {
+        return date.toISOString().split('T')[0];
+    };
+    
+    const today = new Date();
+    const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
+
+    const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
+    const formattedToday = formatedDate(today);
+
+
     const [APIdata, setAPIdata] = useState([]);
     const [dateCounts, setDateCounts] = useState({});
     const [selectedSession, setSelectedSession] = useState(null);
-    const [fromDate, setFromDate] = useState(formatedDate(firstDateOfMonth))
-    const [toDate, seToDate] =useState(formatedDate(today));
+    const [fromDate, setFromDate] = useState(formattedtwoMonthsAgo)
+    const [toDate, seToDate] =useState(formattedToday);
 
-    const [page, setPage] = useState(1);
-    const itemsPerPage = 10;
+    const formatDate = (inputDate) => {
+        const date = new Date(inputDate);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
 
+        return formattedDate;
+    };
 
 
     const fetchData = async (startdate, enddate) => {
@@ -43,18 +56,11 @@ function DateWiseTable() {
         }
     };
 
-    const handleKnowMore = async (date) => {
-        const sessionsOnSelectedDate = APIdata.filter(
-            (session) => formatDate(new Date(session.created)) === date,
-        );
-        console.log('sessionsOnSelectedDate---- ', sessionsOnSelectedDate);
-        setSelectedSession(sessionsOnSelectedDate);
-    };
-
+    
     useEffect(() => {
         const fetchAndProcessData = async () => {
             try {
-                const sessions = await fetchData(firstDateOfMonth, today);
+                const sessions = await fetchData(formattedtwoMonthsAgo, formattedToday);
                 const counts = {};
                 sessions.forEach((item) => {
                     const date = formatDate(new Date(item.created)); // Ensure formatDate is defined
@@ -68,33 +74,8 @@ function DateWiseTable() {
         };
 
         fetchAndProcessData();
-    }, [firstDateOfMonth, today]);
-
-    const convertAndFormatDate = (userInputDate) => {
-        console.log('userInputDate-----', userInputDate);
-        const date = new Date(userInputDate);
-        if (!isNaN(date.getTime())) {
-            const year = date.getFullYear();
-            const month = `0${date.getMonth() + 1}`.slice(-2);
-            const day = `0${date.getDate()}`.slice(-2);
-            const newDate = `${year}-${month}-${day}`;
-
-            return newDate;
-        } else {
-            throw new Error('Invalid date format. Please enter a date in MM/DD/YYYY format.');
-        }
-    };
-
-    const formatDate = (inputDate) => {
-        const date = new Date(inputDate);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const formattedDate = `${year}-${month}-${day}`;
-
-        return formattedDate;
-    };
-
+    }, [formattedtwoMonthsAgo, formattedToday]);
+    
     const finalDate = async (fromDate, toDate) => {
         try {
             const formattedFromDate = convertAndFormatDate(fromDate);
@@ -113,26 +94,41 @@ function DateWiseTable() {
         }
     };
 
+
+    const handleKnowMore = async (date) => {
+        const sessionsOnSelectedDate = APIdata.filter(
+            (session) => formatDate(new Date(session.created)) === date,
+        );
+        console.log('sessionsOnSelectedDate---- ', sessionsOnSelectedDate);
+        setSelectedSession(sessionsOnSelectedDate);
+    };
+
+
+    const convertAndFormatDate = (userInputDate) => {
+        console.log('userInputDate-----', userInputDate);
+        const date = new Date(userInputDate);
+        if (!isNaN(date.getTime())) {
+            const year = date.getFullYear();
+            const month = `0${date.getMonth() + 1}`.slice(-2);
+            const day = `0${date.getDate()}`.slice(-2);
+            const newDate = `${year}-${month}-${day}`;
+
+            return newDate;
+        } else {
+            throw new Error('Invalid date format. Please enter a date in MM/DD/YYYY format.');
+        }
+    };
+
     const handleFormSubmit = (event) => {
         event.preventDefault();
         if (fromDate && toDate) {
             finalDate(fromDate, toDate);
-            setPage(1);
         } else {
             console.error('Invalid date format');
         }
     };
 
-    const handleChange = (event, newPage) => {
-        setPage(newPage);
-    };
-
-    const totalPages = Math.ceil(Object.keys(dateCounts).length / itemsPerPage);
-
-    const currentDateCounts = Object.entries(dateCounts).slice(
-        (page - 1) * itemsPerPage,
-        page * itemsPerPage,
-    );
+    const currentDateCounts = Object.entries(dateCounts).reverse().slice();
 
     const handleCloseModal = () => {
         setSelectedSession(null);
@@ -186,7 +182,7 @@ function DateWiseTable() {
                         {
                             field: 'sessionsHandled',
                             headerName: 'Session Handled',
-                            width: 100,
+                            width: 150,
                         },
                         {
                             field: 'action',
@@ -209,7 +205,7 @@ function DateWiseTable() {
                         },
                     }}
                     pageSizeOptions={[5, 10]}
-                    checkboxSelection
+                 
                 />
 
                 {selectedSession && (

@@ -48,11 +48,12 @@ function a11yProps(index) {
 
 export default function BasicTabs() {
     const [value, setValue] = React.useState(0);
-    const [view, setView] = React.useState('chart'); // State to manage chart or table view
+    const [view, setView] = React.useState('chart');
 
-    const handleChange = (event, newValue) => {
+
+    const handleChange = (event, newValue, buttonId) => {
         setValue(newValue);
-        setView('chart'); // Reset view to chart when switching tabs
+        setView('chart');
     };
 
     const handleViewChange = (newView) => {
@@ -66,31 +67,61 @@ export default function BasicTabs() {
                     <Tab label='Day Count' {...a11yProps(0)} />
                     <Tab label='Month Count' {...a11yProps(1)} />
                     <Tab label='Duration Count' {...a11yProps(2)} />
-                    <Tab label='Avarge Duration' {...a11yProps(3)} />
+                    <Tab label='Average Duration' {...a11yProps(3)} />
                 </Tabs>
             </Box>
             <CustomTabPanel value={value} index={0}>
                 <div className='tab-button'>
-                    <button className='tab-button-1' onClick={() => handleViewChange('chart')}>Chart</button>
-                    <button  className='tab-button-1' onClick={() => handleViewChange('table')}>Table</button>
-                    {view === 'chart' && <ChartForDailySessionCountDate />}
+                    <button
+                        className={`tab-button-1 ${view === 'chart' ? 'active' : ''}`}
+                        onClick={() => handleViewChange('chart')}
+                    >
+                        Chart
+                    </button>
+                    <button
+                        className={`tab-button-1 ${view === 'table' ? 'active' : ''}`}
+                        onClick={() => handleViewChange('table')}
+                    >
+                        Table
+                    </button>
+                    {view === 'chart' && <ChartForDailySessionCountDate  />}
                     {view === 'table' && <DateWiseTable />}
                 </div>
             </CustomTabPanel>
 
             <CustomTabPanel value={value} index={1}>
-            <div className='tab-button'>
-                    <button  className='tab-button-1' onClick={() => handleViewChange('chart')}>Chart</button>
-                    <button  className='tab-button-1' onClick={() => handleViewChange('table')}>Table</button>
+                <div className='tab-button'>
+                <button
+                        className={`tab-button-1 ${view === 'chart' ? 'active' : ''}`}
+                        onClick={() => handleViewChange('chart')}
+                    >
+                        Chart
+                    </button>
+                    <button
+                        className={`tab-button-1 ${view === 'table' ? 'active' : ''}`}
+                        onClick={() => handleViewChange('table')}
+                    >
+                        Table
+                    </button>
                     {view === 'chart' && <MonthSessionsChart />}
                     {view === 'table' && <MonthWiseTable />}
                 </div>
             </CustomTabPanel>
 
             <CustomTabPanel value={value} index={2}>
-            <div className='tab-button'>
-                    <button  className='tab-button-1' onClick={() => handleViewChange('chart')}>Chart</button>
-                    <button  className='tab-button-1' onClick={() => handleViewChange('table')}>Table</button>
+                <div className='tab-button'>
+                <button
+                        className={`tab-button-1 ${view === 'chart' ? 'active' : ''}`}
+                        onClick={() => handleViewChange('chart')}
+                    >
+                        Chart
+                    </button>
+                    <button
+                        className={`tab-button-1 ${view === 'table' ? 'active' : ''}`}
+                        onClick={() => handleViewChange('table')}
+                    >
+                        Table
+                    </button>
                     {view === 'chart' && <SessionChart2 />}
                     {view === 'table' && <DurationChart />}
                 </div>

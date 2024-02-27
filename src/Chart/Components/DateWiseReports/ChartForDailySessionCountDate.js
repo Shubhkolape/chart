@@ -1,27 +1,40 @@
 import { CategoryScale, Chart as ChartJS, Legend, LineElement, LinearScale, PointElement, Title, Tooltip } from "chart.js";
 import CobrowseAPI from "cobrowse-agent-sdk";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import config from "../../../utils/config";
 ChartJS.register(CategoryScale,LinearScale,PointElement,LineElement,Title,Tooltip,Legend);
 
 function ChartForDailySessionCountDate() {
 
+  const formatDate = (inputDate) => {
+    const date = new Date(inputDate);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
 
-  const today = useMemo(() => new Date(), []);
-  const firstDateOfMonth = useMemo( () => new Date(today.getFullYear(), today.getMonth(), 1),[today]);
+    return formattedDate;
+};
 
 
-  const formatedDate = (date) => {
+const formatedDate = (date) => {
     return date.toISOString().split('T')[0];
-  };
+};
+
+
+const today = new Date();
+const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
+
+const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
+const formattedToday = formatedDate(today);
 
 
   const [dateCounts, setDateCounts] = useState({});
   const [chartData, setChartData] = useState([]);
 
-  const [startDate, setStartDate] = useState(formatedDate(firstDateOfMonth))
-  const [endDate, setEndDate] = useState(formatedDate(today));
+  const [startDate, setStartDate] = useState(formattedtwoMonthsAgo)
+  const [endDate, setEndDate] = useState(formattedToday);
 
 
 
@@ -44,7 +57,7 @@ function ChartForDailySessionCountDate() {
   useEffect(() => {
     const fetchAndProcessData = async () => {
       try {
-        const sessions = await fetchData(firstDateOfMonth, today);
+        const sessions = await fetchData(formattedtwoMonthsAgo, formattedToday);
 
         const counts = sessions.reduce((acc, item) => {
           const date = formatDate(new Date(item.created));
@@ -66,18 +79,10 @@ function ChartForDailySessionCountDate() {
     };
 
     fetchAndProcessData();
-  }, [firstDateOfMonth, today]);
+  }, [formattedtwoMonthsAgo, formattedToday]);
 
 
-  const formatDate = (inputDate) => {
-    const date = new Date(inputDate);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const formattedDate = `${year}-${month}-${day}`;
 
-    return formattedDate;
-  };
 
   const convertAndFormatDate = (userInputDate) => {
     console.log("userInputDate-----", userInputDate);
@@ -122,7 +127,7 @@ function ChartForDailySessionCountDate() {
   };
 
   chartData.sort((a, b) => new Date(b.date) - new Date(a.date))
-  // chartData.reverse();
+  chartData.reverse();
   const labelsDetails = chartData.map((dataPoint) => dataPoint.date);
   const dataDetails = chartData.map((dataPoint) => dataPoint.count);
 
@@ -135,7 +140,7 @@ function ChartForDailySessionCountDate() {
       },
       title: {
         display: true,
-        text: "Date Wise Session Count of Agent",
+        text: "Date Wise Session Count",
       },
     },
   };
@@ -153,14 +158,16 @@ function ChartForDailySessionCountDate() {
   };
   return (
     <div>
-     <form onSubmit={handleSubmit} className="dailycount1">
+      <div >
+      <form onSubmit={handleSubmit} className="dailycount1">
         <div>
           <label htmlFor="startDate">From</label>
           <input className="input"
             type="date"
             id="startDate"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}/>
+            onChange={(e) => setStartDate(e.target.value)}
+          />
         </div>
         <div>
           <label htmlFor="endDate">To  </label>
@@ -169,14 +176,15 @@ function ChartForDailySessionCountDate() {
             type="date"
             id="endDate"
             value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}/>
+            onChange={(e) => setEndDate(e.target.value)}
+          />
         </div>
         <button type="submit" className="submit-button" >Submit</button>
       </form>
+      </div>
       <Line className="daywiseCount" options={options} data={data} />
     </div>
   );
 }
 
 export default ChartForDailySessionCountDate;
-

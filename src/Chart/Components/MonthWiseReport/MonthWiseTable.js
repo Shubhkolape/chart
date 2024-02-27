@@ -6,10 +6,8 @@ import config from '../../../utils/config';
 import KnowMoreMonths from './KnowMoreMonths';
 
 function MonthWiseTable() {
-    const formatedDate = (date) => {
-        return date.toISOString().split('T')[0];
-    };
 
+    
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
@@ -20,15 +18,21 @@ function MonthWiseTable() {
         return formattedDate;
     };
 
+    const formatedDate = (date) => {
+        return date.toISOString().split('T')[0];
+    };
+
 
     const today = new Date();
     const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
-    const formattedTwoMonthsAgo = formatDate(twoMonthsAgo);
-    const formattedToday = formatDate(today);
+
+   
+    const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
+    const formattedToday = formatedDate(today);
 
     const [monthlyCounts, setMonthlyCounts] = useState({});
-    const [fromDate, setFromDate] = useState(formatedDate(twoMonthsAgo));
-    const [toDate, seToDate] =  useState(formatedDate(today));
+    const [fromDate, setFromDate] = useState(formattedtwoMonthsAgo);
+    const [toDate, seToDate] =  useState(formattedToday);
 
 
 
@@ -36,8 +40,8 @@ function MonthWiseTable() {
     const [selectedSession, setSelectedSession] = useState(null);
 
     useEffect(() => {
-        fetchData(formattedTwoMonthsAgo, formattedToday);
-    }, [formattedTwoMonthsAgo, formattedToday]);
+        fetchData(formattedtwoMonthsAgo, formattedToday);
+    }, [formattedtwoMonthsAgo, formattedToday]);
 
     const fetchData = async (startDate, endDate) => {
         const agentToken = config.agentToken;
@@ -49,7 +53,7 @@ function MonthWiseTable() {
                 activated_before: endDate,
                 limit: 10000,
             });
-
+      
             const monthly = {};
             sessions.forEach((item) => {
                 const date = new Date(item.created);
@@ -57,17 +61,15 @@ function MonthWiseTable() {
                 monthly[monthYear] = (monthly[monthYear] || 0) + 1;
             });
             const sortedMonthly = Object.fromEntries(
-                Object.entries(monthly).sort(([a], [b]) => {
-                    const [aMonth, aYear] = a.split('-');
-                    const [bMonth, bYear] = b.split('-');
-                    return bYear - aYear || bMonth - aMonth;
-                }),
+                Object.entries(monthly)
+                    .sort((a, b) => {
+                        console.log("Comparing:", a[0], b[0]);
+                        const [aMonth, aYear] = a[0].split('-');
+                        const [bMonth, bYear] = b[0].split('-');
+                        return bYear - aYear || bMonth - aMonth;
+                    })
             );
             setMonthlyCounts(sortedMonthly);
-            console.log('sortedMonthly----', sortedMonthly);
-            setMonthlyCounts(sortedMonthly);
-            // setAPIdata(sessions);
-            console.log('sessions ----', sessions);
         } catch (error) {
             console.error('Error fetching cobrowse data:', error);
         }
@@ -75,16 +77,16 @@ function MonthWiseTable() {
 
     const handleFormSubmit = (event) => {
         event.preventDefault();
-        const manualStartDate = new Date(toDate);
-        const manualEndDate = new Date(fromDate);
-        const formattedFromDate = formatDate(manualStartDate);
-        const formattedToday = formatDate(manualEndDate);
-        fetchData(formattedFromDate, formattedToday);
-        setPage(1);
+        // const manualStartDate = new Date(toDate);
+        // const manualEndDate = new Date(fromDate);
+        const formattedFromDate = formatDate(fromDate);
+        const formattedToday = formatDate(toDate);
+        fetchData(formattedFromDate, formattedToday).catch((error) =>
+            console.error('Error fetching and processing data:', error),
+        );
+        //   setPage(1);
     };
-    // const handleChange = (event, newPage) => {
-    //     setPage(newPage);
-    // };
+
 
     const fetchDetailedSessions = async (monthYear) => {
         try {
@@ -184,20 +186,11 @@ function MonthWiseTable() {
                         },
                     }}
                     pageSizeOptions={[5, 10]}
-                    // checkboxSelection
+                
                 />
             </div>
 
-            {/* <Stack spacing={12}>
-        <Pagination
-          // count={totalPages}
-          page={page}
-          onChange={handleChange}
-          color="secondary"
-          showFirstButton
-          showLastButton
-        />
-      </Stack> */}
+          
 
             {selectedSession && <KnowMoreMonths data={selectedSession} />}
         </div>
@@ -205,15 +198,3 @@ function MonthWiseTable() {
 }
 
 export default MonthWiseTable;
-
-// <DataGrid
-// rows={rows}
-// columns={columns}
-// initialState={{
-//   pagination: {
-//     paginationModel: { page: 0, pageSize: 5 },
-//   },
-// }}
-// pageSizeOptions={[5, 10]}
-// checkboxSelection
-// />

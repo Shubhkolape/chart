@@ -1,28 +1,25 @@
 import { DataGrid } from '@mui/x-data-grid';
 import CobrowseAPI from 'cobrowse-agent-sdk';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import config from '../../../utils/config';
 
 function SessionTable() {
 
-
-
-    const today = useMemo(() => new Date(), []);
-     const fifteendaysAgo = useMemo(() => {
-        const fifteendaysAgoDate = new Date(today);
-        fifteendaysAgoDate.setDate(today.getDate() - 20);
-        return fifteendaysAgoDate;
-      }, [today]);
-      
     const formatedDate = (date) => {
         return date.toISOString().split('T')[0];
-      };
+    };
+
+    const today = new Date();
+    const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
+
+    const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
+    const formattedToday = formatedDate(today);
 
 
 
     const [sessions, setSessions] = useState([]);
-    const [fromDate, setFromDate] = useState(formatedDate(fifteendaysAgo))
-    const [toDate, setToDate] =  useState(formatedDate(today));
+    const [fromDate, setFromDate] = useState(formattedtwoMonthsAgo)
+    const [toDate, setToDate] =  useState(formattedToday);
 
     const fetchData = async (startDate, endDate) => {
         const agentToken = config.agentToken;
@@ -34,7 +31,7 @@ function SessionTable() {
                 activated_before: endDate,
                 limit: 10000,
             });
-            setSessions(sessions);
+            setSessions(sessions.reverse());
         } catch (error) {
             console.error('Error fetching cobrowse data:', error);
         }
@@ -42,8 +39,8 @@ function SessionTable() {
 
     useEffect(() => {
       
-        fetchData(fifteendaysAgo, today);
-    }, [fifteendaysAgo,today]);
+        fetchData(formattedtwoMonthsAgo, formattedToday);
+    }, [formattedtwoMonthsAgo,formattedToday]);
 
     const handleFormSubmit = (event) => {
         event.preventDefault();
@@ -75,14 +72,20 @@ function SessionTable() {
         id: index + 1,
         date: formatDate(session.created),
         sessions: generateSessionLabel(index),
+        StartTime : session.toJSON().activated.toISOString().split("T")[1].split("Z")[0],
+        EndTime :   session.toJSON().ended.toISOString().split("T")[1].split("Z")[0],
         duration: calculateDuration(session.created, session.ended),
+        AgentName : session.agent.name,
     }));
 
     const columns = [
         { field: 'id', headerName: 'SR', width: 70 },
         { field: 'date', headerName: 'Date', width: 130 },
         { field: 'sessions', headerName: 'Sessions', width: 130 },
+        { field: 'StartTime', headerName: 'Start Time', width: 160 },
+        { field: 'EndTime', headerName: 'End Time', width: 160 },
         { field: 'duration', headerName: 'Duration (Min)', width: 160 },
+        { field: 'AgentName', headerName: 'Agent Name', width: 190 },
     ];
 
     return (
@@ -125,7 +128,6 @@ function SessionTable() {
                 rows={rows}
                 columns={columns}
                 pageSize={10}
-                checkboxSelection
                 initialState={{
                     pagination: {
                         paginationModel: { page: 0, pageSize: 5 },
