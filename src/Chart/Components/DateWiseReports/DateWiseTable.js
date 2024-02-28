@@ -8,9 +8,9 @@ import SessionDetailsModal from './SessionDetailsModal';
 function DateWiseTable() {
 
 
-    
   
-
+  
+  
     const formatedDate = (date) => {
         return date.toISOString().split('T')[0];
     };

@@ -26,7 +26,6 @@ function AvarageTime() {
     const [fromDate, setFromDate] = useState(formattedtwoMonthsAgo);
     const [toDate, setToDate] = useState(formattedToday);
 
-    // function for convert date format mm-dd-yy to yyyy-mm-dd
 
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
@@ -51,6 +50,12 @@ function AvarageTime() {
         return durationInMinutes;
     };
 
+    
+
+
+   
+    
+
     const fetchDataforAvageTime = async (startdate, enddate) => {
         const agentToken = config.agentToken;
         const cobrowse = new CobrowseAPI(agentToken);
@@ -64,14 +69,10 @@ function AvarageTime() {
             // setAPI(sessions);
 
             const sessionDurations = sessions.map((session) => calculateSessionDuration(session));
-
             const totalDuration = sessionDurations.reduce((total, duration) => total + duration, 0);
             const averageDuration = (totalDuration / sessions.length).toFixed(2);
             const sessionlength = sessions.length;
               
-
-           
-
             setSessionLength(sessionlength);
             setAvargeDuration(averageDuration);
             setTotalDuration(totalDuration.toFixed(2));
@@ -84,7 +85,7 @@ function AvarageTime() {
     API.forEach(session => {
     agentNamesSet.add(session.agent.name);
   });
-let uniqueAgentNames = Array.from(agentNamesSet);
+            // let uniqueAgentNames = Array.from(agentNamesSet);
 
     useEffect(() => {
         fetchDataforAvageTime(formatedfirstDateOfMonth, formatedToday);

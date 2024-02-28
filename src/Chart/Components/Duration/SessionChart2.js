@@ -43,39 +43,7 @@ function SessionChart2() {
     const [fromDate, setFromDate] = useState(formattedtwoMonthsAgo)
     const [toDate, setToDate] = useState(formattedToday);
 
-    const options = {
-        responsive: true,
-        plugins: {
-            tooltip: {
-                callbacks: {
-                    label: function (context) {
-                        var label = context.dataset.label || '';
-
-                        if (label) {
-                            label += ': ';
-                        }
-                        label += context.parsed.y + ' mins';
-
-                        const sessionIndex = context.dataIndex;
-                        if (sessions[sessionIndex]) {
-                            label +=
-                                ' - ' +
-                                new Date(sessions[sessionIndex].created).toLocaleDateString();
-                        }
-
-                        return label;
-                    },
-                },
-            },
-            legend: {
-                position: 'top',
-            },
-            title: {
-                display: true,
-                text: 'Session Duration',
-            },
-        },
-    };
+   
 
 
 
@@ -115,7 +83,39 @@ function SessionChart2() {
 
     console.log("data1 is ----->", data1);
 
+    const options = {
+        responsive: true,
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function (context) {
+                        var label = context.dataset.label || '';
 
+                        if (label) {
+                            label += ': ';
+                        }
+                        label += context.parsed.y + ' mins';
+
+                        const sessionIndex = context.dataIndex;
+                        if (sessions[sessionIndex]) {
+                            label +=
+                                ' - ' +
+                                new Date(sessions[sessionIndex].created).toLocaleDateString();
+                        }
+
+                        return label;
+                    },
+                },
+            },
+            legend: {
+                position: 'top',
+            },
+            title: {
+                display: true,
+                text: 'Session Duration',
+            },
+        },
+    };
 
     const data = {
         labels,

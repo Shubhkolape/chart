@@ -57,12 +57,29 @@ function SessionTable() {
         return date.toLocaleDateString('en-US', options);
     }
 
-    function calculateDuration(startTime, endTime) {
-        const start = new Date(startTime);
-        const end = new Date(endTime);
-        const duration = Math.abs(end - start) / (1000 * 60);
-        return duration.toFixed(2);
-    }
+    const calculateDuration = (session) => {
+        const activatedTime = new Date(session.activated);
+        const endedTime = new Date(session.ended);
+    
+        const durationInMilliseconds = endedTime - activatedTime;
+        const durationInSeconds = Math.floor(durationInMilliseconds / 1000);
+        const durationInMinutes = Math.floor(durationInSeconds / 60);
+    
+        if (durationInMinutes < 1) {
+          // If duration is less than 1 minute
+          return `${durationInSeconds} sec`;
+      } else if (durationInMinutes < 60) {
+          // If duration is less than 1 hour
+          const seconds = durationInSeconds % 60;
+          return `${durationInMinutes} min ${seconds} sec`;
+      } else {
+          // If duration is 1 hour or more
+          const hours = Math.floor(durationInMinutes / 60);
+          const minutes = durationInMinutes % 60;
+          const seconds = durationInSeconds % 60;
+          return `${hours} hour${hours > 1 ? 's' : ''} ${minutes} min ${seconds} sec`;
+      }
+    };
 
     const generateSessionLabel = (index) => {
         return `Session${index + 1}`;
@@ -74,7 +91,7 @@ function SessionTable() {
         sessions: generateSessionLabel(index),
         StartTime : session.toJSON().activated.toISOString().split("T")[1].split("Z")[0],
         EndTime :   session.toJSON().ended.toISOString().split("T")[1].split("Z")[0],
-        duration: calculateDuration(session.created, session.ended),
+        duration: calculateDuration(session),
         AgentName : session.agent.name,
     }));
 
@@ -84,7 +101,7 @@ function SessionTable() {
         { field: 'sessions', headerName: 'Sessions', width: 130 },
         { field: 'StartTime', headerName: 'Start Time', width: 160 },
         { field: 'EndTime', headerName: 'End Time', width: 160 },
-        { field: 'duration', headerName: 'Duration (Min)', width: 160 },
+        { field: 'duration', headerName: 'Duration', width: 170 },
         { field: 'AgentName', headerName: 'Agent Name', width: 190 },
     ];
 
