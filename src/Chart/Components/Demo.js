@@ -8,8 +8,10 @@ import ChartForDailySessionCountDate from './DateWiseReports/ChartForDailySessio
 import DateWiseTable from './DateWiseReports/DateWiseTable';
 import DurationChart from './Duration/DurationChart';
 import SessionChart2 from './Duration/SessionChart2';
+import License from './License/License';
 import MonthSessionsChart from './MonthWiseReport/MonthSessionsChart';
 import MonthWiseTable from './MonthWiseReport/MonthWiseTable';
+import Agent from './MultipleAgent/Agent';
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -130,6 +132,33 @@ export default function BasicTabs() {
             <CustomTabPanel value={value} index={3}>
                 <div>
                     <AvarageTime />
+                </div>
+            </CustomTabPanel>
+
+
+            
+            <CustomTabPanel value={value} index={4}>
+                <div>
+                    <License />
+                </div>
+            </CustomTabPanel>
+
+            <CustomTabPanel value={value} index={5}>
+            <div className='tab-button'>
+                <button
+                        className={`tab-button-1 ${view === 'chart' ? 'active' : ''}`}
+                        onClick={() => handleViewChange('chart')}
+                    >
+                        Chart
+                    </button>
+                    {/* <button
+                        className={`tab-button-1 ${view === 'table' ? 'active' : ''}`}
+                        onClick={() => handleViewChange('table')}
+                    >
+                        Table
+                    </button> */}
+                    {view === 'chart' && <Agent />}
+                    {/* {view === 'table' && <DurationChart />} */}
                 </div>
             </CustomTabPanel>
         </Box>

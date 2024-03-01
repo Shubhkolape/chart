@@ -38,8 +38,7 @@ function SessionTable() {
     };
 
     useEffect(() => {
-      
-        fetchData(formattedtwoMonthsAgo, formattedToday);
+    fetchData(formattedtwoMonthsAgo, formattedToday);
     }, [formattedtwoMonthsAgo,formattedToday]);
 
     const handleFormSubmit = (event) => {

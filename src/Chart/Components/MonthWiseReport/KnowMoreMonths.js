@@ -6,20 +6,16 @@ function KnowMoreMonths({ data }) {
   const calculateDuration = (session) => {
     const activatedTime = new Date(session.activated);
     const endedTime = new Date(session.ended);
-
     const durationInMilliseconds = endedTime - activatedTime;
     const durationInSeconds = Math.floor(durationInMilliseconds / 1000);
     const durationInMinutes = Math.floor(durationInSeconds / 60);
 
     if (durationInMinutes < 1) {
-      // If duration is less than 1 minute
       return `${durationInSeconds} sec`;
   } else if (durationInMinutes < 60) {
-      // If duration is less than 1 hour
       const seconds = durationInSeconds % 60;
       return `${durationInMinutes} min ${seconds} sec`;
   } else {
-      // If duration is 1 hour or more
       const hours = Math.floor(durationInMinutes / 60);
       const minutes = durationInMinutes % 60;
       const seconds = durationInSeconds % 60;
@@ -59,9 +55,7 @@ function KnowMoreMonths({ data }) {
   return (
     <div className="modal">
       <div className="modal-content">
-        {/* <span className="close" onClick={onClose}>X</span> */}
         <h2>Session Details</h2>
-
         <DataGrid
           className="dateTable"
           rows={rows}
@@ -71,9 +65,7 @@ function KnowMoreMonths({ data }) {
               paginationModel: { page: 0, pageSize: 5 },
             },
           }}
-          pageSizeOptions={[5, 10]}
-          // checkboxSelection
-        />
+          pageSizeOptions={[5, 10]}/>
       </div>
     </div>
   );
