@@ -1,161 +1,235 @@
 .cobrowse-reports-widget-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 30px;
-  
-  }
-  
-  .session{
-    margin: auto;
-    margin-top: 40px;
-    height: 20%;
-    width: 900px;
-  }
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+
+}
+
+.session{
+  margin: auto;
+  margin-top: 40px;
+  height: 20%;
+  width: 900px;
+}
 
 
-  table {
-    padding: 30px;
-    margin: auto;
-    font-family: arial, sans-serif;
-    border-collapse: collapse;
-  }
-  
-  td, th {
-    text-align: center;
-    border: 1px solid #dddddd;
-    padding: 8px;
-  }
-/*   
-  
-  .pagination{
-    margin-top: 30px;
-    margin-left: 810px;
-    display: flex;
-    list-style-type: none;
-  }
-  .date-stack{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 30px;
-    list-style-type: none;
-    margin-bottom: 60px;
-  } */
-  
-  .daywiseCount{
-    height: 500px;
-    width: 800px;
-    margin: auto;
-    margin-bottom: 90px;
-  }
-  
-  .dailycount1{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 30px;
-  }
+table {
+  padding: 30px;
+  margin: auto;
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+}
 
-  .main-header{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
+td, th {
+  text-align: center;
+  border: 1px solid #dddddd;
+  padding: 8px;
+}
 
 
-  .input{
-    margin: 10px;
-    padding: 10px;
-  }
-  
-  
-  .modal{
-    margin-bottom: 90px;
-  }
-  
-  .timeduration{
-    height: 500px;
-    width: 800px;
-    margin: auto;
-    margin-bottom: 90px;
-  }
-  
-  .Duration-table{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: auto;
-    /* margin: auto; */
-    margin-bottom: 50px;
-  }
-  
-  
-  .Agentmonth-table{
-    margin-bottom: 90px;
-  }
-  
-  
-   .dateTable1{
-    width: 100%;
-    margin: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  } 
 
 
-  .tab-button-1{
-    background-color: #FFFFFF;
-    border: 0;
-    margin: 10px;
-    border-radius: .5rem;
-    box-sizing: border-box;
-    color: #111827;
-    font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
-    font-size: .875rem;
-    font-weight: 600;
-    line-height: 1.25rem;
-    padding: .75rem 1rem;
-    text-align: center;
-    text-decoration: none #D1D5DB solid;
-    text-decoration-thickness: auto;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    cursor: pointer;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: manipulation;
-  }
+.daywiseCount{
+  height: 500px;
+  width: 800px;
+  margin: auto;
+  margin-bottom: 90px;
+}
 
-  .active {
-    background-color: #1565C0;
-    color: white;
-  }
+.dailycount1{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+
+.main-header{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+}
 
 
-  .submit-button{
-    background-color: #1565C0;
-    border: 0;
-    margin: 10px;
-    border-radius: .5rem;
-    box-sizing: border-box;
-    color: white;
-    font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
-    font-size: .875rem;
-    font-weight: 600;
-    line-height: 1.25rem;
-    padding: .75rem 1rem;
-    text-align: center;
-    text-decoration: none #D1D5DB solid;
-    text-decoration-thickness: auto;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    cursor: pointer;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: manipulation;
-  }
-  
+.input{
+  margin: 10px;
+  padding: 10px;
+}
+
+
+.modal{
+  margin-bottom: 90px;
+}
+
+.timeduration{
+  height: 500px;
+  width: 800px;
+  margin: auto;
+  margin-bottom: 90px;
+}
+
+.Duration-table{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  /* margin: auto; */
+  margin-bottom: 50px;
+}
+
+
+.Agentmonth-table{
+  margin-bottom: 90px;
+}
+
+
+
+
+.centered-header {
+  text-align: center;
+  background-color: #f0f0f0; /* Change this to your desired background color */
+}
+
+
+
+
+.tab-button-1{
+  display: inline-flex;
+  background-color: #FFFFFF;
+  border: 0;
+  margin: 10px;
+  border-radius: .5rem;
+  box-sizing: border-box;
+  color: #111827;
+  font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  font-size: .875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  padding: .75rem 1rem;
+  text-align: center;
+  text-decoration: none #D1D5DB solid;
+  text-decoration-thickness: auto;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.active {
+  background-color: #1565C0;
+  color: white;
+}
+
+
+.submit-button{
+  background-color: #1565C0;
+  border: 0;
+  margin: 10px;
+  border-radius: .5rem;
+  box-sizing: border-box;
+  color: white;
+  font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  font-size: .875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  padding: .75rem 1rem;
+  text-align: center;
+  text-decoration: none #D1D5DB solid;
+  text-decoration-thickness: auto;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.license-info{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+
+}
+
+.license-table{
+  width: 700px;
+  height: 250px;
+}
+
+.Month-table{
+  width: 1100px;
+  height: 150px;
+}
+
+
+.averge-table{
+  width: 1100px;
+  height: 110px;
+}
+
+
+.dateTable1{
+  width: 100%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+} 
+
+
+
+
+.session-details-table{
+width: 1150px;
+
+}
+
+
+
+.license-table-agent{
+  width: 900px;
+  height: 200px;
+}
+
+
+
+.table-text{
+  text-align: center;
+}
+
+
+
+.icon{
+  cursor: pointer;
+}
+
+
+.pagination{
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items:center;
+  gap: 90px;
+}
+
+.pagination-button{
+  display: flex;
+  gap: 10px;
+}
+
+
+
+/*  css for seslect option */
+
+
+.select{
+border: none;
+}

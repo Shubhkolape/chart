@@ -7,9 +7,9 @@ import agentData from "../../../utils/licenses.json";
 function License() {
 
     return (
-        <div className='license-info'>
+        <div className='main-header'>
             <h2>License Information</h2>
-            <table className='license-table'>
+            <table className='Month-table'>
                 <thead>
                     <tr>
                         <th className="centered-header">#</th>
