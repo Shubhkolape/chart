@@ -1,13 +1,18 @@
-import Button from '@mui/material/Button';
-import { DataGrid } from '@mui/x-data-grid';
+import { Icon, Tooltip } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
 import config from '../../../utils/config';
 import KnowMoreMonths from './KnowMoreMonths';
 
+
 function MonthWiseTable() {
 
-    
+    const [itemsPerPage, setItemsPerPage] = useState(5);
+
+    const [currentPage, setCurrentPage] = useState(1);
+
+
+
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
@@ -22,19 +27,15 @@ function MonthWiseTable() {
         return date.toISOString().split('T')[0];
     };
 
-
     const today = new Date();
     const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
 
-   
     const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
     const formattedToday = formatedDate(today);
 
     const [monthlyCounts, setMonthlyCounts] = useState({});
     const [fromDate, setFromDate] = useState(formattedtwoMonthsAgo);
-    const [toDate, seToDate] =  useState(formattedToday);
-
-
+    const [toDate, seToDate] = useState(formattedToday);
 
     const [page, setPage] = useState(formatedDate(today));
     const [selectedSession, setSelectedSession] = useState(null);
@@ -53,7 +54,6 @@ function MonthWiseTable() {
                 activated_before: endDate,
                 limit: 10000,
             });
-      
             const monthly = {};
             sessions.forEach((item) => {
                 const date = new Date(item.created);
@@ -61,13 +61,12 @@ function MonthWiseTable() {
                 monthly[monthYear] = (monthly[monthYear] || 0) + 1;
             });
             const sortedMonthly = Object.fromEntries(
-                Object.entries(monthly)
-                    .sort((a, b) => {
-                        console.log("Comparing:", a[0], b[0]);
-                        const [aMonth, aYear] = a[0].split('-');
-                        const [bMonth, bYear] = b[0].split('-');
-                        return bYear - aYear || bMonth - aMonth;
-                    })
+                Object.entries(monthly).sort((a, b) => {
+                    // console.log('Comparing:', a[0], b[0]);
+                    const [aMonth, aYear] = a[0].split('-');
+                    const [bMonth, bYear] = b[0].split('-');
+                    return bYear - aYear || bMonth - aMonth;
+                }),
             );
             setMonthlyCounts(sortedMonthly);
         } catch (error) {
@@ -86,7 +85,6 @@ function MonthWiseTable() {
         );
         //   setPage(1);
     };
-
 
     const fetchDetailedSessions = async (monthYear) => {
         try {
@@ -111,38 +109,35 @@ function MonthWiseTable() {
         }
     };
 
-    // const handleCloseModal = () => {
-    //   setAPIdata(null);
-    // };
 
-    const columns = [
-        { field: 'monthYear', headerName: 'Month', width: 150 },
-        { field: 'count', headerName: 'Requests Handled', width: 200 },
-        {
-            field: 'action',
-            headerName: 'Action',
-            width: 150,
-            renderCell: (params) => (
-                <Button
-                    onClick={() => fetchDetailedSessions(params.row.monthYear)}
-                    variant='contained'
-                    color='primary'
-                >
-                    Know More
-                </Button>
-            ),
-        },
-    ];
+    const Monthdata =  Object.entries(monthlyCounts).reverse()
 
-    const rows = Object.entries(monthlyCounts).map(([monthYear, count], index) => ({
-        id: index + 1,
-        monthYear,
-        count,
-    }));
+
+    const totalPages = Math.ceil(Monthdata.length / itemsPerPage);
+
+    // Calculate range of data to display
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, Monthdata.length);
+
+    // Slice the data based on the current page
+    const currentData = Monthdata.slice(startIndex, endIndex);
+
+    // Function to handle page change
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    const handleItemsPerPageChange = (event) => {
+        const value = parseInt(event.target.value);
+        setItemsPerPage(value);
+        setCurrentPage(1); 
+    };
+
+
 
     return (
         <div className='main-header'>
-            <h2>Monthly Requests for the Selected Period</h2>
+            <h2>Monthly Session report Table</h2>
             <div>
                 <form onSubmit={handleFormSubmit} className='dailycount1'>
                     <div>
@@ -150,10 +145,9 @@ function MonthWiseTable() {
                         <input
                             type='date'
                             required
-                            className="input"
+                            className='input'
                             value={fromDate}
                             onChange={(e) => {
-                                
                                 setFromDate(e.target.value);
                             }}
                         />
@@ -162,7 +156,7 @@ function MonthWiseTable() {
                         <label htmlFor='endDate'>To </label>
                         <input
                             type='date'
-                            className="input"
+                            className='input'
                             value={toDate}
                             required
                             onChange={(e) => {
@@ -176,21 +170,90 @@ function MonthWiseTable() {
                 </form>
             </div>
 
-            <div>
-                <DataGrid
-                    rows={rows}
-                    columns={columns}
-                    initialState={{
-                        pagination: {
-                            paginationModel: { page: 0, pageSize: 5 },
-                        },
-                    }}
-                    pageSizeOptions={[5, 10]}
-                
-                />
-            </div>
+            <div className='dateTable1'>
+                <table className='Month-table'>
+                    <thead>
+                        <tr>
+                            <th className='centered-header'>#</th>
+                            <th className='centered-header'>Month</th>
+                            <th className='centered-header'>Requests Handled</th>
+                            <th className='centered-header'>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {currentData.map(([monthYear, count], index) => {
+                            const itemIndex = (currentPage - 1) * itemsPerPage + index ;
+                            return (
+                                <tr key={itemIndex}>
+                                    <td>{itemIndex + 1}</td>
+                                    <td>{monthYear}</td>
+                                    <td>{count}</td>
+                                    <td>
+                                        {
+                                            <Tooltip
+                                                className='icon'
+                                                onClick={() => fetchDetailedSessions(monthYear)}
+                                                label='Sessions Details'
+                                                position='top'
+                                                multiline={false}
+                                            >
+                                                <Icon
+                                                    aria-label='info icon'
+                                                    icon='info'
+                                                    size='lg'
+                                                />
+                                            </Tooltip>
+                                        }
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
 
-          
+                {/* Pagination */}
+                <div className='pagination'>
+                <div>
+                    Rows per page:{' '}
+                    <select
+                        className='select'
+                        value={itemsPerPage}
+                        onChange={handleItemsPerPageChange}
+                    >
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                    </select>
+                </div>
+
+                <div className='pagination-button'>
+                <span>
+                        {currentPage} of {totalPages}
+                    </span>
+                    <button  onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}>
+                        <Icon
+                            aria-label='backward-fast'
+                            icon='backward-fast'
+                            size='sm'
+                           
+                        />
+                    </button>
+                   
+                    <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    >
+                       <Icon
+                            aria-label='forward-fast'
+                            icon='forward-fast'
+                            size='sm'
+                           
+                        />
+                    </button>
+                </div>
+            </div>
+            </div>
 
             {selectedSession && <KnowMoreMonths data={selectedSession} />}
         </div>

@@ -1,22 +1,17 @@
-import {
-    CategoryScale,
-    Chart as ChartJS,
-    Legend,
-    LineElement,
-    LinearScale,
-    PointElement,
-    Title,
-    Tooltip,
-} from 'chart.js';
+import { BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip, } from 'chart.js';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import { React, useEffect, useState } from 'react';
-import { Line } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import config from '../../../utils/config';
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-function MonthSessionsChart() {
+function MultiAgentMonthlyChart() {
 
-    
+     // The logic of this code is based on the agents in the api. we show the data only the agents name are available in the api, if in API there is only one agent name available then we can only show the data of that single agent. if multiple agents name in api then it automatically shows in the bar chart.
+    const formatedDate = (date) => {
+        return date.toISOString().split('T')[0];
+    };
+
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
@@ -27,27 +22,22 @@ function MonthSessionsChart() {
         return formattedDate;
     };
 
-    const formatedDate = (date) => {
-        return date.toISOString().split('T')[0];
-    };
-
-
     const today = new Date();
-    const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
+    const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 5, 0);
 
     const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
     const formattedToday = formatedDate(today);
 
-
-    const [monthlyCounts, setMonthlyCounts] = useState({});
-
     const [toDate, seToDate] = useState(formattedtwoMonthsAgo);
-    console.log("date is ss ---->", toDate);
     const [fromDate, setFroDate] = useState(formattedToday);
+
+    const [chartData, setChartData] = useState([]);
+
 
     const fetchData = async (startDate, endDate) => {
         const agentToken = config.agentToken;
         const cobrowse = new CobrowseAPI(agentToken);
+        const allSessions = [];
 
         try {
             const sessions = await cobrowse.sessions.list({
@@ -55,29 +45,28 @@ function MonthSessionsChart() {
                 activated_before: endDate,
                 limit: 10000,
             });
-            const monthly = {};
-            const agentName = sessions[0].agent.name;
-            console.log("agentName is --->", agentName);
-
-            sessions.forEach((item) => {
-                const date = new Date(item.created);
-                const monthYear = `${date.getMonth() + 1}-${date.getFullYear()}`;
-                monthly[monthYear] = (monthly[monthYear] || 0) + 1;
-            });
-            const sortedMonthly = Object.fromEntries(
-                Object.entries(monthly).sort(([a], [b]) => {
-                    const [aMonth, aYear] = a.split('-');
-                    const [bMonth, bYear] = b.split('-');
-                    return bYear - aYear || bMonth - aMonth;
-                }),
-            );
-            console.log('sortedMonthly----', sortedMonthly);
-            setMonthlyCounts(sortedMonthly);
-            // setAPIdata(sessions);
-            console.log('sessions ----', sessions);
+            allSessions.push(...sessions);
+        
         } catch (error) {
             console.error('Error fetching cobrowse data:', error);
         }
+      const monthlyCounts = {};
+
+        allSessions.forEach((session) => {
+            const date = new Date(session.created);
+            const monthYear = formatDate(date);
+            if (!monthlyCounts[monthYear]) {
+              monthlyCounts[monthYear] = 0;
+            }
+            monthlyCounts[monthYear]++;
+          });
+      
+          const sortedChartData = Object.entries(monthlyCounts).map(([date, count]) => ({
+            date,
+            count,
+          }));
+          setChartData(sortedChartData);
+        
     };
 
     useEffect(() => {
@@ -89,72 +78,77 @@ function MonthSessionsChart() {
         const manualStartDate = new Date(toDate);
         const manualEndDate = new Date(fromDate);
         const formattedFromDate = formatDate(manualStartDate);
-        const formattedToday = formatDate(manualEndDate);
+        const formattedToday = formatDate(manualEndDate);   
         fetchData(formattedFromDate, formattedToday).catch((error) =>
             console.error('Error fetching and processing data:', error),
         );
-        //   setPage(1);
     };
 
-    const sortedKeys = Object.keys(monthlyCounts).sort((a, b) => {
-        const [monthA, yearA] = a.split('-').map(Number);
-        const [monthB, yearB] = b.split('-').map(Number);
+    // const sortedKeys = Object.keys(monthlyCounts).sort((a, b) => {
+    //     const [monthA, yearA] = a.split('-').map(Number);
+    //     const [monthB, yearB] = b.split('-').map(Number);
 
-        // Sort by year in descending order
-        if (yearA !== yearB) {
-            return yearB - yearA;
-        }
+    //     // Sort by year in descending order
+    //     if (yearA !== yearB) {
+    //         return yearB - yearA;
+    //     }
 
-        // If years are equal, sort by month in descending order
-        return monthB - monthA;
-    });
+    //     // If years are equal, sort by month in descending order
+    //     return monthB - monthA;
+    // });
 
-    sortedKeys.reverse();
+    // sortedKeys.reverse();
 
-    // Construct a new object using the sorted keys
-    const sortedData = {};
-    sortedKeys.forEach((key) => {
-        sortedData[key] = monthlyCounts[key]; // Access monthlyCounts instead of data
-    });
+    // // Construct a new object using the sorted keys
+    // const sortedData = {};
+    // sortedKeys.forEach((key) => {
+    //     sortedData[key] = monthlyCounts[key]; // Access monthlyCounts instead of data
+    // });
 
-    const keys = Object.keys(sortedData);
-    const values = Object.values(sortedData);
-    console.log("keys---", keys);
+   
+    // const keys = Object.keys(sortedData);
+    // const values = Object.values(sortedData);
 
-    const labels = keys.map((key) => {
-        const [month, year] = key.split('-');
-        return `${month}/${year}`;
-    });
 
+    // const labels = keys.map((key) => {
+    //     const [month, year] = key.split('-');
+    //     return `${month}/${year}`;
+    // });
+
+  
+  
     const options = {
         responsive: true,
         plugins: {
-            legend: {
-                position: 'top',
-            },
-            title: {
-                display: true,  
-                text: 'Monthly Sessions handled',
-            },
+          legend: {
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: 'Monthly Session Report Chart',
+          },
         },
-    };
-
-    const data = {
+      };
+      const labels = chartData.map((dataPoint) => dataPoint.date);
+      const data = {
         labels,
         datasets: [
-            {
-                label: 'Monthly Sessions handled',
-                data: values,
-                borderColor: 'rgb(53, 162, 235)',
-                backgroundColor: 'rgba(53, 162, 235, 0.5)',
-            },
+          {
+            label: 'Monthly Session Count',
+            data: chartData.map((dataPoint) => dataPoint.count),
+            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+            borderColor: 'rgb(255, 99, 132)',
+            borderWidth: 1,
+          },
         ],
-    };
+      };
+
+   
 
     return (
         <div className='main-header'>
              <h2>Monthly Session report Chart </h2>
-            <div>
+             <div>
                 <form onSubmit={handleFormSubmit} className='dailycount1'>
                     <div>
                         <label htmlFor='startDate'>From </label>
@@ -185,10 +179,12 @@ function MonthSessionsChart() {
                     </button>
                 </form>
             </div>
-            <Line className='daywiseCount' options={options} data={data} />
-            {console.log('values---', values)}
+            <Bar className='daywiseCount' options={options} data={data} />
+            {/* <AgentTable/> */}
         </div>
     );
 }
 
-export default MonthSessionsChart;
+export default MultiAgentMonthlyChart;
+
+

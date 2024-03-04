@@ -1,28 +1,25 @@
-import { DataGrid } from '@mui/x-data-grid';
+import { Icon } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
 import config from '../../../utils/config';
 
+
+
 function AvarageTime() {
-    // const [APIdata, setAPIdata] = useState([]);
-    const [SessionLength, setSessionLength] = useState(null);
-    const [AvargeDuration, setAvargeDuration] = useState(null);
-    const [TotalDuration, setTotalDuration] = useState(null);
 
-
-    const [API, setAPI] = useState([]);
+    const [itemsPerPage, setItemsPerPage] = useState(5);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [AgentStats, setAgentStats] = useState([]);
 
     const formatedDate = (date) => {
         return date.toISOString().split('T')[0];
     };
-
 
     const today = new Date();
     const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
 
     const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
     const formattedToday = formatedDate(today);
-
     const [fromDate, setFromDate] = useState(formattedtwoMonthsAgo);
     const [toDate, setToDate] = useState(formattedToday);
 
@@ -51,11 +48,6 @@ function AvarageTime() {
     };
 
     
-
-
-   
-    
-
     const fetchDataforAvageTime = async (startdate, enddate) => {
         const agentToken = config.agentToken;
         const cobrowse = new CobrowseAPI(agentToken);
@@ -66,26 +58,64 @@ function AvarageTime() {
                 activated_before: enddate,
                 limit: 100000,
             });
-            // setAPI(sessions);
 
-            const sessionDurations = sessions.map((session) => calculateSessionDuration(session));
-            const totalDuration = sessionDurations.reduce((total, duration) => total + duration, 0);
-            const averageDuration = (totalDuration / sessions.length).toFixed(2);
-            const sessionlength = sessions.length;
-              
-            setSessionLength(sessionlength);
-            setAvargeDuration(averageDuration);
-            setTotalDuration(totalDuration.toFixed(2));
+
+            const agentData = sessions.reduce((acc, session) => {
+                const agentName = session.agent.name;
+                const duration = calculateSessionDuration(session);
+
+                if (!acc[agentName]) {
+                    acc[agentName] = {
+                        sessionCount: 0,
+                        totalDuration: 0,
+                    };
+                }
+
+                acc[agentName].sessionCount += 1;
+                acc[agentName].totalDuration += duration;
+
+                return acc;
+            }, {});
+
+            const agentStatsArray = Object.keys(agentData).map((agentName) => {
+                const { sessionCount, totalDuration } = agentData[agentName];
+                const averageDuration = totalDuration / sessionCount;
+                return {
+                    agentName,
+                    sessionCount,
+                    totalDuration,
+                    averageDuration,
+                };
+            });
+
+            setAgentStats(agentStatsArray);
         } catch (error) {
             console.error('Error fetching cobrowse data:', error);
         }
     };
     const agentNamesSet = new Set();
 
-    API.forEach(session => {
-    agentNamesSet.add(session.agent.name);
-  });
-            // let uniqueAgentNames = Array.from(agentNamesSet);
+    function formatDuration(totalMinutes) {
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = Math.floor(totalMinutes % 60);
+        const seconds = Math.round((totalMinutes % 1) * 60);
+
+        let durationString = '';
+        if (hours > 0) {
+            durationString += `${hours} hour${hours > 1 ? 's' : ''} `;
+        }
+        if (minutes > 0) {
+            durationString += `${minutes} minute${minutes > 1 ? 's' : ''} `;
+        }
+        if (seconds > 0) {
+            durationString += `${seconds} second${seconds > 1 ? 's' : ''}`;
+        }
+
+        return durationString.trim();
+    }
+
+
+
 
     useEffect(() => {
         fetchDataforAvageTime(formatedfirstDateOfMonth, formatedToday);
@@ -97,9 +127,25 @@ function AvarageTime() {
     };
 
 
+  
+    const totalPages = Math.ceil(AgentStats.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, AgentStats);
+
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+    const handleItemsPerPageChange = (event) => {
+        const value = parseInt(event.target.value);
+        setItemsPerPage(value);
+        setCurrentPage(1);
+    };
+
+
     return (
         <div className='main-header'>
-            <h1>Average Duration of Agent</h1>
+            <h1>Average Duration report table</h1>
             <div>
                 <form className='dailycount1' onSubmit={handleFormSubmit}>
                     <div>
@@ -133,45 +179,73 @@ function AvarageTime() {
                 </form>
             </div>
 
-            <DataGrid
-                className='dateTable'
-                rows={[
-                    {
-                        id: 1,
-                        sessionsHandled: SessionLength,
-                        'Total Duration': TotalDuration,
-                        'Average Duration': AvargeDuration,
-                        // 'Agent Name' :  AgentName,
-                        
-                    },
-                ]}
-                columns={[
-                    { field: 'id', headerName: 'Sr.No', width: 100 },
-                    {
-                        field: 'sessionsHandled',
-                        headerName: 'No of Sessions',
-                        width: 150,
-                    },
+            <div className='dateTable1'>
+                <table className='averge-table'>
+                    <thead>
+                        <tr>
+                            <th className='centered-header'>#</th>
+                            <th className='centered-header'>No of Session</th>
+                            <th className='centered-header'>Total Duration (In Min)</th>
+                            <th className='centered-header'>Average Duration</th>
+                            <th className='centered-header'>Agent Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {AgentStats.map((agent, index) => (
+                            <tr key={index}>
+                                <td>{index + 1}</td>
+                                <td>{agent.sessionCount}</td>
+                                <td>{formatDuration(agent.totalDuration)}</td>
+                                <td>{formatDuration(agent.averageDuration)}</td>
+                                <td>{agent.agentName}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
 
-                    { field: 'Total Duration', headerName: 'Total Duration (In Min)', width: 200 },
+                {/* Pagination */}
+                <div className='pagination'>
+                    <div>
+                        Rows per page:{' '}
+                        <select
+                            className='select'
+                            value={itemsPerPage}
+                            onChange={handleItemsPerPageChange}
+                        >
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                        </select>
+                    </div>
 
-                    {
-                        field: 'Average Duration',
-                        headerName: 'Average Duration (In Min)',
-                        width: 200,
-                    },
-                    // { field: 'AgentName', headerName: 'Agent Name', width: 200 },
+                    <div className='pagination-button'>
+                        <span>
+                           {currentPage} of {totalPages}
+                        </span>
+                        <button onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}>
+                            <Icon
+                                aria-label='backward-fast'
+                                icon='backward-fast'
+                                size='sm'
 
-                  
-                ]}
-                initialState={{
-                    pagination: {
-                        paginationModel: { page: 0, pageSize: 5 },
-                    },
-                }}
-                pageSizeOptions={[5, 10]}
-             
-            />
+                            />
+                        </button>
+
+                        <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                        >
+                            <Icon
+                                aria-label='forward-fast'
+                                icon='forward-fast'
+                                size='sm'
+
+                            />
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }

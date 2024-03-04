@@ -1,15 +1,18 @@
 import { Icon, Tooltip } from '@avaya/neo-react';
-import { DataGrid } from '@mui/x-data-grid';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
 import config from '../../../utils/config';
-import DateWiseTablecopy from './DateWiseTablecopy';
 import SessionDetailsModal from './SessionDetailsModal';
 
-function DateWiseTable() {
+
+function DateWiseTablecopy() {
     const formatedDate = (date) => {
         return date.toISOString().split('T')[0];
     };
+
+    const [itemsPerPage, setItemsPerPage] = useState(5);
+
+    const [currentPage, setCurrentPage] = useState(1);
 
     const today = new Date();
     const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
@@ -119,10 +122,30 @@ function DateWiseTable() {
         }
     };
 
-    const currentDateCounts = Object.entries(dateCounts).reverse().slice();
-
     const handleCloseModal = () => {
         setSelectedSession(null);
+    };
+
+    const currentDateCounts = Object.entries(dateCounts).reverse().slice();
+
+    const totalPages = Math.ceil(currentDateCounts.length / itemsPerPage);
+
+    // Calculate range of data to display
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, currentDateCounts.length);
+
+    // Slice the data based on the current page
+    const currentData = currentDateCounts.slice(startIndex, endIndex);
+
+    // Function to handle page change
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    const handleItemsPerPageChange = (event) => {
+        const value = parseInt(event.target.value);
+        setItemsPerPage(value);
+        setCurrentPage(1); // Reset to first page when changing items per page
     };
 
     return (
@@ -160,60 +183,94 @@ function DateWiseTable() {
                 </form>
             </div>
             <div className='dateTable1'>
-                <DataGrid
-                    className='dateTable'
-                    rows={currentDateCounts.map(([date, count], index) => ({
-                        id: index + 1,
-                        date: date,
-                        sessionsHandled: count,
-                    }))}
-                    columns={[
-                        { field: 'id', headerName: 'Sr.No', width: 100 },
-                        { field: 'date', headerName: 'Date', width: 150 },
-                        {
-                            field: 'sessionsHandled',
-                            headerName: 'Session Handled',
-                            width: 150,
-                        },
-                        {
-                            field: 'action',
-                            headerName: 'Action',
-                            width: 140,
+                <table className='license-table'>
+                    <thead>
+                        <tr>
+                            <th className='centered-header'>#</th>
+                            <th className='centered-header'>Date</th>
+                            <th className='centered-header'>Session Handled</th>
+                            <th className='centered-header'>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {currentData.map(([date, count], index) => {
+                            const itemIndex = (currentPage - 1) * itemsPerPage + index + 1;
+                            return (
+                                <tr key={itemIndex}>
+                                    <td>{itemIndex}</td>
+                                    <td>{date}</td>
+                                    <td>{count}</td>
+                                    <td>
+                                        {
+                                            <Tooltip
+                                                className='icon'
+                                                onClick={() => handleKnowMore(date)}
+                                                label='Sessions Details'
+                                                position='top'
+                                                multiline={false}
+                                            >
+                                                <Icon
+                                                    aria-label='info icon'
+                                                    icon='info'
+                                                    size='lg'
+                                                />
+                                            </Tooltip>
+                                        }
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
 
-                            renderCell: (params) => (
-                              
-                                <Tooltip
-                                className= "tooltip"
-                                onClick={() => handleKnowMore(params.row.date)}
-                                    label='Sessions Details.'
-                                    position='top'
-                                    multiline={false}
-                                >
-                                    <Icon
-                                      aria-label='info icon'
-                                      icon='info'
-                                      size='lg'
+                {/* Pagination */}
+                <div className='pagination'>
+                <div>
+                    Rows per page:{' '}
+                    <select
+                        className='select'
+                        value={itemsPerPage}
+                        onChange={handleItemsPerPageChange}
+                    >
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                    </select>
+                </div>
 
-                                  />
-                                </Tooltip>
-                            ),
-                        },
-                    ]}
-                    initialState={{
-                        pagination: {
-                            paginationModel: { page: 0, pageSize: 5 },
-                        },
-                    }}
-                    pageSizeOptions={[5, 10]}
-                />
-
-                {selectedSession && (
+                <div className='pagination-button'>
+                <span>
+                        {currentPage} of {totalPages}
+                    </span>
+                    <button  onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}>
+                        <Icon
+                            aria-label='backward-fast'
+                            icon='backward-fast'
+                            size='sm'
+                           
+                        />
+                    </button>
+                   
+                    <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    >
+                       <Icon
+                            aria-label='forward-fast'
+                            icon='forward-fast'
+                            size='sm'
+                           
+                        />
+                    </button>
+                </div>
+            </div>
+            </div>
+            {selectedSession && (
                     <SessionDetailsModal data={selectedSession} onClose={handleCloseModal} />
                 )}
-            </div>
-            <DateWiseTablecopy/>
         </div>
     );
 }
 
-export default DateWiseTable;
+export default DateWiseTablecopy;

@@ -1,3 +1,4 @@
+import '@avaya/neo-react/avaya-neo-react.css';
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
@@ -5,13 +6,17 @@ import PropTypes from 'prop-types';
 import * as React from 'react';
 import AvarageTime from './AvarageTime/AvarageTime';
 import ChartForDailySessionCountDate from './DateWiseReports/ChartForDailySessionCountDate';
-import DateWiseTable from './DateWiseReports/DateWiseTable';
+import DateWiseTablecopy from './DateWiseReports/DateWiseTablecopy';
 import DurationChart from './Duration/DurationChart';
 import SessionChart2 from './Duration/SessionChart2';
 import License from './License/License';
 import MonthSessionsChart from './MonthWiseReport/MonthSessionsChart';
 import MonthWiseTable from './MonthWiseReport/MonthWiseTable';
-import Agent from './MultipleAgent/Agent';
+import MultiAgentDailyChart2 from './MultipleAgent/MultiAgentDailyChart2';
+import MultiAgentDailyTable from './MultipleAgent/MultiAgentDailyTable';
+import MultiAgentMonthTable from './MultipleAgent/MultiAgentMonthTable';
+import MultiAgentMonthlyChart2 from './MultipleAgent/MultiAgentMonthlyChart2';
+
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -25,7 +30,7 @@ function CustomTabPanel(props) {
             {...other}
         >
             {value === index && (
-                <Box sx={{ p: 3 }}>
+                <Box sx={{ p: 6 }}>
                     {/* <Typography> */}
                     {children}
                     {/* </Typography> */}
@@ -70,6 +75,9 @@ export default function BasicTabs() {
                     <Tab label='Month Count' {...a11yProps(1)} />
                     <Tab label='Duration Count' {...a11yProps(2)} />
                     <Tab label='Average Duration' {...a11yProps(3)} />
+                    <Tab label='License Information' {...a11yProps(4)} />
+                    <Tab label='Multiple Agents Info' {...a11yProps(5)} />
+                    <Tab label='Multiple Agents daily Info' {...a11yProps(6)} />
                 </Tabs>
             </Box>
             <CustomTabPanel value={value} index={0}>
@@ -87,7 +95,7 @@ export default function BasicTabs() {
                         Table
                     </button>
                     {view === 'chart' && <ChartForDailySessionCountDate  />}
-                    {view === 'table' && <DateWiseTable />}
+                    {view === 'table' && <DateWiseTablecopy />}
                 </div>
             </CustomTabPanel>
 
@@ -135,8 +143,6 @@ export default function BasicTabs() {
                 </div>
             </CustomTabPanel>
 
-
-            
             <CustomTabPanel value={value} index={4}>
                 <div>
                     <License />
@@ -151,14 +157,33 @@ export default function BasicTabs() {
                     >
                         Chart
                     </button>
-                    {/* <button
+                    <button
                         className={`tab-button-1 ${view === 'table' ? 'active' : ''}`}
                         onClick={() => handleViewChange('table')}
                     >
                         Table
-                    </button> */}
-                    {view === 'chart' && <Agent />}
-                    {/* {view === 'table' && <DurationChart />} */}
+                    </button>
+                    {view === 'chart' && <MultiAgentMonthlyChart2 />}
+                    {view === 'table' && <MultiAgentMonthTable />}
+                </div>
+            </CustomTabPanel>
+
+            <CustomTabPanel value={value} index={6}>
+            <div className='tab-button'>
+                <button
+                        className={`tab-button-1 ${view === 'chart' ? 'active' : ''}`}
+                        onClick={() => handleViewChange('chart')}
+                    >
+                        Chart
+                    </button>
+                    <button
+                        className={`tab-button-1 ${view === 'table' ? 'active' : ''}`}
+                        onClick={() => handleViewChange('table')}
+                    >
+                        Table
+                    </button>
+                    {view === 'chart' && <MultiAgentDailyChart2 />}
+                    {view === 'table' && <MultiAgentDailyTable />}
                 </div>
             </CustomTabPanel>
         </Box>

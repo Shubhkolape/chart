@@ -1,4 +1,4 @@
-import { DataGrid } from '@mui/x-data-grid';
+import { Icon } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
 import config from '../../../utils/config';
@@ -15,7 +15,9 @@ function SessionTable() {
     const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
     const formattedToday = formatedDate(today);
 
+    const [itemsPerPage, setItemsPerPage] = useState(5);
 
+    const [currentPage, setCurrentPage] = useState(1);
 
     const [sessions, setSessions] = useState([]);
     const [fromDate, setFromDate] = useState(formattedtwoMonthsAgo)
@@ -31,7 +33,8 @@ function SessionTable() {
                 activated_before: endDate,
                 limit: 10000,
             });
-            setSessions(sessions.reverse());
+            const reversedSessions = sessions.reverse()
+            setSessions(reversedSessions);
         } catch (error) {
             console.error('Error fetching cobrowse data:', error);
         }
@@ -55,6 +58,9 @@ function SessionTable() {
         const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
         return date.toLocaleDateString('en-US', options);
     }
+
+    
+
 
     const calculateDuration = (session) => {
         const activatedTime = new Date(session.activated);
@@ -84,29 +90,34 @@ function SessionTable() {
         return `Session${index + 1}`;
     };
 
-    const rows = sessions.map((session, index) => ({
-        id: index + 1,
-        date: formatDate(session.created),
-        sessions: generateSessionLabel(index),
-        StartTime : session.toJSON().activated.toISOString().split("T")[1].split("Z")[0],
-        EndTime :   session.toJSON().ended.toISOString().split("T")[1].split("Z")[0],
-        duration: calculateDuration(session),
-        AgentName : session.agent.name,
-    }));
 
-    const columns = [
-        { field: 'id', headerName: 'SR', width: 70 },
-        { field: 'date', headerName: 'Date', width: 130 },
-        { field: 'sessions', headerName: 'Sessions', width: 130 },
-        { field: 'StartTime', headerName: 'Start Time', width: 160 },
-        { field: 'EndTime', headerName: 'End Time', width: 160 },
-        { field: 'duration', headerName: 'Duration', width: 170 },
-        { field: 'AgentName', headerName: 'Agent Name', width: 190 },
-    ];
+    
+    const totalPages = Math.ceil(sessions.length / itemsPerPage);
+
+    // Calculate range of data to display
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, sessions.length);
+
+    // Slice the data based on the current page
+    const currentData = sessions.slice(startIndex, endIndex);
+
+    // Function to handle page change
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    const handleItemsPerPageChange = (event) => {
+        const value = parseInt(event.target.value);
+        setItemsPerPage(value);
+        setCurrentPage(1); 
+    };
+
+
+
 
     return (
         <div className='main-header'>
-            <h1>Agent Session Duration </h1>
+            <h1>Session Duration report Table </h1>
             <div>
                 <form className='dailycount1' onSubmit={handleFormSubmit}>
                     <div>
@@ -140,17 +151,81 @@ function SessionTable() {
                 </form>
             </div>
 
-            <DataGrid
-                rows={rows}
-                columns={columns}
-                pageSize={10}
-                initialState={{
-                    pagination: {
-                        paginationModel: { page: 0, pageSize: 5 },
-                    },
-                }}
-                pageSizeOptions={[5, 10]}
-            />
+            <div className='dateTable1'>
+                <table className='Month-table'>
+                    <thead>
+                        <tr>
+                            <th className='centered-header'>#</th>
+                            <th className='centered-header'>Date</th>
+                            <th className='centered-header'>Sessions</th>
+                            <th className='centered-header'>Start Time</th>
+                            <th className='centered-header'>End Time</th>
+                            <th className='centered-header'>Duration</th>
+                            <th className='centered-header'>Agent Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {currentData.map((session, index) => {
+                            const itemIndex = (currentPage - 1) * itemsPerPage + index;
+                            return (
+                                <tr key={itemIndex}>
+                                    <td>{ itemIndex + 1}</td>
+                                    <td>{formatDate(session.created)}</td>
+                                    <td>{generateSessionLabel(itemIndex)}</td>
+                                    <td>{ session.toJSON().activated.toISOString().split("T")[1].split("Z")[0]}</td>
+                                    <td>{session.toJSON().ended.toISOString().split("T")[1].split("Z")[0]}</td>
+                                    <td>{calculateDuration(session)}</td>
+                                    <td>{session.agent.name}</td>
+                                   
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+
+                {/* Pagination */}
+                <div className='pagination'>
+                <div>
+                    Rows per page:{' '}
+                    <select
+                        className='select'
+                        value={itemsPerPage}
+                        onChange={handleItemsPerPageChange}
+                    >
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                    </select>
+                </div>
+
+                <div className='pagination-button'>
+                <span>
+                        {currentPage} of {totalPages}
+                    </span>
+                    <button  onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}>
+                        <Icon
+                            aria-label='backward-fast'
+                            icon='backward-fast'
+                            size='sm'
+                           
+                        />
+                    </button>
+                   
+                    <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    >
+                       <Icon
+                            aria-label='forward-fast'
+                            icon='forward-fast'
+                            size='sm'
+                           
+                        />
+                    </button>
+                </div>
+            </div>
+            </div>
         </div>
     );
 }

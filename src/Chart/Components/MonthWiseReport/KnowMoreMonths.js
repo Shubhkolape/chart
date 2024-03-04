@@ -1,7 +1,35 @@
-import { DataGrid } from "@mui/x-data-grid";
-import React from "react";
+import { Icon } from '@avaya/neo-react';
+import React, { useState } from "react";
+
 
 function KnowMoreMonths({ data }) {
+
+
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+
+   const totalPages = Math.ceil(data.length / itemsPerPage);
+
+    // Calculate range of data to display
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, data.length);
+
+    // Slice the data based on the current page
+    const currentData = data.slice(startIndex, endIndex);
+
+    // Function to handle page change
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    const handleItemsPerPageChange = (event) => {
+        const value = parseInt(event.target.value);
+        setItemsPerPage(value);
+        setCurrentPage(1); 
+    };
+
 
   const calculateDuration = (session) => {
     const activatedTime = new Date(session.activated);
@@ -35,7 +63,7 @@ function KnowMoreMonths({ data }) {
     { field: "AgentName", headerName: "Agent Name", width: 180 },
   ];
 
-  const rows = data.map((session, index) => ({
+  const rows = currentData.map((session, index) => ({
     id: session.id,
     sessionNo: index + 1,
     date: session.toJSON().activated.toISOString().split("T")[0],
@@ -54,19 +82,102 @@ function KnowMoreMonths({ data }) {
 
   return (
     <div className="modal">
-      <div className="modal-content">
-        <h2>Session Details</h2>
-        <DataGrid
-          className="dateTable"
-          rows={rows}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: 5 },
-            },
-          }}
-          pageSizeOptions={[5, 10]}/>
-      </div>
+     <div className='modal-content'>
+                {/* <span className='close' onClick={onClose}></span> */}
+                <h2>Session Details</h2>
+                <table className='session-details-table'>
+                    <thead>
+                        <tr>
+                            <th className='centered-header'>#</th>
+                            <th className='centered-header'>Date</th>
+                            <th className='centered-header'>Start Time</th>
+                            <th className='centered-header'>End Time</th>
+                            <th className='centered-header'>End Time</th>
+                            <th className='centered-header'>Duration</th>
+                            <th className='centered-header'>App Name</th>
+                            <th className='centered-header'>Device Timezone</th>
+                            <th className='centered-header'>Agent Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {currentData.map((session, index) => {
+                            const itemIndex = (currentPage - 1) * itemsPerPage + index + 1;
+                            return (
+                                <tr key={itemIndex}>
+                                    <td>{itemIndex}</td>
+                                    <td>
+                                        {session.toJSON().activated.toISOString().split('T')[0]}
+                                    </td>
+                                    <td>
+                                        {
+                                            session
+                                                .toJSON()
+                                                .activated.toISOString()
+                                                .split('T')[1]
+                                                .split('Z')[0]
+                                        }
+                                    </td>
+                                    <td>
+                                        {
+                                            session
+                                                .toJSON()
+                                                .ended.toISOString()
+                                                .split('T')[1]
+                                                .split('Z')[0]
+                                        }
+                                    </td>
+                                    <td>{calculateDuration(session)}</td>
+                                    <td>{calculateDuration(session)}</td>
+                                    <td>{session.device.app_name}</td>
+                                    <td>{session.device.device_timezone}</td>
+                                    <td>{session.agent.name}</td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+            <div className='pagination'>
+                <div>
+                    Rows per page:{' '}
+                    <select
+                        className='select'
+                        value={itemsPerPage}
+                        onChange={handleItemsPerPageChange}
+                    >
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                    </select>
+                </div>
+
+                <div className='pagination-button'>
+                <span>
+                        {currentPage} of {totalPages}
+                    </span>
+                    <button  onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}>
+                        <Icon
+                            aria-label='backward-fast'
+                            icon='backward-fast'
+                            size='sm'
+                           
+                        />
+                    </button>
+                   
+                    <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    >
+                       <Icon
+                            aria-label='forward-fast'
+                            icon='forward-fast'
+                            size='sm'
+                           
+                        />
+                    </button>
+                </div>
+            </div>
     </div>
   );
 }

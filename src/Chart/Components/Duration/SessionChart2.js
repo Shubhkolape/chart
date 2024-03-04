@@ -13,6 +13,8 @@ import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import config from '../../../utils/config';
+
+
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -141,7 +143,7 @@ function SessionChart2() {
 
     return (
         <div className='main-header'>
-            <h1>Duration of session </h1>
+            <h1>Session Duration report Chart</h1>
             <div>
                 <form className='dailycount1' onSubmit={handleFormSubmit}>
                     <div>
