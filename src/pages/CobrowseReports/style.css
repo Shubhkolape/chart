@@ -96,35 +96,24 @@ td, th {
 }
 
 
-
-
-.tab-button-1{
-  display: inline-flex;
-  background-color: #FFFFFF;
-  border: 0;
-  margin: 10px;
-  border-radius: .5rem;
-  box-sizing: border-box;
-  color: #111827;
-  font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
-  font-size: .875rem;
-  font-weight: 600;
-  line-height: 1.25rem;
-  padding: .75rem 1rem;
-  text-align: center;
-  text-decoration: none #D1D5DB solid;
-  text-decoration-thickness: auto;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
+.tab-button-1 {
+  background-color: white;
+  border: none;
+  color: #555; 
+  padding: 10px 20px;
+  font-size: 16px; 
+  cursor: pointer; 
+  border-bottom: 2px solid transparent; 
+  transition: border-bottom-color 0.3s ease;
 }
 
-.active {
-  background-color: #1565C0;
-  color: white;
+.tab-button-1.active {
+  color: #007bff;
+  font-weight: 650;
+  border-bottom-color: #007bff;
 }
+
+
 
 
 .submit-button{
