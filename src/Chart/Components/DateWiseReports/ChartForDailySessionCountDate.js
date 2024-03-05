@@ -1,12 +1,12 @@
 import {
-  CategoryScale,
-  Chart as ChartJS,
-  Legend,
-  LineElement,
-  LinearScale,
-  PointElement,
-  Title,
-  Tooltip,
+    CategoryScale,
+    Chart as ChartJS,
+    Legend,
+    LineElement,
+    LinearScale,
+    PointElement,
+    Title,
+    Tooltip,
 } from 'chart.js';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
@@ -75,7 +75,7 @@ function ChartForDailySessionCountDate() {
                 }));
 
                 setDateCounts(counts);
-                console.log('counts----', counts);
+                // console.log('counts----', counts);
                 setChartData(chartDataArray);
             } catch (error) {
                 console.error('Error fetching and processing data:', error);

@@ -150,7 +150,7 @@ function DateWiseTablecopy() {
 
     return (
         <div className='main-header'>
-            <h2>Daily Session report Table </h2>
+            <h2>DAY SUMMARY TABLE </h2>
             <div>
                 <form onSubmit={handleFormSubmit} className='dailycount1'>
                     <div>

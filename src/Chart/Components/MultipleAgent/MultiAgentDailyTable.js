@@ -122,32 +122,9 @@ const customColors = [
   const dates =
     chartData.length > 0 ? Object.keys(chartData[0].sessionCounts) : [];
 
-
-  // const data = {
-  //   labels: dates,
-  //   datasets: chartData.map((agentData, index) => ({
-  //     label: agentData.agentName,
-  //     data: dates.map((date) => agentData.sessionCounts[date] || 0),
-  //     backgroundColor: customColors[index % customColors.length], 
-  //   })),
-  // };
-  // const options = {
-  //   indexAxis: "x",
-  //   responsive: true,
-  //   plugins: {
-  //     title: {
-  //       display: true,
-  //       text: "Session Count by Date and Agent",
-  //     },
-  //     legend: {
-  //       display: true,
-  //       position: "top",
-  //     },
-  //   },
-  // };
     return (
         <div className='main-header'>
-            <h2>Multiple Agent Daily Session Report Chart</h2>
+            <h2>DAY AGENT SESSION DETAILS TABLE</h2>
 
             <div>
                 <form onSubmit={handleSubmit} className='dailycount1'>

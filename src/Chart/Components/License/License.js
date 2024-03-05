@@ -8,7 +8,7 @@ function License() {
 
     return (
         <div className='main-header'>
-            <h2>License Information</h2>
+            <h2>LICENSE DETAILS</h2>
             <table className='Month-table'>
                 <thead>
                     <tr>

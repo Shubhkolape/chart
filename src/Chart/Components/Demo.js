@@ -4,19 +4,18 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import PropTypes from 'prop-types';
 import * as React from 'react';
-import AvarageTime from './AvarageTime/AvarageTime';
-import ChartForDailySessionCountDate from './DateWiseReports/ChartForDailySessionCountDate';
+import AveraheDurationAllAgent from './AllAgents/AveraheDurationAllAgent';
+import DailyChartAllAgent from './AllAgents/DailyChartAllAgent';
+import MonthlyChartAllAgent from './AllAgents/MonthlyChartAllAgent';
+import SessionDurationAllAgent from './AllAgents/SessionDurationAllAgent';
 import DateWiseTablecopy from './DateWiseReports/DateWiseTablecopy';
 import DurationChart from './Duration/DurationChart';
-import SessionChart2 from './Duration/SessionChart2';
 import License from './License/License';
-import MonthSessionsChart from './MonthWiseReport/MonthSessionsChart';
 import MonthWiseTable from './MonthWiseReport/MonthWiseTable';
 import MultiAgentDailyChart2 from './MultipleAgent/MultiAgentDailyChart2';
 import MultiAgentDailyTable from './MultipleAgent/MultiAgentDailyTable';
 import MultiAgentMonthTable from './MultipleAgent/MultiAgentMonthTable';
 import MultiAgentMonthlyChart2 from './MultipleAgent/MultiAgentMonthlyChart2';
-
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -29,13 +28,7 @@ function CustomTabPanel(props) {
             aria-labelledby={`simple-tab-${index}`}
             {...other}
         >
-            {value === index && (
-                <Box sx={{ p: 6 }}>
-                    {/* <Typography> */}
-                    {children}
-                    {/* </Typography> */}
-                </Box>
-            )}
+            {value === index && <Box sx={{ p: 7 }}>{children}</Box>}
         </div>
     );
 }
@@ -57,7 +50,6 @@ export default function BasicTabs() {
     const [value, setValue] = React.useState(0);
     const [view, setView] = React.useState('chart');
 
-
     const handleChange = (event, newValue, buttonId) => {
         setValue(newValue);
         setView('chart');
@@ -71,13 +63,13 @@ export default function BasicTabs() {
         <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={value} onChange={handleChange} aria-label='basic tabs example'>
-                    <Tab label='Day Count' {...a11yProps(0)} />
-                    <Tab label='Month Count' {...a11yProps(1)} />
-                    <Tab label='Duration Count' {...a11yProps(2)} />
+                    <Tab label='Day SUmmary' {...a11yProps(0)} />
+                    <Tab label='Month SUmmary' {...a11yProps(1)} />
+                    <Tab label='Duration Summary' {...a11yProps(2)} />
                     <Tab label='Average Duration' {...a11yProps(3)} />
-                    <Tab label='License Information' {...a11yProps(4)} />
-                    <Tab label='Multiple Agents Info' {...a11yProps(5)} />
-                    <Tab label='Multiple Agents daily Info' {...a11yProps(6)} />
+                    <Tab label='License Details' {...a11yProps(4)} />
+                    <Tab label='Agent Session Details' {...a11yProps(5)} />
+                    <Tab label='Day Agent Session Details' {...a11yProps(6)} />
                 </Tabs>
             </Box>
             <CustomTabPanel value={value} index={0}>
@@ -94,14 +86,14 @@ export default function BasicTabs() {
                     >
                         Table
                     </button>
-                    {view === 'chart' && <ChartForDailySessionCountDate  />}
+                    {view === 'chart' &&     <DailyChartAllAgent />}
                     {view === 'table' && <DateWiseTablecopy />}
                 </div>
             </CustomTabPanel>
 
             <CustomTabPanel value={value} index={1}>
                 <div className='tab-button'>
-                <button
+                    <button
                         className={`tab-button-1 ${view === 'chart' ? 'active' : ''}`}
                         onClick={() => handleViewChange('chart')}
                     >
@@ -113,14 +105,14 @@ export default function BasicTabs() {
                     >
                         Table
                     </button>
-                    {view === 'chart' && <MonthSessionsChart />}
+                    {view === 'chart' && <MonthlyChartAllAgent />}
                     {view === 'table' && <MonthWiseTable />}
                 </div>
             </CustomTabPanel>
 
             <CustomTabPanel value={value} index={2}>
                 <div className='tab-button'>
-                <button
+                    <button
                         className={`tab-button-1 ${view === 'chart' ? 'active' : ''}`}
                         onClick={() => handleViewChange('chart')}
                     >
@@ -132,14 +124,14 @@ export default function BasicTabs() {
                     >
                         Table
                     </button>
-                    {view === 'chart' && <SessionChart2 />}
+                    {view === 'chart' && <SessionDurationAllAgent />}
                     {view === 'table' && <DurationChart />}
                 </div>
             </CustomTabPanel>
 
             <CustomTabPanel value={value} index={3}>
                 <div>
-                    <AvarageTime />
+                    <AveraheDurationAllAgent />
                 </div>
             </CustomTabPanel>
 
@@ -150,8 +142,8 @@ export default function BasicTabs() {
             </CustomTabPanel>
 
             <CustomTabPanel value={value} index={5}>
-            <div className='tab-button'>
-                <button
+                <div className='tab-button'>
+                    <button
                         className={`tab-button-1 ${view === 'chart' ? 'active' : ''}`}
                         onClick={() => handleViewChange('chart')}
                     >
@@ -169,8 +161,8 @@ export default function BasicTabs() {
             </CustomTabPanel>
 
             <CustomTabPanel value={value} index={6}>
-            <div className='tab-button'>
-                <button
+                <div className='tab-button'>
+                    <button
                         className={`tab-button-1 ${view === 'chart' ? 'active' : ''}`}
                         onClick={() => handleViewChange('chart')}
                     >
@@ -186,6 +178,8 @@ export default function BasicTabs() {
                     {view === 'table' && <MultiAgentDailyTable />}
                 </div>
             </CustomTabPanel>
+
+        
         </Box>
     );
 }

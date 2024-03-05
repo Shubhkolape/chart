@@ -137,7 +137,7 @@ function MonthWiseTable() {
 
     return (
         <div className='main-header'>
-            <h2>Monthly Session report Table</h2>
+            <h2>MONTH SUMMARY TABLE</h2>
             <div>
                 <form onSubmit={handleFormSubmit} className='dailycount1'>
                     <div>

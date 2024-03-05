@@ -83,38 +83,6 @@ function MultiAgentMonthlyChart() {
             console.error('Error fetching and processing data:', error),
         );
     };
-
-    // const sortedKeys = Object.keys(monthlyCounts).sort((a, b) => {
-    //     const [monthA, yearA] = a.split('-').map(Number);
-    //     const [monthB, yearB] = b.split('-').map(Number);
-
-    //     // Sort by year in descending order
-    //     if (yearA !== yearB) {
-    //         return yearB - yearA;
-    //     }
-
-    //     // If years are equal, sort by month in descending order
-    //     return monthB - monthA;
-    // });
-
-    // sortedKeys.reverse();
-
-    // // Construct a new object using the sorted keys
-    // const sortedData = {};
-    // sortedKeys.forEach((key) => {
-    //     sortedData[key] = monthlyCounts[key]; // Access monthlyCounts instead of data
-    // });
-
-   
-    // const keys = Object.keys(sortedData);
-    // const values = Object.values(sortedData);
-
-
-    // const labels = keys.map((key) => {
-    //     const [month, year] = key.split('-');
-    //     return `${month}/${year}`;
-    // });
-
   
   
     const options = {

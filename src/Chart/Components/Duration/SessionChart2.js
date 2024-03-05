@@ -83,7 +83,7 @@ function SessionChart2() {
     const data1 = sessions.map((session) =>
     getDurationInMinutes(session.created, session.ended))
 
-    console.log("data1 is ----->", data1);
+    // console.log("data1 is ----->", data1);
 
     const options = {
         responsive: true,

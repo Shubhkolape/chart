@@ -1,11 +1,11 @@
 import {
-    BarElement,
-    CategoryScale,
-    Chart as ChartJS,
-    Legend,
-    LinearScale,
-    Title,
-    Tooltip,
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
 } from 'chart.js';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
@@ -38,7 +38,6 @@ function MultiAgentDailyChart2() {
     const [endDate, setEndDate] = useState(formattedToday);
 
     const [chartData, setChartData] = useState([]);
-    // const [dateCounts, setDateCounts] = useState({});
 
     const fetchDataForAgents = async (startDate, endDate) => {
         const agentSessions = [];
@@ -50,7 +49,7 @@ function MultiAgentDailyChart2() {
               activated_after: startDate,
               activated_before: endDate,
               limit: 10000,
-            });
+            }); 
     
             const sessionCounts = {};
             const mainsessions = sessions.reverse()
@@ -147,7 +146,7 @@ const customColors = [
   };
     return (
         <div className='main-header'>
-            <h2>Multiple Agent Daily Session Report Chart</h2>
+            <h2>DAY AGENT SESSION DETAILS CHART</h2>
 
             <div>
                 <form onSubmit={handleSubmit} className='dailycount1'>

@@ -134,7 +134,7 @@ function MultiAgentMonthlyChart2() {
 
     return (
         <div className='main-header'>
-            <h2>Agents Monthly Session Report Chart</h2>
+            <h2>AGENT SESSIONS DETAILS CHART</h2>
             <div>
                 <form onSubmit={handleFormSubmit} className='dailycount1'>
                     <div>

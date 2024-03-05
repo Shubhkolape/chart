@@ -110,7 +110,7 @@ chartData.length > 0 ? Object.keys(chartData[0].sessionCounts) : [];
 
   return (
     <div  className='license-info'>
-      <h2> Multiple Agent Monthly Session Report Table</h2>
+      <h2>AGENT SESSIONS DETAILS TABLE</h2>
       <div>
                 <form onSubmit={handleFormSubmit} className='dailycount1'>
                     <div>

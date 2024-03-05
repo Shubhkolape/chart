@@ -117,7 +117,7 @@ function SessionTable() {
 
     return (
         <div className='main-header'>
-            <h1>Session Duration report Table </h1>
+            <h1>DURATION SUMMARY TABLE</h1>
             <div>
                 <form className='dailycount1' onSubmit={handleFormSubmit}>
                     <div>
