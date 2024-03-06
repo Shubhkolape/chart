@@ -1,8 +1,9 @@
+import { Icon } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
 import agentdata from '../../../utils/licenses.json';
 
-function MonthlyTableAllAgent() {
+function MonthlyChartAllAgent() {
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
@@ -25,6 +26,9 @@ function MonthlyTableAllAgent() {
     const [selectedAgent, setSelectedAgent] = useState('all');
     const [chartData, setChartData] = useState([]);
 
+    const [itemsPerPage, setItemsPerPage] = useState(5);
+    const [currentPage, setCurrentPage] = useState(1);
+
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
         const agentSessions = [];
         const agentsToFetch = agentName
@@ -41,8 +45,8 @@ function MonthlyTableAllAgent() {
                 });
 
                 const sessionCounts = {};
-                const mainsessions = sessions.reverse();
-                mainsessions.forEach((session) => {
+                const mainsession = sessions.reverse()
+                mainsession.forEach((session) => {
                     const monthYear = formatDate(new Date(session.activated));
                     sessionCounts[monthYear] = (sessionCounts[monthYear] || 0) + 1;
                 });
@@ -125,34 +129,26 @@ function MonthlyTableAllAgent() {
             return selectedAgentData ? selectedAgentData.sessionCounts : {};
         }
     };
-    const months = Object.keys(getChartData());
 
-    // const currentDateCounts = Object.entries(getChartData());
-    // const totalPages = Math.ceil(currentDateCounts.length / itemsPerPage);
-    
-    // // Calculate range of data to display
-    // const startIndex = (currentPage - 1) * itemsPerPage;
-    // const endIndex = Math.min(startIndex + itemsPerPage, currentDateCounts.length);
-    
-    // // Slice the data based on the current page
-    // const currentData = currentDateCounts.slice(startIndex, endIndex);
-    
-    // const handlePageChange = (page) => {
-    //     setCurrentPage(page);
-    // };
-    
-    // const handleItemsPerPageChange = (event) => {
-    //     const value = parseInt(event.target.value);
-    //     setItemsPerPage(value);
-    //     setCurrentPage(1); // Reset to first page when changing items per page
-    // };
+    const currentDateCounts = Object.entries(getChartData());
+    const totalPages = Math.ceil(currentDateCounts.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, currentDateCounts.length);
+    const currentData = currentDateCounts.slice(startIndex, endIndex);
 
-        
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
+
+    const handleItemsPerPageChange = (event) => {
+        const value = parseInt(event.target.value);
+        setItemsPerPage(value);
+        setCurrentPage(1); // Reset to first page when changing items per page
+    };
 
     return (
         <div className='main-header'>
-            <h2>MONTHLY SUMMARY TABLE</h2>
-
+            <h2>MONTHLY SESSION COUNT FOR ALL AGENTS</h2>
             <div>
                 <form onSubmit={handleSubmitForDates} className='dailycount1'>
                     <div>
@@ -198,62 +194,57 @@ function MonthlyTableAllAgent() {
                     </button>
                 </form>
             </div>
-
             <table className='license-table'>
                 <thead>
                     <tr>
-                        <th className='centered-header'>Agent</th>
-                        {months.map((month) => (
-                            <th className='centered-header' key={month}>{month}</th>
-                        ))}
+                        <th>Month</th>
+                        <th>Session Count</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {chartData.map((agentData) => (
-                        <tr key={agentData.agentName}>
-                            <td>{agentData.agentName}</td>
-                            {months.map((month) => (
-                                <td key={month}>{agentData.sessionCounts[month] || 0}</td>
-                            ))}
+                    {currentData.map(([monthYear, count], index) => (
+                        <tr key={index}>
+                            <td>{monthYear}</td>
+                            <td>{count}</td>
                         </tr>
                     ))}
                 </tbody>
             </table>
-            {/* <div className='pagination'>
-        <div>
-            Rows per page:{' '}
-            <select
-                className='select'
-                value={itemsPerPage}
-                onChange={handleItemsPerPageChange}
-            >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-            </select>
-        </div>
+            <div className='pagination'>
+                <div>
+                    Rows per page:{' '}
+                    <select
+                        className='select'
+                        value={itemsPerPage}
+                        onChange={handleItemsPerPageChange}
+                    >
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                    </select>
+                </div>
 
-        <div className='pagination-button'>
-            <span>
-                {currentPage} of {totalPages}
-            </span>
-            <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-            >
-                Previous
-            </button>
+                <div className='pagination-button'>
+                    <span>
+                        {currentPage} of {totalPages}
+                    </span>
+                    <button
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                    >
+                        <Icon aria-label='backward-fast' icon='backward-fast' size='sm' />
+                    </button>
 
-            <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-            >
-                Next
-            </button>
-        </div>
-    </div> */}
+                    <button
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                    >
+                        <Icon aria-label='forward-fast' icon='forward-fast' size='sm' />
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }
 
-export default MonthlyTableAllAgent;
+export default MonthlyChartAllAgent;
