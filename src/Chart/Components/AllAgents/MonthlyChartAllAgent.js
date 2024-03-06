@@ -52,7 +52,8 @@ function MonthlyChartAllAgent() {
                 });
 
                 const sessionCounts = {};
-                sessions.forEach((session) => {
+                const mainsessions = sessions.reverse()
+                mainsessions.forEach((session) => {
                     const monthYear = formatDate(new Date(session.activated));
                     sessionCounts[monthYear] = (sessionCounts[monthYear] || 0) + 1;
                 });

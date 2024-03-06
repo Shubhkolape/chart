@@ -41,9 +41,10 @@ function AveraheDurationAllAgent() {
                 });
 
                 const sessionCounts = {};
+                const mainsession = sessions.reverse()
                 let totalDuration = 0;
 
-                sessions.forEach((session) => {
+                mainsession.forEach((session) => {
                     const date = formatDate(new Date(session.activated));
                     sessionCounts[date] = (sessionCounts[date] || 0) + 1;
                     totalDuration += calculateSessionDuration(session);

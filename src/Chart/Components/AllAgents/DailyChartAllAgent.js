@@ -56,7 +56,8 @@ function DailyChartAllAgent() {
                 });
 
                 const sessionCounts = {};
-                sessions.forEach((session) => {
+                const mainsessions = sessions.reverse()
+                mainsessions.forEach((session) => {
                     const date = formatDate(new Date(session.activated));
                     sessionCounts[date] = (sessionCounts[date] || 0) + 1;
                 });

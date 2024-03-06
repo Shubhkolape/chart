@@ -50,7 +50,8 @@ function SessionDurationAllAgent() {
                     limit: 10000,
                 });
     
-                const agentSessionData = sessions.map(session => ({
+                const mainsessions  = sessions.reverse()
+                const agentSessionData = mainsessions.map(session => ({
                     duration: calculateSessionDuration(session),
                     startDate: formatDate(session.activated)
                 }));
