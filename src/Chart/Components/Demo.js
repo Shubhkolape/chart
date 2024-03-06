@@ -4,12 +4,11 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import PropTypes from 'prop-types';
 import * as React from 'react';
-import AveraheDurationAllAgent from './AllAgents/AveraheDurationAllAgent';
+import AverageDurationAllAgent from './AllAgents/AverageDurationAllAgent';
 import DailyChartAllAgent from './AllAgents/DailyChartAllAgent';
 import MonthlyChartAllAgent from './AllAgents/MonthlyChartAllAgent';
 import SessionDurationAllAgent from './AllAgents/SessionDurationAllAgent';
 import DateWiseTablecopy from './DateWiseReports/DateWiseTablecopy';
-import DurationChart from './Duration/DurationChart';
 import License from './License/License';
 import MonthWiseTable from './MonthWiseReport/MonthWiseTable';
 import MultiAgentDailyChart2 from './MultipleAgent/MultiAgentDailyChart2';
@@ -66,10 +65,10 @@ export default function BasicTabs() {
                     <Tab label='Day SUmmary' {...a11yProps(0)} />
                     <Tab label='Month SUmmary' {...a11yProps(1)} />
                     <Tab label='Duration Summary' {...a11yProps(2)} />
-                    <Tab label='Average Duration' {...a11yProps(3)} />
-                    <Tab label='License Details' {...a11yProps(4)} />
-                    <Tab label='Agent Session Details' {...a11yProps(5)} />
-                    <Tab label='Day Agent Session Details' {...a11yProps(6)} />
+                    {/* <Tab label='Average Duration' {...a11yProps(3)} /> */}
+                    <Tab label='License Details' {...a11yProps(3)} />
+                    <Tab label='Agent Session Details' {...a11yProps(4)} />
+                    <Tab label='Day Agent Session Details' {...a11yProps(5)} />
                 </Tabs>
             </Box>
             <CustomTabPanel value={value} index={0}>
@@ -125,23 +124,23 @@ export default function BasicTabs() {
                         Table
                     </button>
                     {view === 'chart' && <SessionDurationAllAgent />}
-                    {view === 'table' && <DurationChart />}
+                    {view === 'table' && <AverageDurationAllAgent />}
                 </div>
             </CustomTabPanel>
+
+            {/* <CustomTabPanel value={value} index={3}>
+                <div>
+                    <AverageDurationAllAgent />
+                </div>
+            </CustomTabPanel> */}
 
             <CustomTabPanel value={value} index={3}>
-                <div>
-                    <AveraheDurationAllAgent />
-                </div>
-            </CustomTabPanel>
-
-            <CustomTabPanel value={value} index={4}>
                 <div>
                     <License />
                 </div>
             </CustomTabPanel>
 
-            <CustomTabPanel value={value} index={5}>
+            <CustomTabPanel value={value} index={4}>
                 <div className='tab-button'>
                     <button
                         className={`tab-button-1 ${view === 'chart' ? 'active' : ''}`}
@@ -160,7 +159,7 @@ export default function BasicTabs() {
                 </div>
             </CustomTabPanel>
 
-            <CustomTabPanel value={value} index={6}>
+            <CustomTabPanel value={value} index={5}>
                 <div className='tab-button'>
                     <button
                         className={`tab-button-1 ${view === 'chart' ? 'active' : ''}`}

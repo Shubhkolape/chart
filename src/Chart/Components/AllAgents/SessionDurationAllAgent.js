@@ -173,7 +173,7 @@ const data = {
     };
     return (
         <div className='main-header'>
-            <h2>DURATION SUMMART CHART</h2>
+            <h2>DURATION SUMMARY CHART</h2>
             <div>
                 <form className='dailycount1'
                  onSubmit={handleFormSubmit}

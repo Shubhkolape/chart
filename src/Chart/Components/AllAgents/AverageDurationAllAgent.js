@@ -2,7 +2,7 @@ import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
 import agentdata from '../../../utils/licenses.json';
 
-function AveraheDurationAllAgent() {
+function AverageDurationAllAgent() {
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
@@ -23,6 +23,7 @@ function AveraheDurationAllAgent() {
 
     const [startDate, setStartDate] = useState(formattedtwoMonthsAgo);
     const [endDate, setEndDate] = useState(formattedToday);
+    const [selectedAgent, setSelectedAgent] = useState('all'); // State to keep track of selected agent
     const [chartData, setChartData] = useState([]);
 
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
@@ -78,7 +79,7 @@ function AveraheDurationAllAgent() {
         };
 
         fetchAndProcessData();
-    }, [formattedtwoMonthsAgo, formattedToday]);
+    }, [formattedtwoMonthsAgo, formattedToday]); 
 
     const convertAndFormatDate = (userInputDate) => {
         const date = new Date(userInputDate);
@@ -98,13 +99,16 @@ function AveraheDurationAllAgent() {
         const formattedFromDate = convertAndFormatDate(startDate);
         const formattedToDate = convertAndFormatDate(endDate);
 
-        fetchDataForAgents(startDate, endDate).then((data) => {
+        fetchDataForAgents(formattedFromDate, formattedToDate, selectedAgent).then((data) => { 
             setChartData(data);
         }).catch((error) => {
             console.error('Error fetching and processing data for all agents:', error);
         });
     };
 
+    const handleAgentChange = (e) => {
+        setSelectedAgent(e.target.value); 
+    };
 
     const calculateSessionDuration = (session) => {
         const activatedTime = new Date(session.activated);
@@ -113,8 +117,6 @@ function AveraheDurationAllAgent() {
         const durationInMinutes = durationInMilliseconds / (1000 * 60);
         return durationInMinutes;
     };
-
-      
 
     const formatDuration = (totalMinutes) => {
         const hours = Math.floor(totalMinutes / 60);
@@ -161,6 +163,22 @@ function AveraheDurationAllAgent() {
                             onChange={(e) => setEndDate(e.target.value)}
                         />
                     </div>
+                    <div className='agent-div'>
+                        <label htmlFor='agent'>Agent</label>
+                        <select
+                            id='agent'
+                            className='agent-label'
+                            value={selectedAgent}
+                            onChange={handleAgentChange}    
+                            >
+                            <option value='all'>All</option>
+                            {agentdata.map((agent) => (
+                                <option key={agent.agent.name} value={agent.agent.name}>
+                                    {agent.agent.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                     <button type='submit' className='submit-button'>
                         Submit
                     </button>
@@ -196,4 +214,4 @@ function AveraheDurationAllAgent() {
     );
 }
 
-export default AveraheDurationAllAgent;
+export default AverageDurationAllAgent;
