@@ -1,25 +1,13 @@
-import { Icon, Tooltip } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
-import config from '../../../utils/config';
-import KnowMoreMonths from './KnowMoreMonths';
+import agentdata from '../../../utils/licenses.json';
 
-
-function MonthWiseTable() {
-
-    const [itemsPerPage, setItemsPerPage] = useState(5);
-
-    const [currentPage, setCurrentPage] = useState(1);
-
-
-
+function MonthlyTableAllAgent() {
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const formattedDate = `${year}-${month}-${day}`;
-
+        const formattedDate = `${year}-${month}`;
         return formattedDate;
     };
 
@@ -28,236 +16,244 @@ function MonthWiseTable() {
     };
 
     const today = new Date();
-    const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
-
-    const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
+    const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1);
+    const formattedSixMonthsAgo = formatedDate(sixMonthsAgo);
     const formattedToday = formatedDate(today);
 
-    const [monthlyCounts, setMonthlyCounts] = useState({});
-    const [fromDate, setFromDate] = useState(formattedtwoMonthsAgo);
-    const [toDate, seToDate] = useState(formattedToday);
+    const [startDate, setStartDate] = useState(formattedSixMonthsAgo);
+    const [endDate, setEndDate] = useState(formattedToday);
+    const [selectedAgent, setSelectedAgent] = useState('all');
+    const [chartData, setChartData] = useState([]);
 
-    const [page, setPage] = useState(formatedDate(today));
-    const [selectedSession, setSelectedSession] = useState(null);
+    const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
+        const agentSessions = [];
+        const agentsToFetch = agentName
+            ? [agentdata.find((agent) => agent.agent.name === agentName)]
+            : agentdata;
+
+        for (const agent of agentsToFetch) {
+            const cobrowse = new CobrowseAPI(agent.agent.token);
+            try {
+                const sessions = await cobrowse.sessions.list({
+                    activated_after: startDate,
+                    activated_before: endDate,
+                    limit: 10000,
+                });
+
+                const sessionCounts = {};
+                const mainsessions = sessions.reverse();
+                mainsessions.forEach((session) => {
+                    const monthYear = formatDate(new Date(session.activated));
+                    sessionCounts[monthYear] = (sessionCounts[monthYear] || 0) + 1;
+                });
+
+                agentSessions.push({
+                    agentName: agent.agent.name,
+                    sessionCounts: sessionCounts,
+                });
+            } catch (error) {
+                console.error(`Error fetching cobrowse data for agent:`, error);
+            }
+        }
+        return agentSessions;
+    };
 
     useEffect(() => {
-        fetchData(formattedtwoMonthsAgo, formattedToday);
-    }, [formattedtwoMonthsAgo, formattedToday]);
+        const fetchAndProcessData = async () => {
+            try {
+                const agentSessions = await fetchDataForAgents(
+                    formattedSixMonthsAgo,
+                    formattedToday,
+                );
+                setChartData(agentSessions);
+            } catch (error) {
+                console.error('Error fetching and processing data for all agents:', error);
+            }
+        };
 
-    const fetchData = async (startDate, endDate) => {
-        const agentToken = config.agentToken;
-        const cobrowse = new CobrowseAPI(agentToken);
+        fetchAndProcessData();
+    }, [formattedSixMonthsAgo, formattedToday]);
 
-        try {
-            const sessions = await cobrowse.sessions.list({
-                activated_after: startDate,
-                activated_before: endDate,
-                limit: 10000,
-            });
-            const monthly = {};
-            sessions.forEach((item) => {
-                const date = new Date(item.created);
-                const monthYear = `${date.getMonth() + 1}-${date.getFullYear()}`;
-                monthly[monthYear] = (monthly[monthYear] || 0) + 1;
-            });
-            const sortedMonthly = Object.fromEntries(
-                Object.entries(monthly).sort((a, b) => {
-                    // console.log('Comparing:', a[0], b[0]);
-                    const [aMonth, aYear] = a[0].split('-');
-                    const [bMonth, bYear] = b[0].split('-');
-                    return bYear - aYear || bMonth - aMonth;
-                }),
+    const convertAndFormatDate = (userInputDate) => {
+        const date = new Date(userInputDate);
+        if (!isNaN(date.getTime())) {
+            const year = date.getFullYear();
+            const month = `0${date.getMonth() + 1}`.slice(-2);
+            const newDate = `${year}-${month}`;
+            return newDate;
+        } else {
+            throw new Error('Invalid date format. Please enter a date in MM/YYYY format.');
+        }
+    };
+
+    const handleSubmitForDates = async (e) => {
+        e.preventDefault();
+        const formattedFromDate = convertAndFormatDate(startDate);
+        const formattedToDate = convertAndFormatDate(endDate);
+
+        if (selectedAgent === 'all') {
+            const agentSessions1 = await fetchDataForAgents(formattedFromDate, formattedToDate);
+            setChartData(agentSessions1);
+        } else {
+            const agentSessions1 = await fetchDataForAgents(
+                formattedFromDate,
+                formattedToDate,
+                selectedAgent,
             );
-            setMonthlyCounts(sortedMonthly);
-        } catch (error) {
-            console.error('Error fetching cobrowse data:', error);
+            setChartData(agentSessions1); // Update chartData with data for selected agent
         }
     };
 
-    const handleFormSubmit = (event) => {
-        event.preventDefault();
-        // const manualStartDate = new Date(toDate);
-        // const manualEndDate = new Date(fromDate);
-        const formattedFromDate = formatDate(fromDate);
-        const formattedToday = formatDate(toDate);
-        fetchData(formattedFromDate, formattedToday).catch((error) =>
-            console.error('Error fetching and processing data:', error),
-        );
-        //   setPage(1);
+    const handleAgentChange = (e) => {
+        setSelectedAgent(e.target.value); // Update selectedAgent state
     };
 
-    const fetchDetailedSessions = async (monthYear) => {
-        try {
-            const [month, year] = monthYear.split('-');
-            const lastDayOfMonth = new Date(year, month, 0).getDate();
-            const startDate = `${year}-${month}-01`;
-            const endDate = `${year}-${month}-${lastDayOfMonth}`;
-
-            const agentToken = config.agentToken;
-            const cobrowse = new CobrowseAPI(agentToken);
-
-            const sessions = await cobrowse.sessions.list({
-                activated_after: startDate,
-                activated_before: endDate,
-                limit: 10000,
+    const getChartData = () => {
+        const totalSessionCounts = {};
+        chartData.forEach((agentData) => {
+            Object.entries(agentData.sessionCounts).forEach(([monthYear, count]) => {
+                totalSessionCounts[monthYear] = (totalSessionCounts[monthYear] || 0) + count;
             });
-            setSelectedSession(sessions);
+        });
 
-            console.log('button sesions are -----', sessions);
-        } catch (error) {
-            console.error('Error fetching detailed session data:', error);
+        if (selectedAgent === 'all') {
+            return totalSessionCounts;
+        } else {
+            const selectedAgentData = chartData.find(
+                (agentData) => agentData.agentName === selectedAgent,
+            );
+            return selectedAgentData ? selectedAgentData.sessionCounts : {};
         }
     };
+    const months = Object.keys(getChartData());
 
+    // const currentDateCounts = Object.entries(getChartData());
+    // const totalPages = Math.ceil(currentDateCounts.length / itemsPerPage);
+    
+    // // Calculate range of data to display
+    // const startIndex = (currentPage - 1) * itemsPerPage;
+    // const endIndex = Math.min(startIndex + itemsPerPage, currentDateCounts.length);
+    
+    // // Slice the data based on the current page
+    // const currentData = currentDateCounts.slice(startIndex, endIndex);
+    
+    // const handlePageChange = (page) => {
+    //     setCurrentPage(page);
+    // };
+    
+    // const handleItemsPerPageChange = (event) => {
+    //     const value = parseInt(event.target.value);
+    //     setItemsPerPage(value);
+    //     setCurrentPage(1); // Reset to first page when changing items per page
+    // };
 
-    const Monthdata =  Object.entries(monthlyCounts).reverse()
-
-
-    const totalPages = Math.ceil(Monthdata.length / itemsPerPage);
-
-    // Calculate range of data to display
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = Math.min(startIndex + itemsPerPage, Monthdata.length);
-
-    // Slice the data based on the current page
-    const currentData = Monthdata.slice(startIndex, endIndex);
-
-    // Function to handle page change
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-    };
-
-    const handleItemsPerPageChange = (event) => {
-        const value = parseInt(event.target.value);
-        setItemsPerPage(value);
-        setCurrentPage(1); 
-    };
-
-
+        
 
     return (
         <div className='main-header'>
-            <h2>MONTH SUMMARY TABLE</h2>
+            <h2>MONTHLY SUMMARY TABLE</h2>
+
             <div>
-                <form onSubmit={handleFormSubmit} className='dailycount1'>
+                <form onSubmit={handleSubmitForDates} className='dailycount1'>
                     <div>
-                        <label htmlFor='startDate'>From </label>
+                        <label htmlFor='startDate'>From</label>
                         <input
-                            type='date'
-                            required
                             className='input'
-                            value={fromDate}
-                            onChange={(e) => {
-                                setFromDate(e.target.value);
-                            }}
+                            type='date'
+                            id='startDate'
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
                         />
                     </div>
                     <div>
-                        <label htmlFor='endDate'>To </label>
+                        <label htmlFor='endDate'>To</label>
                         <input
-                            type='date'
                             className='input'
-                            value={toDate}
-                            required
-                            onChange={(e) => {
-                                seToDate(e.target.value);
-                            }}
+                            type='date'
+                            id='endDate'
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
                         />
                     </div>
-                    <button type='submit' className='submit-button' value='Submit'>
+                    <div>
+                        <div className='agent-div'>
+                            <label htmlFor='agent'>Agent</label>
+                            <select
+                                className='agent-label'
+                                id='agent'
+                                value={selectedAgent}
+                                onChange={handleAgentChange}
+                            >
+                                <option value='all'>All</option>
+                                {agentdata.map((agent) => (
+                                    <option key={agent.agent.name} value={agent.agent.name}>
+                                        {agent.agent.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                    <button type='submit' className='submit-button'>
                         Submit
                     </button>
                 </form>
             </div>
 
-            <div className='dateTable1'>
-                <table className='Month-table'>
-                    <thead>
-                        <tr>
-                            <th className='centered-header'>#</th>
-                            <th className='centered-header'>Month</th>
-                            <th className='centered-header'>Requests Handled</th>
-                            <th className='centered-header'>Action</th>
+            <table className='license-table'>
+                <thead>
+                    <tr>
+                        <th className='centered-header'>Agent</th>
+                        {months.map((month) => (
+                            <th className='centered-header' key={month}>{month}</th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {chartData.map((agentData) => (
+                        <tr key={agentData.agentName}>
+                            <td>{agentData.agentName}</td>
+                            {months.map((month) => (
+                                <td key={month}>{agentData.sessionCounts[month] || 0}</td>
+                            ))}
                         </tr>
-                    </thead>
-                    <tbody>
-                        {currentData.map(([monthYear, count], index) => {
-                            const itemIndex = (currentPage - 1) * itemsPerPage + index ;
-                            return (
-                                <tr key={itemIndex}>
-                                    <td>{itemIndex + 1}</td>
-                                    <td>{monthYear}</td>
-                                    <td>{count}</td>
-                                    <td>
-                                        {
-                                            <Tooltip
-                                                className='icon'
-                                                onClick={() => fetchDetailedSessions(monthYear)}
-                                                label='Sessions Details'
-                                                position='top'
-                                                multiline={false}
-                                            >
-                                                <Icon
-                                                    aria-label='info icon'
-                                                    icon='info'
-                                                    size='lg'
-                                                />
-                                            </Tooltip>
-                                        }
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                    ))}
+                </tbody>
+            </table>
+            {/* <div className='pagination'>
+        <div>
+            Rows per page:{' '}
+            <select
+                className='select'
+                value={itemsPerPage}
+                onChange={handleItemsPerPageChange}
+            >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+            </select>
+        </div>
 
-                {/* Pagination */}
-                <div className='pagination'>
-                <div>
-                    Rows per page:{' '}
-                    <select
-                        className='select'
-                        value={itemsPerPage}
-                        onChange={handleItemsPerPageChange}
-                    >
-                        <option value={5}>5</option>
-                        <option value={10}>10</option>
-                        <option value={20}>20</option>
-                    </select>
-                </div>
+        <div className='pagination-button'>
+            <span>
+                {currentPage} of {totalPages}
+            </span>
+            <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+            >
+                Previous
+            </button>
 
-                <div className='pagination-button'>
-                <span>
-                        {currentPage} of {totalPages}
-                    </span>
-                    <button  onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 1}>
-                        <Icon
-                            aria-label='backward-fast'
-                            icon='backward-fast'
-                            size='sm'
-                           
-                        />
-                    </button>
-                   
-                    <button
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                    >
-                       <Icon
-                            aria-label='forward-fast'
-                            icon='forward-fast'
-                            size='sm'
-                           
-                        />
-                    </button>
-                </div>
-            </div>
-            </div>
-
-            {selectedSession && <KnowMoreMonths data={selectedSession} />}
+            <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+            >
+                Next
+            </button>
+        </div>
+    </div> */}
         </div>
     );
 }
 
-export default MonthWiseTable;
+export default MonthlyTableAllAgent;
