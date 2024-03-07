@@ -50,6 +50,7 @@ function DailyChartAllAgent() {
                     activated_before: endDate,
                     limit: 10000,
                 });
+                // console.log("sessions-=-=-=-=-=-", sessions);
 
                 const sessionCounts = {};
                 sessions.forEach((session) => {
@@ -88,7 +89,6 @@ function DailyChartAllAgent() {
                 const { agentSessions, totalSessionCounts } = await fetchDataForAgents(
                     formattedtwoMonthsAgo,
                     formattedToday,
-                    
                 );
                 setChartData(agentSessions);
                 setTotalSessionCounts(totalSessionCounts);
@@ -162,20 +162,18 @@ function DailyChartAllAgent() {
         let sessionsOnSelectedDate = [];
         if (selectedAgent === 'all') {
             sessionsOnSelectedDate = sessionDetails.filter(
-                (session) => formatDate(new Date(session.created)) === date
+                (session) => formatDate(new Date(session.created)) === date,
             );
         } else {
-            // Filter sessions based on agent and date
             sessionsOnSelectedDate = sessionDetails.filter(
                 (session) =>
                     formatDate(new Date(session.activated)) === date &&
-                    session.agent.name === "Nikhil Vishvas Ghorpade" // Check if session agent matches selected agent
+                    session.agent === selectedAgent,
             );
         }
         setSelectedDateSessionDetails(sessionsOnSelectedDate);
         setShowSessionDetailsModal(true);
     };
-    
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
@@ -213,13 +211,13 @@ function DailyChartAllAgent() {
                         />
                     </div>
                     <div>
-                        <div className='agent-div'>
+                    <div className='agent-div'>
                             <label htmlFor='agent'>Agent</label>
                             <select
                                 className='agent-label'
                                 id='agent'
                                 value={selectedAgent}
-                                onClick ={handleAgentChange}
+                                onChange={handleAgentChange}
                             >
                                 <option value='all'>All</option>
                                 {agentdata.map((agent) => (
@@ -248,11 +246,12 @@ function DailyChartAllAgent() {
                     {currentData.map((dateData, index) => {
                         const date = dateData[0];
                         const count =
-                            selectedAgent === 'all'
-                                ? dateData[1]
-                                : chartData.find(
-                                      (agentData) => agentData.agentName === selectedAgent,
-                                  ).sessionCounts[date];
+                        selectedAgent === 'all'
+                        ? dateData[1]
+                        : chartData.find(
+                              (agentData) => agentData.agentName === selectedAgent,
+                          ).sessionCounts[date];
+
 
                         const itemIndex = startIndex + index + 1;
 

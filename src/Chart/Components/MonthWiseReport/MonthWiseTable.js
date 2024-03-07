@@ -119,7 +119,6 @@ function MonthlyChartAllAgent() {
         const sessionsOnSelectedDate = sessionDetails.filter(
             (session) => formatDate(new Date(session.created)) === date,
         );
-        // console.log('sessionsOnSelectedDate---- ', sessionsOnSelectedDate);
         setSelectedDateSessionDetails(sessionsOnSelectedDate);
         setShowSessionDetailsModal(true);
     };
@@ -127,7 +126,7 @@ function MonthlyChartAllAgent() {
     
 
     const handleAgentChange = (e) => {
-        setSelectedAgent(e.target.value); // Update selectedAgent state
+        setSelectedAgent(e.target.value);
     };
 
     const getChartData = () => {
