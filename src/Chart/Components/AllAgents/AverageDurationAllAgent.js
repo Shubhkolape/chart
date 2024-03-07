@@ -2,6 +2,7 @@ import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
 import agentdata from '../../../utils/licenses.json';
 
+
 function AverageDurationAllAgent() {
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
@@ -26,6 +27,10 @@ function AverageDurationAllAgent() {
     const [selectedAgent, setSelectedAgent] = useState('all'); // State to keep track of selected agent
     const [chartData, setChartData] = useState([]);
 
+    const [sessionDetails, setSessionDetails] = useState([]);
+    const [showSessionDetailsModal, setShowSessionDetailsModal] = useState(false);
+    const [selectedDateSessionDetails, setSelectedDateSessionDetails] = useState([]);
+
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
         const agentSessions = [];
         const agentsToFetch = agentName
@@ -42,6 +47,7 @@ function AverageDurationAllAgent() {
                 });
 
                 const sessionCounts = {};
+                setSessionDetails(sessions.reverse())
                 const mainsession = sessions.reverse()
                 let totalDuration = 0;
 
@@ -93,6 +99,16 @@ function AverageDurationAllAgent() {
             throw new Error('Invalid date format. Please enter a date in MM/DD/YYYY format.');
         }
     };
+
+    const handleKnowMore = async (date) => {
+        const sessionsOnSelectedDate = sessionDetails.filter(
+            (session) => formatDate(new Date(session.created)) === date,
+        );
+        console.log('sessionsOnSelectedDate---- ', sessionsOnSelectedDate);
+        setSelectedDateSessionDetails(sessionsOnSelectedDate);
+        setShowSessionDetailsModal(true);
+    };
+
 
     const handleSubmitForDates = async (e) => {
         e.preventDefault();
@@ -195,16 +211,33 @@ function AverageDurationAllAgent() {
                             <th className='centered-header'>No. of Sessions</th>
                             <th className='centered-header'>Total Duration</th>
                             <th className='centered-header'>Average Duration</th>
+                            {/* <th className='centered-header'>Action</th> */}
                         </tr>
                     </thead>
                     <tbody>
                         {chartData.map((agentData, index) => (
+                        
                             <tr key={index}>
                                 <td>{index + 1 }</td>
                                 <td>{agentData.agentName}</td>
                                 <td>{agentData.totalSessions}</td>
                                 <td>{formatDuration(agentData.totalDuration)}</td>
                                 <td>{formatDuration(agentData.averageDuration)}</td>
+                                {/* <td>
+                                    <Tooltip
+                                        className='icon'
+                                        label='Sessions Details'
+                                        position='top'
+                                        multiline={false}
+                                    >
+                                        <Icon
+                                            onClick={() => handleKnowMore(agentData)}
+                                            aria-label='info icon'
+                                            icon='info'
+                                            size='lg'
+                                        />
+                                    </Tooltip>
+                                </td> */}
                             </tr>
                         ))}
                     </tbody>

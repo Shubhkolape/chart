@@ -47,7 +47,7 @@ function SessionDetailsModal({ data }) {
     const handleItemsPerPageChange = (event) => {
         const value = parseInt(event.target.value);
         setItemsPerPage(value);
-        setCurrentPage(1); // Reset to first page when changing items per page
+        setCurrentPage(1); 
     };
 
   
@@ -66,7 +66,6 @@ function SessionDetailsModal({ data }) {
                             <th className='centered-header'>#</th>
                             <th className='centered-header'>Date</th>
                             <th className='centered-header'>Start Time</th>
-                            <th className='centered-header'>End Time</th>
                             <th className='centered-header'>End Time</th>
                             <th className='centered-header'>Duration</th>
                             <th className='centered-header'>App Name</th>
@@ -101,7 +100,6 @@ function SessionDetailsModal({ data }) {
                                                 .split('Z')[0]
                                         }
                                     </td>
-                                    <td>{calculateDuration(session)}</td>
                                     <td>{calculateDuration(session)}</td>
                                     <td>{session.device.app_name}</td>
                                     <td>{session.device.device_timezone}</td>

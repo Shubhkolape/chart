@@ -1,7 +1,8 @@
-import { Icon } from '@avaya/neo-react';
+import { Icon, Tooltip } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
 import agentdata from '../../../utils/licenses.json';
+import SessionDetailsModal from '../../Components/DateWiseReports/SessionDetailsModal';
 
 function DailyChartAllAgent() {
     const formatDate = (inputDate) => {
@@ -26,16 +27,20 @@ function DailyChartAllAgent() {
     const [endDate, setEndDate] = useState(formattedToday);
     const [selectedAgent, setSelectedAgent] = useState('all');
     const [chartData, setChartData] = useState([]);
-
+    const [totalSessionCounts, setTotalSessionCounts] = useState({});
+    const [sessionDetails, setSessionDetails] = useState([]);
     const [itemsPerPage, setItemsPerPage] = useState(5);
-
     const [currentPage, setCurrentPage] = useState(1);
+    const [showSessionDetailsModal, setShowSessionDetailsModal] = useState(false);
+    const [selectedDateSessionDetails, setSelectedDateSessionDetails] = useState([]);
 
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
         const agentSessions = [];
         const agentsToFetch = agentName
             ? [agentdata.find((agent) => agent.agent.name === agentName)]
             : agentdata;
+
+        const allSessions = [];
 
         for (const agent of agentsToFetch) {
             const cobrowse = new CobrowseAPI(agent.agent.token);
@@ -47,8 +52,7 @@ function DailyChartAllAgent() {
                 });
 
                 const sessionCounts = {};
-                const mainsessions = sessions.reverse();
-                mainsessions.forEach((session) => {
+                sessions.forEach((session) => {
                     const date = formatDate(new Date(session.activated));
                     sessionCounts[date] = (sessionCounts[date] || 0) + 1;
                 });
@@ -57,21 +61,37 @@ function DailyChartAllAgent() {
                     agentName: agent.agent.name,
                     sessionCounts: sessionCounts,
                 });
+
+                allSessions.push(...sessions);
             } catch (error) {
                 console.error(`Error fetching cobrowse data for agent:`, error);
             }
         }
-        return agentSessions;
+
+        const totalSessionCounts = {};
+        allSessions.forEach((session) => {
+            const date = formatDate(new Date(session.activated));
+            totalSessionCounts[date] = (totalSessionCounts[date] || 0) + 1;
+        });
+
+        setSessionDetails(allSessions);
+
+        return {
+            agentSessions: agentSessions,
+            totalSessionCounts: totalSessionCounts,
+        };
     };
 
     useEffect(() => {
         const fetchAndProcessData = async () => {
             try {
-                const agentSessions = await fetchDataForAgents(
+                const { agentSessions, totalSessionCounts } = await fetchDataForAgents(
                     formattedtwoMonthsAgo,
                     formattedToday,
+                    
                 );
                 setChartData(agentSessions);
+                setTotalSessionCounts(totalSessionCounts);
             } catch (error) {
                 console.error('Error fetching and processing data for all agents:', error);
             }
@@ -99,30 +119,29 @@ function DailyChartAllAgent() {
         const formattedToDate = convertAndFormatDate(endDate);
 
         if (selectedAgent === 'all') {
-            const agentSessions1 = await fetchDataForAgents(formattedFromDate, formattedToDate);
-            setChartData(agentSessions1);
+            const { agentSessions, totalSessionCounts } = await fetchDataForAgents(
+                formattedFromDate,
+                formattedToDate,
+            );
+            setChartData(agentSessions);
+            setTotalSessionCounts(totalSessionCounts);
+            console.log('i am here ');
         } else {
-            const agentSessions1 = await fetchDataForAgents(
+            const { agentSessions } = await fetchDataForAgents(
                 formattedFromDate,
                 formattedToDate,
                 selectedAgent,
             );
-            setChartData(agentSessions1); // Update chartData with data for selected agent
+            setChartData(agentSessions);
+            console.log('i am noyt in  here ');
         }
     };
 
     const handleAgentChange = (e) => {
-        setSelectedAgent(e.target.value); // Update selectedAgent state
+        setSelectedAgent(e.target.value);
     };
 
     const getChartData = () => {
-        const totalSessionCounts = {};
-        chartData.forEach((agentData) => {
-            Object.entries(agentData.sessionCounts).forEach(([date, count]) => {
-                totalSessionCounts[date] = (totalSessionCounts[date] || 0) + count;
-            });
-        });
-
         if (selectedAgent === 'all') {
             return totalSessionCounts;
         } else {
@@ -133,16 +152,30 @@ function DailyChartAllAgent() {
         }
     };
 
-
     const currentDateCounts = Object.entries(getChartData());
-const totalPages = Math.ceil(currentDateCounts.length / itemsPerPage);
+    const totalPages = Math.ceil(currentDateCounts.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, currentDateCounts.length);
+    const currentData = currentDateCounts.slice(startIndex, endIndex);
 
-// Calculate range of data to display
-const startIndex = (currentPage - 1) * itemsPerPage;
-const endIndex = Math.min(startIndex + itemsPerPage, currentDateCounts.length);
-
-// Slice the data based on the current page
-const currentData = currentDateCounts.slice(startIndex, endIndex);
+    const handleKnowMore = async (date) => {
+        let sessionsOnSelectedDate = [];
+        if (selectedAgent === 'all') {
+            sessionsOnSelectedDate = sessionDetails.filter(
+                (session) => formatDate(new Date(session.created)) === date
+            );
+        } else {
+            // Filter sessions based on agent and date
+            sessionsOnSelectedDate = sessionDetails.filter(
+                (session) =>
+                    formatDate(new Date(session.activated)) === date &&
+                    session.agent.name === "Nikhil Vishvas Ghorpade" // Check if session agent matches selected agent
+            );
+        }
+        setSelectedDateSessionDetails(sessionsOnSelectedDate);
+        setShowSessionDetailsModal(true);
+    };
+    
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
@@ -151,7 +184,7 @@ const currentData = currentDateCounts.slice(startIndex, endIndex);
     const handleItemsPerPageChange = (event) => {
         const value = parseInt(event.target.value);
         setItemsPerPage(value);
-        setCurrentPage(1); // Reset to first page when changing items per page
+        setCurrentPage(1);
     };
 
     return (
@@ -186,7 +219,7 @@ const currentData = currentDateCounts.slice(startIndex, endIndex);
                                 className='agent-label'
                                 id='agent'
                                 value={selectedAgent}
-                                onChange={handleAgentChange}
+                                onClick ={handleAgentChange}
                             >
                                 <option value='all'>All</option>
                                 {agentdata.map((agent) => (
@@ -208,6 +241,7 @@ const currentData = currentDateCounts.slice(startIndex, endIndex);
                         <th className='centered-header'>#</th>
                         <th className='centered-header'>Date</th>
                         <th className='centered-header'>Count</th>
+                        <th className='centered-header'>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -225,8 +259,23 @@ const currentData = currentDateCounts.slice(startIndex, endIndex);
                         return (
                             <tr key={itemIndex}>
                                 <td>{itemIndex}</td>
-                                <td>{count}</td>
                                 <td>{date}</td>
+                                <td>{count}</td>
+                                <td>
+                                    <Tooltip
+                                        className='icon'
+                                        label='Sessions Details'
+                                        position='top'
+                                        multiline={false}
+                                    >
+                                        <Icon
+                                            onClick={() => handleKnowMore(date)}
+                                            aria-label='info icon'
+                                            icon='info'
+                                            size='lg'
+                                        />
+                                    </Tooltip>
+                                </td>
                             </tr>
                         );
                     })}
@@ -245,7 +294,6 @@ const currentData = currentDateCounts.slice(startIndex, endIndex);
                         <option value={20}>20</option>
                     </select>
                 </div>
-
                 <div className='pagination-button'>
                     <span>
                         {currentPage} of {totalPages}
@@ -256,7 +304,6 @@ const currentData = currentDateCounts.slice(startIndex, endIndex);
                     >
                         <Icon aria-label='backward-fast' icon='backward-fast' size='sm' />
                     </button>
-
                     <button
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
@@ -265,6 +312,7 @@ const currentData = currentDateCounts.slice(startIndex, endIndex);
                     </button>
                 </div>
             </div>
+            {showSessionDetailsModal && <SessionDetailsModal data={selectedDateSessionDetails} />}
         </div>
     );
 }
