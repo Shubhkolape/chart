@@ -168,7 +168,7 @@ function DailyChartAllAgent() {
             sessionsOnSelectedDate = sessionDetails.filter(
                 (session) =>
                     formatDate(new Date(session.activated)) === date &&
-                    session.agent === selectedAgent,
+                    session.agent === "Nikhil Vishvas Ghorpade",
             );
         }
         setSelectedDateSessionDetails(sessionsOnSelectedDate);
