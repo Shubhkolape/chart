@@ -2,7 +2,7 @@ import { Icon, Tooltip } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
 import agentdata from '../../../utils/licenses.json';
-import KnowMoreMonths from '../../Components/MonthWiseReport/KnowMoreMonths';
+import KnowMoreMonths from "../../Components/MonthWiseReport/KnowMoreMonths";
 
 function MonthlyChartAllAgent() {
     const formatDate = (inputDate) => {
@@ -26,20 +26,20 @@ function MonthlyChartAllAgent() {
     const [endDate, setEndDate] = useState(formattedToday);
     const [selectedAgent, setSelectedAgent] = useState('all');
     const [chartData, setChartData] = useState([]);
-    const [totalSessionCounts, setTotalSessionCounts] = useState({});
+
     const [sessionDetails, setSessionDetails] = useState([]);
-    const [itemsPerPage, setItemsPerPage] = useState(5);
-    const [currentPage, setCurrentPage] = useState(1);
     const [showSessionDetailsModal, setShowSessionDetailsModal] = useState(false);
     const [selectedDateSessionDetails, setSelectedDateSessionDetails] = useState([]);
+
+
+    const [itemsPerPage, setItemsPerPage] = useState(5);
+    const [currentPage, setCurrentPage] = useState(1);
 
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
         const agentSessions = [];
         const agentsToFetch = agentName
             ? [agentdata.find((agent) => agent.agent.name === agentName)]
             : agentdata;
-
-        const allSessions = [];
 
         for (const agent of agentsToFetch) {
             const cobrowse = new CobrowseAPI(agent.agent.token);
@@ -51,46 +51,32 @@ function MonthlyChartAllAgent() {
                 });
 
                 const sessionCounts = {};
-                setSessionDetails(sessions.reverse());
-                sessions.forEach((session) => {
-                    const date = formatDate(new Date(session.activated));
-                    sessionCounts[date] = (sessionCounts[date] || 0) + 1;
+                setSessionDetails(sessions.reverse())
+                const mainsession = sessions.reverse()
+                mainsession.forEach((session) => {
+                    const monthYear = formatDate(new Date(session.activated));
+                    sessionCounts[monthYear] = (sessionCounts[monthYear] || 0) + 1;
                 });
 
                 agentSessions.push({
                     agentName: agent.agent.name,
                     sessionCounts: sessionCounts,
                 });
-                allSessions.push(...sessions);
             } catch (error) {
                 console.error(`Error fetching cobrowse data for agent:`, error);
             }
         }
-
-         const totalSessionCounts = {};
-        allSessions.forEach((session) => {
-            const date = formatDate(new Date(session.activated));
-            totalSessionCounts[date] = (totalSessionCounts[date] || 0) + 1;
-        });
-
-        setSessionDetails(allSessions);
-
-        return {
-            agentSessions: agentSessions,
-            totalSessionCounts: totalSessionCounts,
-        };
+        return agentSessions;
     };
 
     useEffect(() => {
         const fetchAndProcessData = async () => {
             try {
-                const { agentSessions, totalSessionCounts } = await fetchDataForAgents(
+                const agentSessions = await fetchDataForAgents(
                     formattedSixMonthsAgo,
                     formattedToday,
-                    
                 );
                 setChartData(agentSessions);
-                setTotalSessionCounts(totalSessionCounts);
             } catch (error) {
                 console.error('Error fetching and processing data for all agents:', error);
             }
@@ -117,41 +103,28 @@ function MonthlyChartAllAgent() {
         const formattedToDate = convertAndFormatDate(endDate);
 
         if (selectedAgent === 'all') {
-            const { agentSessions, totalSessionCounts } = await fetchDataForAgents(
-                formattedFromDate,
-                formattedToDate,
-            );
-            setChartData(agentSessions);
-            setTotalSessionCounts(totalSessionCounts);
-            console.log('i am here ');
+            const agentSessions1 = await fetchDataForAgents(formattedFromDate, formattedToDate);
+            setChartData(agentSessions1);
         } else {
-            const { agentSessions } = await fetchDataForAgents(
+            const agentSessions1 = await fetchDataForAgents(
                 formattedFromDate,
                 formattedToDate,
                 selectedAgent,
             );
-            setChartData(agentSessions);
-            console.log('i am noyt in  here ');
+            setChartData(agentSessions1);
         }
     };
 
     const handleKnowMore = async (date) => {
-        let sessionsOnSelectedDate = [];
-        if (selectedAgent === 'all') {
-            sessionsOnSelectedDate = sessionDetails.filter(
-                (session) => formatDate(new Date(session.created)) === date
-            );
-        } else {
-            // Filter sessions based on agent and date
-            sessionsOnSelectedDate = sessionDetails.filter(
-                (session) =>
-                    formatDate(new Date(session.activated)) === date &&
-                    session.agent.name === "Nikhil Vishvas Ghorpade" // Check if session agent matches selected agent
-            );
-        }
+        const sessionsOnSelectedDate = sessionDetails.filter(
+            (session) => formatDate(new Date(session.created)) === date,
+        );
+        // console.log('sessionsOnSelectedDate---- ', sessionsOnSelectedDate);
         setSelectedDateSessionDetails(sessionsOnSelectedDate);
         setShowSessionDetailsModal(true);
     };
+
+    
 
     const handleAgentChange = (e) => {
         setSelectedAgent(e.target.value); // Update selectedAgent state
@@ -188,7 +161,7 @@ function MonthlyChartAllAgent() {
     const handleItemsPerPageChange = (event) => {
         const value = parseInt(event.target.value);
         setItemsPerPage(value);
-        setCurrentPage(1); // Reset to first page when changing items per page
+        setCurrentPage(1);
     };
 
     return (
@@ -249,7 +222,7 @@ function MonthlyChartAllAgent() {
                     </tr>
                 </thead>
                 <tbody>
-                    {currentData.map((month, index) => {
+                {currentData.map((month, index) => {
                         const date = month[0];
                         const count =
                             selectedAgent === 'all'
@@ -318,10 +291,11 @@ function MonthlyChartAllAgent() {
                     </button>
                 </div>
             </div>
-            {showSessionDetailsModal && <KnowMoreMonths data={selectedDateSessionDetails} />}
+            {showSessionDetailsModal && (
+                <KnowMoreMonths data={selectedDateSessionDetails} />
+            )}
         </div>
     );
 }
 
 export default MonthlyChartAllAgent;
-// KnowMoreMonths
