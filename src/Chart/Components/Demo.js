@@ -65,7 +65,6 @@ export default function BasicTabs() {
                     <Tab label='Day SUmmary' {...a11yProps(0)} />
                     <Tab label='Month SUmmary' {...a11yProps(1)} />
                     <Tab label='Duration Summary' {...a11yProps(2)} />
-                    {/* <Tab label='Average Duration' {...a11yProps(3)} /> */}
                     <Tab label='License Details' {...a11yProps(3)} />
                     <Tab label='Agent Session Details' {...a11yProps(4)} />
                     <Tab label='Day Agent Session Details' {...a11yProps(5)} />
@@ -85,7 +84,7 @@ export default function BasicTabs() {
                     >
                         Table
                     </button>
-                    {view === 'chart' &&     <DailyChartAllAgent />}
+                    {view === 'chart' && <DailyChartAllAgent />}
                     {view === 'table' && <DateWiseTablecopy />}
                 </div>
             </CustomTabPanel>
@@ -127,12 +126,6 @@ export default function BasicTabs() {
                     {view === 'table' && <AverageDurationAllAgent />}
                 </div>
             </CustomTabPanel>
-
-            {/* <CustomTabPanel value={value} index={3}>
-                <div>
-                    <AverageDurationAllAgent />
-                </div>
-            </CustomTabPanel> */}
 
             <CustomTabPanel value={value} index={3}>
                 <div>
@@ -177,8 +170,6 @@ export default function BasicTabs() {
                     {view === 'table' && <MultiAgentDailyTable />}
                 </div>
             </CustomTabPanel>
-
-        
         </Box>
     );
 }
