@@ -32,8 +32,8 @@ function MonthlyChartAllAgent() {
     const [selectedDateSessionDetails, setSelectedDateSessionDetails] = useState([]);
 
 
-    const [itemsPerPage, setItemsPerPage] = useState(5);
     const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(5);
 
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
         const agentSessions = [];
@@ -51,16 +51,17 @@ function MonthlyChartAllAgent() {
                 });
 
                 const sessionCounts = {};
-                setSessionDetails(sessions.reverse())
-                const mainsession = sessions.reverse()
-                mainsession.forEach((session) => {
-                    const monthYear = formatDate(new Date(session.activated));
+                const allSessions = sessions.reverse()
+                allSessions.forEach((session) => {
+                    const monthYear= formatDate(new Date(session.activated));
                     sessionCounts[monthYear] = (sessionCounts[monthYear] || 0) + 1;
                 });
 
+             
                 agentSessions.push({
                     agentName: agent.agent.name,
                     sessionCounts: sessionCounts,
+                    allSessions: allSessions,
                 });
             } catch (error) {
                 console.error(`Error fetching cobrowse data for agent:`, error);
@@ -102,25 +103,56 @@ function MonthlyChartAllAgent() {
         const formattedFromDate = convertAndFormatDate(startDate);
         const formattedToDate = convertAndFormatDate(endDate);
 
-        if (selectedAgent === 'all') {
-            const agentSessions1 = await fetchDataForAgents(formattedFromDate, formattedToDate);
+        try {
+            let agentSessions1;
+    
+            if (selectedAgent === 'all') { 
+                agentSessions1 = await fetchDataForAgents(formattedFromDate, formattedToDate);
+            } else {
+                agentSessions1 = await fetchDataForAgents(
+                    formattedFromDate,
+                    formattedToDate,
+                    selectedAgent,
+                );
+            }
+    
             setChartData(agentSessions1);
-        } else {
-            const agentSessions1 = await fetchDataForAgents(
-                formattedFromDate,
-                formattedToDate,
-                selectedAgent,
-            );
-            setChartData(agentSessions1);
+        } catch (error) {
+            console.error('Error handling dates:', error);
         }
     };
 
     const handleKnowMore = async (date) => {
-        const sessionsOnSelectedDate = sessionDetails.filter(
-            (session) => formatDate(new Date(session.created)) === date,
-        );
-        setSelectedDateSessionDetails(sessionsOnSelectedDate);
-        setShowSessionDetailsModal(true);
+        try {
+            let sessionsOnSelectedDate = [];
+    
+            if (selectedAgent === 'all') {
+                // If all agents are selected, get sessions for all agents on the selected date
+                sessionsOnSelectedDate = chartData.reduce((acc, agentData) => {
+                    const agentSessions = agentData.allSessions.filter(
+                        (session) => formatDate(new Date(session.activated)) === date,
+                    );
+                    return acc.concat(agentSessions);
+                }, []);
+            } else {
+                // If a specific agent is selected, get sessions only for that agent on the selected date
+                const selectedAgentData = chartData.find(
+                    (agentData) => agentData.agentName === selectedAgent,
+                );
+       
+                if (selectedAgentData) {
+                    sessionsOnSelectedDate = selectedAgentData.allSessions.filter(
+                        (session) => formatDate(new Date(session.activated)) === date,
+                    );
+                }
+            }
+    
+            setSelectedDateSessionDetails(sessionsOnSelectedDate);
+            setShowSessionDetailsModal(true);
+        } catch (error) {
+            console.error('Error getting session details:', error);
+        }
+
     };
 
     

@@ -56,9 +56,8 @@ function DailyChartAllAgent() {
                 });
 
                 const sessionCounts = {};
-                setSessionDetails(sessions.reverse())
-                const mainsession = sessions.reverse()
-                mainsession.forEach((session) => {
+                const allSessions = sessions.reverse()
+                allSessions.forEach((session) => {
                     const date = formatDate(new Date(session.activated));
                     sessionCounts[date] = (sessionCounts[date] || 0) + 1;
                 });
@@ -66,6 +65,7 @@ function DailyChartAllAgent() {
                 agentSessions.push({
                     agentName: agent.agent.name,
                     sessionCounts: sessionCounts,
+                    allSessions: allSessions,
                 });
             } catch (error) {
                 console.error(`Error fetching cobrowse data for agent:`, error);
@@ -84,6 +84,7 @@ function DailyChartAllAgent() {
                     formattedToday,
                 );
                 setChartData(agentSessions);
+                console.log("chartData is -=-=-=-=", chartData)
 
             } catch (error) {
                 console.error('Error fetching and processing data for all agents:', error);
@@ -112,17 +113,23 @@ function DailyChartAllAgent() {
         e.preventDefault();
         const formattedFromDate = convertAndFormatDate(startDate);
         const formattedToDate = convertAndFormatDate(endDate);
-
-        if (selectedAgent === 'all') {
-            const agentSessions1 = await fetchDataForAgents(formattedFromDate, formattedToDate);
+    
+        try {
+            let agentSessions1;
+    
+            if (selectedAgent === 'all') { 
+                agentSessions1 = await fetchDataForAgents(formattedFromDate, formattedToDate);
+            } else {
+                agentSessions1 = await fetchDataForAgents(
+                    formattedFromDate,
+                    formattedToDate,
+                    selectedAgent,
+                );
+            }
+    
             setChartData(agentSessions1);
-        } else {
-            const agentSessions1 = await fetchDataForAgents(
-                formattedFromDate,
-                formattedToDate,
-                selectedAgent,
-            );
-            setChartData(agentSessions1);
+        } catch (error) {
+            console.error('Error handling dates:', error);
         }
     };
 
@@ -134,12 +141,13 @@ function DailyChartAllAgent() {
   
     const getChartData = () => {
         const totalSessionCounts = {};
+    
         chartData.forEach((agentData) => {
-            Object.entries(agentData.sessionCounts).forEach(([monthYear, count]) => {
-                totalSessionCounts[monthYear] = (totalSessionCounts[monthYear] || 0) + count;
+            Object.entries(agentData.sessionCounts).forEach(([date, count]) => {
+                totalSessionCounts[date] = (totalSessionCounts[date] || 0) + count;
             });
         });
-
+    
         if (selectedAgent === 'all') {
             return totalSessionCounts;
         } else {
@@ -147,7 +155,8 @@ function DailyChartAllAgent() {
                 (agentData) => agentData.agentName === selectedAgent,
             );
             return selectedAgentData ? selectedAgentData.sessionCounts : {};
-        }}
+        }
+    };
 
     // Pagination calculations
     const currentDateCounts = Object.entries(getChartData());
@@ -158,12 +167,37 @@ function DailyChartAllAgent() {
 
     // Function to handle "Know More" action
     const handleKnowMore = async (date) => {
-        const sessionsOnSelectedDate = sessionDetails.filter(
-            (session) => formatDate(new Date(session.created)) === date,
-        );
-        setSelectedDateSessionDetails(sessionsOnSelectedDate);
-        setShowSessionDetailsModal(true);
+        try {
+            let sessionsOnSelectedDate = [];
+    
+            if (selectedAgent === 'all') {
+                // If all agents are selected, get sessions for all agents on the selected date
+                sessionsOnSelectedDate = chartData.reduce((acc, agentData) => {
+                    const agentSessions = agentData.allSessions.filter(
+                        (session) => formatDate(new Date(session.activated)) === date,
+                    );
+                    return acc.concat(agentSessions);
+                }, []);
+            } else {
+                // If a specific agent is selected, get sessions only for that agent on the selected date
+                const selectedAgentData = chartData.find(
+                    (agentData) => agentData.agentName === selectedAgent,
+                );
+       
+                if (selectedAgentData) {
+                    sessionsOnSelectedDate = selectedAgentData.allSessions.filter(
+                        (session) => formatDate(new Date(session.activated)) === date,
+                    );
+                }
+            }
+    
+            setSelectedDateSessionDetails(sessionsOnSelectedDate);
+            setShowSessionDetailsModal(true);
+        } catch (error) {
+            console.error('Error getting session details:', error);
+        }
     };
+    
 
 
     const handlePageChange = (page) => {
