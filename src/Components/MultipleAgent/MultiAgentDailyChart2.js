@@ -1,3 +1,4 @@
+import { Spinner } from '@avaya/neo-react';
 import {
   BarElement,
   CategoryScale,
@@ -10,7 +11,7 @@ import {
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
-import agentdata from "../../../utils/licenses.json";
+import agentdata from "../../utils/licenses.json";
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function MultiAgentDailyChart2() {
@@ -38,6 +39,8 @@ function MultiAgentDailyChart2() {
     const [endDate, setEndDate] = useState(formattedToday);
 
     const [chartData, setChartData] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
 
     const fetchDataForAgents = async (startDate, endDate) => {
         const agentSessions = [];
@@ -66,6 +69,7 @@ function MultiAgentDailyChart2() {
             console.error(`Error fetching cobrowse data for agent :`, error);
           }
         }
+        setIsLoading(false);
         return agentSessions;
       };
 
@@ -175,7 +179,12 @@ const customColors = [
                     </button>
                 </form>
             </div>
-            <Bar className='daywiseCount' options={options} data={data} />
+            {isLoading ? (
+                    <Spinner size="xl"  className='spinner-for-chart'/>
+                ) : (
+                    
+                    <Bar className='daywiseCount' options={options} data={data} />
+                )}
         </div>
     );
 }

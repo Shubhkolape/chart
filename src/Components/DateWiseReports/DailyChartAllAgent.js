@@ -1,8 +1,8 @@
 import { Icon, Tooltip } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
-import agentdata from '../../../utils/licenses.json';
-import SessionDetailsModal from '../../Components/DateWiseReports/SessionDetailsModal';
+import agentdata from '../../utils/licenses.json';
+import SessionDetailsModal from './SessionDetailsModal';
 
 
 function DailyChartAllAgent() {
@@ -32,13 +32,14 @@ function DailyChartAllAgent() {
     const [endDate, setEndDate] = useState(formattedToday);
     const [selectedAgent, setSelectedAgent] = useState('all');
     const [chartData, setChartData] = useState([]);
-    // const [totalSessionCounts, setTotalSessionCounts] = useState({});
+    
     const [sessionDetails, setSessionDetails] = useState([]);
+     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [showSessionDetailsModal, setShowSessionDetailsModal] = useState(false);
+      const [showSessionDetailsModal, setShowSessionDetailsModal] = useState(false);
     const [selectedDateSessionDetails, setSelectedDateSessionDetails] = useState([]);
-
+    
+   
  
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
         const agentSessions = [];
@@ -74,8 +75,7 @@ function DailyChartAllAgent() {
         return agentSessions;
     };
 
-
-
+     
     useEffect(() => {
         const fetchAndProcessData = async () => {
             try {
@@ -84,7 +84,7 @@ function DailyChartAllAgent() {
                     formattedToday,
                 );
                 setChartData(agentSessions);
-                console.log("chartData is -=-=-=-=", chartData)
+                // console.log("chartData is =-=--=-=-=-=", JSON.stringify(chartData))
 
             } catch (error) {
                 console.error('Error fetching and processing data for all agents:', error);
@@ -213,8 +213,8 @@ function DailyChartAllAgent() {
     
     return (
         <div className='main-header'>
-        <h2>DAY SUMMARY CHART</h2>
-        <div>
+        <h3>DAY SUMMARY CHART</h3>
+  
             <form onSubmit={handleSubmitForDates} className='dailycount1'>
                 <div>
                     <label htmlFor='startDate'>From</label>
@@ -258,8 +258,13 @@ function DailyChartAllAgent() {
                     Submit
                 </button>
             </form>
-        </div>
-        <table className='license-table'>
+    
+
+
+    
+      <div className='table-div'>
+
+      <table className='license-table'>
             <thead>
                 <tr>
                     <th className='centered-header'>#</th>
@@ -337,6 +342,7 @@ function DailyChartAllAgent() {
                 </button>
             </div>
         </div>
+      </div>
         {showSessionDetailsModal && <SessionDetailsModal data={selectedDateSessionDetails} />}
     </div>
     );

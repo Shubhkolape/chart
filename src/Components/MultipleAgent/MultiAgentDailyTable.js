@@ -1,29 +1,27 @@
+import { Spinner } from '@avaya/neo-react';
 import {
-    CategoryScale,
-    Chart as ChartJS,
-    Legend,
-    LineElement,
-    LinearScale,
-    PointElement,
-    Title,
-    Tooltip,
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
 } from 'chart.js';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
-import { Line } from 'react-chartjs-2';
+import agentdata from '../../utils/licenses.json';
 
-import agentdata from '../../../utils/licenses.json';
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-
-function DailyChartAllAgent() {
-
+function MultiAgentDailyTable() {
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         const formattedDate = `${year}-${month}-${day}`;
+
         return formattedDate;
     };
 
@@ -38,16 +36,16 @@ function DailyChartAllAgent() {
 
     const [startDate, setStartDate] = useState(formattedtwoMonthsAgo);
     const [endDate, setEndDate] = useState(formattedToday);
-    const [selectedAgent, setSelectedAgent] = useState('all');
+
     const [chartData, setChartData] = useState([]);
+    // const [dateCounts, setDateCounts] = useState({});
 
-    const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchDataForAgents = async (startDate, endDate) => {
         const agentSessions = [];
-        const agentsToFetch = agentName
-            ? [agentdata.find((agent) => agent.agent.name === agentName)]
-            : agentdata;
 
-        for (const agent of agentsToFetch) {
+        for (const agent of agentdata) {
             const cobrowse = new CobrowseAPI(agent.agent.token);
             try {
                 const sessions = await cobrowse.sessions.list({
@@ -57,7 +55,7 @@ function DailyChartAllAgent() {
                 });
 
                 const sessionCounts = {};
-                const mainsessions = sessions.reverse()
+                const mainsessions = sessions.reverse();
                 mainsessions.forEach((session) => {
                     const date = formatDate(new Date(session.activated));
                     sessionCounts[date] = (sessionCounts[date] || 0) + 1;
@@ -68,9 +66,10 @@ function DailyChartAllAgent() {
                     sessionCounts: sessionCounts,
                 });
             } catch (error) {
-                console.error(`Error fetching cobrowse data for agent:`, error);
+                console.error(`Error fetching cobrowse data for agent :`, error);
             }
         }
+        setIsLoading(false);
         return agentSessions;
     };
 
@@ -103,44 +102,12 @@ function DailyChartAllAgent() {
         }
     };
 
-    const handleSubmitForDates = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const formattedFromDate = convertAndFormatDate(startDate);
         const formattedToDate = convertAndFormatDate(endDate);
-
-        if (selectedAgent === 'all') {
-            const agentSessions1 = await fetchDataForAgents(formattedFromDate, formattedToDate);
-            setChartData(agentSessions1);
-        } else {
-            const agentSessions1 = await fetchDataForAgents(
-                formattedFromDate,
-                formattedToDate,
-                selectedAgent,
-            );
-            setChartData(agentSessions1); // Update chartData with data for selected agent
-        }
-    };
-
-    const handleAgentChange = (e) => {
-        setSelectedAgent(e.target.value); // Update selectedAgent state
-    };
-
-    const getChartData = () => {
-        const totalSessionCounts = {};
-        chartData.forEach((agentData) => {
-            Object.entries(agentData.sessionCounts).forEach(([date, count]) => {
-                totalSessionCounts[date] = (totalSessionCounts[date] || 0) + count;
-            });
-        });
-
-        if (selectedAgent === 'all') {
-            return totalSessionCounts;
-        } else {
-            const selectedAgentData = chartData.find(
-                (agentData) => agentData.agentName === selectedAgent,
-            );
-            return selectedAgentData ? selectedAgentData.sessionCounts : {};
-        }
+        const agentSessions1 = await fetchDataForAgents(formattedFromDate, formattedToDate);
+        setChartData(agentSessions1);
     };
 
     const customColors = [
@@ -149,38 +116,14 @@ function DailyChartAllAgent() {
         'rgba(255, 244, 136, 0.8)',
     ];
 
-    const dates = Object.keys(getChartData());
-
-    const data = {
-        labels: dates,
-        datasets: [{
-            label: selectedAgent === 'all' ? 'All Agents' : selectedAgent,
-            data: dates.map((date) => getChartData()[date] || 0),
-            backgroundColor: customColors[0],
-        }],
-    };
-
-    const options = {
-        indexAxis: 'x',
-        responsive: true,
-        plugins: {
-            title: {
-                display: true,
-                text: 'Session Count by Date and Agent',
-            },
-            legend: {
-                display: true,
-                position: 'top',
-            },
-        },
-    };
+    const dates = chartData.length > 0 ? Object.keys(chartData[0].sessionCounts) : [];
 
     return (
         <div className='main-header'>
-            <h2>DAY SUMMARY CHART</h2>
+            <h2>DAY AGENT SESSION DETAILS TABLE</h2>
 
             <div>
-                <form onSubmit={handleSubmitForDates} className='dailycount1'>
+                <form onSubmit={handleSubmit} className='dailycount1'>
                     <div>
                         <label htmlFor='startDate'>From</label>
                         <input
@@ -192,7 +135,7 @@ function DailyChartAllAgent() {
                         />
                     </div>
                     <div>
-                        <label htmlFor='endDate'>To</label>
+                        <label htmlFor='endDate'>To </label>
                         <input
                             className='input'
                             type='date'
@@ -201,33 +144,48 @@ function DailyChartAllAgent() {
                             onChange={(e) => setEndDate(e.target.value)}
                         />
                     </div>
-                    <div>
-              <div className='agent-div'>
-              <label htmlFor='agent'>Agent</label>
-                <select
-                   className='agent-label' 
-                    id='agent'
-                    value={selectedAgent}
-                    onChange={handleAgentChange}
-                >
-                    <option value='all'>All</option>
-                    {agentdata.map((agent) => (
-                        <option key={agent.agent.name} value={agent.agent.name}>
-                            {agent.agent.name}
-                        </option>
-                    ))}
-                </select>
-              </div>
-            </div>
                     <button type='submit' className='submit-button'>
                         Submit
                     </button>
                 </form>
             </div>
-            
-            <Line className='daywiseCount' options={options} data={data} />
+
+            <div className='dateTable1'>
+                {isLoading ? (
+                    <Spinner size='xl' className='spinner-for-table' />
+                ) : (
+                    <>
+                        <table className='Month-table'>
+                            <thead>
+                                <tr>
+                                    <th className='centered-header'>#</th>
+                                    <th className='centered-header'>Agent Name</th>
+                                    {dates.map((month) => (
+                                        <th className='centered-header' key={month}>
+                                            {month}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {chartData.map((agentData, index) => (
+                                    <tr key={index}>
+                                        <td>{index + 1}</td>
+                                        <td>{agentData.agentName}</td>
+                                        {dates.map((month) => (
+                                            <td key={`${agentData.agentName}-${month}`}>
+                                                {agentData.sessionCounts[month] || 0}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </>
+                )}
+            </div>
         </div>
     );
 }
 
-export default DailyChartAllAgent;
+export default MultiAgentDailyTable;

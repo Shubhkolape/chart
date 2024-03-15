@@ -1,7 +1,7 @@
+import { Spinner } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
-import agentdata from '../../../utils/licenses.json';
-
+import agentdata from '../../utils/licenses.json';
 
 function AverageDurationAllAgent() {
     const formatDate = (inputDate) => {
@@ -27,9 +27,12 @@ function AverageDurationAllAgent() {
     const [selectedAgent, setSelectedAgent] = useState('all'); // State to keep track of selected agent
     const [chartData, setChartData] = useState([]);
 
-    const [sessionDetails, setSessionDetails] = useState([]);
-    const [showSessionDetailsModal, setShowSessionDetailsModal] = useState(false);
-    const [selectedDateSessionDetails, setSelectedDateSessionDetails] = useState([]);
+    // const [sessionDetails, setSessionDetails] = useState([]);
+
+    const [isLoading, setIsLoading] = useState(true);
+
+    // const [showSessionDetailsModal, setShowSessionDetailsModal] = useState(false);
+    // const [selectedDateSessionDetails, setSelectedDateSessionDetails] = useState([]);
 
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
         const agentSessions = [];
@@ -47,8 +50,8 @@ function AverageDurationAllAgent() {
                 });
 
                 const sessionCounts = {};
-                setSessionDetails(sessions.reverse())
-                const mainsession = sessions.reverse()
+                // setSessionDetails(sessions.reverse())
+                const mainsession = sessions.reverse();
                 let totalDuration = 0;
 
                 mainsession.forEach((session) => {
@@ -68,6 +71,7 @@ function AverageDurationAllAgent() {
                 console.error(`Error fetching cobrowse data for agent:`, error);
             }
         }
+        setIsLoading(false);
         return agentSessions;
     };
 
@@ -85,7 +89,7 @@ function AverageDurationAllAgent() {
         };
 
         fetchAndProcessData();
-    }, [formattedtwoMonthsAgo, formattedToday]); 
+    }, [formattedtwoMonthsAgo, formattedToday]);
 
     const convertAndFormatDate = (userInputDate) => {
         const date = new Date(userInputDate);
@@ -100,30 +104,41 @@ function AverageDurationAllAgent() {
         }
     };
 
-    const handleKnowMore = async (date) => {
-        const sessionsOnSelectedDate = sessionDetails.filter(
-            (session) => formatDate(new Date(session.created)) === date,
-        );
-        console.log('sessionsOnSelectedDate---- ', sessionsOnSelectedDate);
-        setSelectedDateSessionDetails(sessionsOnSelectedDate);
-        setShowSessionDetailsModal(true);
-    };
-
+    // const handleKnowMore = async (date) => {
+    //     const sessionsOnSelectedDate = sessionDetails.filter(
+    //         (session) => formatDate(new Date(session.created)) === date,
+    //     );
+    //     console.log('sessionsOnSelectedDate---- ', sessionsOnSelectedDate);
+    //     setSelectedDateSessionDetails(sessionsOnSelectedDate);
+    //     setShowSessionDetailsModal(true);
+    // };
 
     const handleSubmitForDates = async (e) => {
         e.preventDefault();
         const formattedFromDate = convertAndFormatDate(startDate);
         const formattedToDate = convertAndFormatDate(endDate);
 
-        fetchDataForAgents(formattedFromDate, formattedToDate, selectedAgent).then((data) => { 
-            setChartData(data);
-        }).catch((error) => {
-            console.error('Error fetching and processing data for all agents:', error);
-        });
+        try {
+            let agentSessions1;
+
+            if (selectedAgent === 'all') {
+                agentSessions1 = await fetchDataForAgents(formattedFromDate, formattedToDate);
+            } else {
+                agentSessions1 = await fetchDataForAgents(
+                    formattedFromDate,
+                    formattedToDate,
+                    selectedAgent,
+                );
+            }
+
+            setChartData(agentSessions1);
+        } catch (error) {
+            console.error('Error handling dates:', error);
+        }
     };
 
     const handleAgentChange = (e) => {
-        setSelectedAgent(e.target.value); 
+        setSelectedAgent(e.target.value);
     };
 
     const calculateSessionDuration = (session) => {
@@ -155,7 +170,7 @@ function AverageDurationAllAgent() {
 
     return (
         <div className='main-header'>
-            <h2>AVERAGE DURATION CHART</h2>
+            <h3>AVERAGE DURATION CHART</h3>
 
             <div>
                 <form onSubmit={handleSubmitForDates} className='dailycount1'>
@@ -185,8 +200,8 @@ function AverageDurationAllAgent() {
                             id='agent'
                             className='agent-label'
                             value={selectedAgent}
-                            onChange={handleAgentChange}    
-                            >
+                            onChange={handleAgentChange}
+                        >
                             <option value='all'>All</option>
                             {agentdata.map((agent) => (
                                 <option key={agent.agent.name} value={agent.agent.name}>
@@ -202,28 +217,31 @@ function AverageDurationAllAgent() {
             </div>
 
             <div className='dateTable1'>
-                <h3>Session Information</h3>
-                <table className='license-table'>
-                    <thead>
-                        <tr>
-                            <th className='centered-header'>#</th>
-                            <th className='centered-header'>Agent Name</th>
-                            <th className='centered-header'>No. of Sessions</th>
-                            <th className='centered-header'>Total Duration</th>
-                            <th className='centered-header'>Average Duration</th>
-                            {/* <th className='centered-header'>Action</th> */}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {chartData.map((agentData, index) => (
-                        
-                            <tr key={index}>
-                                <td>{index + 1 }</td>
-                                <td>{agentData.agentName}</td>
-                                <td>{agentData.totalSessions}</td>
-                                <td>{formatDuration(agentData.totalDuration)}</td>
-                                <td>{formatDuration(agentData.averageDuration)}</td>
-                                {/* <td>
+                <div className='table-div'>
+                    {isLoading ? (
+                        <Spinner size='xl' className='spinner-for-table' />
+                    ) : (
+                        <>
+                            <table className='Month-table'>
+                                <thead>
+                                    <tr>
+                                        <th className='centered-header'>#</th>
+                                        <th className='centered-header'>Agent Name</th>
+                                        <th className='centered-header'>No. of Sessions</th>
+                                        <th className='centered-header'>Total Duration</th>
+                                        <th className='centered-header'>Average Duration</th>
+                                        {/* <th className='centered-header'>Action</th> */}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {chartData.map((agentData, index) => (
+                                        <tr key={index}>
+                                            <td>{index + 1}</td>
+                                            <td>{agentData.agentName}</td>
+                                            <td>{agentData.totalSessions}</td>
+                                            <td>{formatDuration(agentData.totalDuration)}</td>
+                                            <td>{formatDuration(agentData.averageDuration)}</td>
+                                            {/* <td>
                                     <Tooltip
                                         className='icon'
                                         label='Sessions Details'
@@ -238,10 +256,13 @@ function AverageDurationAllAgent() {
                                         />
                                     </Tooltip>
                                 </td> */}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </>
+                    )}
+                </div>
             </div>
         </div>
     );

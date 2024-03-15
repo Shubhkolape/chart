@@ -1,3 +1,4 @@
+import { Spinner } from '@avaya/neo-react';
 import {
     CategoryScale,
     Chart as ChartJS,
@@ -9,7 +10,9 @@ import {
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import { React, useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
-import agentdata from '../../../utils/licenses.json';
+import agentdata from "../../utils/licenses.json";
+
+
 ChartJS.register(CategoryScale,LinearScale,PointElement,LineElement,Title,Tooltip,Legend);
 
 function SessionDurationAllAgent() {
@@ -36,6 +39,9 @@ function SessionDurationAllAgent() {
     const [selectedAgent, setSelectedAgent] = useState('all');
     const [chartData, setChartData] = useState([]);
 
+    const [isLoading, setIsLoading] = useState(true);
+
+
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
         const agentSessions = [];
         const agentsToFetch = agentName
@@ -55,28 +61,37 @@ function SessionDurationAllAgent() {
                     duration: calculateSessionDuration(session),
                     startDate: formatDate(session.activated)
                 }));
+                console.log("agentSessionData is -=-=---==---->", agentSessionData);
                 agentSessions.push({
                     agentName: agent.agent.name,
-                    sessionDurations: agentSessionData, // Corrected property name to sessionDurations
+                    sessionDurations: agentSessionData,
                 });
             } catch (error) {
                 console.error(`Error fetching cobrowse data for agent:`, error);
             }
         }
+        setIsLoading(false);
         return agentSessions;
     };
     
 
 
     useEffect(() => {
-        fetchDataForAgents(formattedtwoMonthsAgo, formattedToday).then(data => {
-            setChartData(data);
-        }).catch(error => {
-            console.error('Error fetching and processing data for all agents:', error);
-        });
+        const fetchAndProcessData = async () => {
+            try {
+                const agentSessions = await fetchDataForAgents(
+                    formattedtwoMonthsAgo,
+                    formattedToday,
+                );
+                setChartData(agentSessions);
+            } catch (error) {
+                console.error('Error fetching and processing data for all agents:', error);
+            }
+        };
+        fetchAndProcessData()
     }, [formattedtwoMonthsAgo, formattedToday]);
     
-    console.log("chartData-=-=-=-=-=-=-=-=", chartData);
+    // console.log("chartData-=-=-=-=-=-=-=-=", chartData);
 
     const handleAgentChange = (e) => {
         setSelectedAgent(e.target.value);
@@ -86,8 +101,19 @@ function SessionDurationAllAgent() {
         e.preventDefault();
         const formattedStartDate = formatDate(startDate);
         const formattedEndDate = formatDate(endDate);
-        setChartData(await fetchDataForAgents(formattedStartDate, formattedEndDate, selectedAgent));
-    };
+        if (selectedAgent === 'all') {
+            const agentSessions1 = await fetchDataForAgents(formattedStartDate, formattedEndDate);
+            setChartData(agentSessions1);
+        }
+        else {
+            const agentSessions1 = await fetchDataForAgents(
+                formattedStartDate,
+                formattedEndDate,
+                selectedAgent,
+            );
+            setChartData(agentSessions1); 
+        }
+      };
 
     const calculateSessionDuration = (session) => {
         const activatedTime = new Date(session.activated);
@@ -120,11 +146,11 @@ function SessionDurationAllAgent() {
     };
 
     
-    const customColors = [
-        'rgba(255, 99, 132, 0.5)',
-        'rgba(53, 162, 235, 0.5)',
-        'rgba(255, 244, 136, 0.8)'
-      ];
+    // const customColors = [
+    //     'rgba(255, 99, 132, 0.5)',
+    //     'rgba(53, 162, 235, 0.5)',
+    //     'rgba(255, 244, 136, 0.8)'
+    //   ];
 
       const bgColor = [
           'rgba(255, 244, 136, 0.8)',
@@ -143,8 +169,8 @@ const data = {
         label: agentData.agentName,
         data: agentData.sessionDurations.map(session => session.duration.minutes),
         hoverText: agentData.sessionDurations.map(session => `${formatDate(session.startDate)}: ${session.duration.formatted}`),
-        borderColor: customColors[index % customColors.length],
-        backgroundColor: bgColor[index % customColors.length],
+        // borderColor: customColors[index % customColors.length],
+        backgroundColor: bgColor[index % bgColor.length],
     })),
   };
   
@@ -173,7 +199,7 @@ const data = {
     };
     return (
         <div className='main-header'>
-            <h2>DURATION SUMMARY CHART</h2>
+            <h3>DURATION SUMMARY CHART</h3>
             <div>
                 <form className='dailycount1'
                  onSubmit={handleFormSubmit}
@@ -226,7 +252,14 @@ const data = {
             </div>
         
 
-            <Line  className="daywiseCount" data={data} options={options} />
+
+            {isLoading ? (
+                    <Spinner size="xl"  className='spinner-for-chart'/>
+                ) : (
+                    
+                    <Line  className="daywiseCount" data={data} options={options} />
+
+                )}
         </div>
     );
 }

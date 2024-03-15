@@ -1,24 +1,32 @@
+import { Spinner } from '@avaya/neo-react';
 import {
-    BarElement,
     CategoryScale,
     Chart as ChartJS,
     Legend,
+    LineElement,
     LinearScale,
+    PointElement,
     Title,
     Tooltip,
 } from 'chart.js';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
-import { Bar } from 'react-chartjs-2';
-import agentdata from '../../../utils/licenses.json';
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+import { Line } from 'react-chartjs-2';
 
-function MonthlyChartAllAgent() {
+
+import agentdata from "../../utils/licenses.json";
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+
+
+function DailyChartAllAgent() {
+
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
-        const formattedDate = `${year}-${month}`;
+        const day = String(date.getDate()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
         return formattedDate;
     };
 
@@ -27,14 +35,17 @@ function MonthlyChartAllAgent() {
     };
 
     const today = new Date();
-    const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1);
-    const formattedSixMonthsAgo = formatedDate(sixMonthsAgo);
+    const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
+    const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
     const formattedToday = formatedDate(today);
 
-    const [startDate, setStartDate] = useState(formattedSixMonthsAgo);
+    const [startDate, setStartDate] = useState(formattedtwoMonthsAgo);
     const [endDate, setEndDate] = useState(formattedToday);
     const [selectedAgent, setSelectedAgent] = useState('all');
     const [chartData, setChartData] = useState([]);
+
+  const [isLoading, setIsLoading] = useState(true);
+
 
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
         const agentSessions = [];
@@ -54,14 +65,15 @@ function MonthlyChartAllAgent() {
                 const sessionCounts = {};
                 const mainsessions = sessions.reverse()
                 mainsessions.forEach((session) => {
-                    const monthYear = formatDate(new Date(session.activated));
-                    sessionCounts[monthYear] = (sessionCounts[monthYear] || 0) + 1;
+                    const date = formatDate(new Date(session.activated));
+                    sessionCounts[date] = (sessionCounts[date] || 0) + 1;
                 });
 
                 agentSessions.push({
                     agentName: agent.agent.name,
                     sessionCounts: sessionCounts,
                 });
+                setIsLoading(false);
             } catch (error) {
                 console.error(`Error fetching cobrowse data for agent:`, error);
             }
@@ -73,7 +85,7 @@ function MonthlyChartAllAgent() {
         const fetchAndProcessData = async () => {
             try {
                 const agentSessions = await fetchDataForAgents(
-                    formattedSixMonthsAgo,
+                    formattedtwoMonthsAgo,
                     formattedToday,
                 );
                 setChartData(agentSessions);
@@ -83,17 +95,18 @@ function MonthlyChartAllAgent() {
         };
 
         fetchAndProcessData();
-    }, [formattedSixMonthsAgo, formattedToday]);
+    }, [formattedtwoMonthsAgo, formattedToday]);
 
     const convertAndFormatDate = (userInputDate) => {
         const date = new Date(userInputDate);
         if (!isNaN(date.getTime())) {
             const year = date.getFullYear();
             const month = `0${date.getMonth() + 1}`.slice(-2);
-            const newDate = `${year}-${month}`;
+            const day = `0${date.getDate()}`.slice(-2);
+            const newDate = `${year}-${month}-${day}`;
             return newDate;
         } else {
-            throw new Error('Invalid date format. Please enter a date in MM/YYYY format.');
+            throw new Error('Invalid date format. Please enter a date in MM/DD/YYYY format.');
         }
     };
 
@@ -122,8 +135,8 @@ function MonthlyChartAllAgent() {
     const getChartData = () => {
         const totalSessionCounts = {};
         chartData.forEach((agentData) => {
-            Object.entries(agentData.sessionCounts).forEach(([monthYear, count]) => {
-                totalSessionCounts[monthYear] = (totalSessionCounts[monthYear] || 0) + count;
+            Object.entries(agentData.sessionCounts).forEach(([date, count]) => {
+                totalSessionCounts[date] = (totalSessionCounts[date] || 0) + count;
             });
         });
 
@@ -137,20 +150,20 @@ function MonthlyChartAllAgent() {
         }
     };
 
-    const customColors = [
-        'rgba(255, 99, 132, 0.5)',
-        'rgba(53, 162, 235, 0.5)',
-        'rgba(255, 244, 136, 0.8)',
-    ];
+    // const customColors = [
+      
+    //     // 'rgb(55, 140, 231)',
+    //     // 'rgb(103, 198, 227)'
+    // ];
 
-    const months = Object.keys(getChartData());
+    const dates = Object.keys(getChartData());
 
     const data = {
-        labels: months,
+        labels: dates,
         datasets: [{
             label: selectedAgent === 'all' ? 'All Agents' : selectedAgent,
-            data: months.map((month) => getChartData()[month] || 0),
-            backgroundColor: customColors[0],
+            data: dates.map((date) => getChartData()[date] || 0),
+            backgroundColor:   'rgb(83, 86, 255)',
         }],
     };
 
@@ -160,7 +173,7 @@ function MonthlyChartAllAgent() {
         plugins: {
             title: {
                 display: true,
-                text: 'Session Count by Month and Agent',
+                text: 'Session Count by Date and Agent',
             },
             legend: {
                 display: true,
@@ -171,11 +184,11 @@ function MonthlyChartAllAgent() {
 
     return (
         <div className='main-header'>
-            <h2>MONTH SUMMARY CHART </h2>
+            <h3>DAY SUMMARY CHART</h3>
 
             <div>
                 <form onSubmit={handleSubmitForDates} className='dailycount1'>
-                <div>
+                    <div>
                         <label htmlFor='startDate'>From</label>
                         <input
                             className='input'
@@ -196,7 +209,7 @@ function MonthlyChartAllAgent() {
                         />
                     </div>
                     <div>
-                    <div className='agent-div'>
+              <div className='agent-div'>
               <label htmlFor='agent'>Agent</label>
                 <select
                    className='agent-label' 
@@ -218,11 +231,16 @@ function MonthlyChartAllAgent() {
                     </button>
                 </form>
             </div>
-        
-           
-            <Bar className='daywiseCount' options={options} data={data} />
+            {
+                isLoading ? (
+                    <Spinner size="xl"  className='spinner-for-chart'/>
+                ) : (
+
+                    <Line className='daywiseCount' options={options} data={data} />
+                )
+            }
         </div>
     );
 }
 
-export default MonthlyChartAllAgent;
+export default DailyChartAllAgent;

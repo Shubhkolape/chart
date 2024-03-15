@@ -1,5 +1,5 @@
 import React from 'react';
-import agentData from "../../../utils/licenses.json";
+import agentData from "../../utils/licenses.json";
 
 
 // npm install @avaya/neo-react --force
@@ -8,7 +8,8 @@ function License() {
 
     return (
         <div className='main-header'>
-            <h2>LICENSE DETAILS</h2>
+            <h3>LICENSE DETAILS</h3>
+            <div className='table-div'>
             <table className='Month-table'>
                 <thead>
                     <tr>
@@ -28,6 +29,8 @@ function License() {
                         ))}
                 </tbody>
             </table>
+            </div>
+            
         </div>
     );
 }

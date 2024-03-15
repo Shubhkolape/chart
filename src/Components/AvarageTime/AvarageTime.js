@@ -1,7 +1,7 @@
 import { Icon } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
-import config from '../../../utils/config';
+import config from '../../utils/config';
 
 
 

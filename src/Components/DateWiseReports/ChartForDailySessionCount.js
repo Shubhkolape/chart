@@ -11,7 +11,7 @@
 import CobrowseAPI from "cobrowse-agent-sdk";
 import React, { useEffect, useMemo, useState } from "react";
 import { Line } from "react-chartjs-2";
-import config from "../../../utils/config";
+import config from "../../utils/config";
 ChartJS.register(
   CategoryScale,
   LinearScale,
