@@ -67,6 +67,7 @@ const EditData = ({ selectedAgent, handleClosePopUp }) => {
                 <div className='input-filed'>
                     <label className='input-label'>Token</label>
                     <textarea
+                    rows={5}
                         className='box-input'
                         type='text'
                         name='token'

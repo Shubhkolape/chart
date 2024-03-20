@@ -80,6 +80,7 @@ function AddNewAgent({ showForm, setShowForm, handleClosePopUp }) {
                     <div className='input-filed'>
                         <label className='input-label'>Token:</label>
                         <textarea
+                        rows={5}
                             className='box-input'
                             type='text'
                             value={token}

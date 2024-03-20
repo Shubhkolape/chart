@@ -431,7 +431,7 @@ align-items: self-start;
 
 .popup-container textarea {
     padding: 10px;
-    height: 30px;
+    /* height: 30px; */
     width: 100%;
     box-sizing: border-box;
 }

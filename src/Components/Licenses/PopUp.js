@@ -23,7 +23,7 @@ function PopUp({ selectedAgent, handleClosePopUp }) {
 
                     <p>
                         <strong className='input-label'>Token :</strong>
-                        <textarea className='box-input' type='text' readOnly value={selectedAgent.token} />
+                        <textarea rows={5} className='box-input' type='text' readOnly value={selectedAgent.token} />
                     </p>
                 </div>
                 <button className='submit-button' onClick={handleClosePopUp}>
