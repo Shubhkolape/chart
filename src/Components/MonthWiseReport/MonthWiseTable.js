@@ -1,10 +1,30 @@
 import { Icon, Spinner, Tooltip } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
-import React, { useEffect, useState } from 'react';
-import KnowMoreMonths from "../../Components/MonthWiseReport/KnowMoreMonths";
+import html2pdf from 'html2pdf.js';
+import React, { useEffect, useRef, useState } from 'react';
+import KnowMoreMonths from '../../Components/MonthWiseReport/KnowMoreMonths';
 import agentdata from '../../utils/licenses.json';
 
 function MonthlyChartAllAgent() {
+    const contentRef = useRef(null);
+
+    const convertToPdf = () => {
+        const content = contentRef.current;
+        const options = {
+            filename: 'my-chart.pdf',
+            margin: 1,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 4 },
+            jsPDF: {
+                unit: 'cm',
+                format: 'letter',
+                orientation: 'landscape',
+            },
+        };
+
+        html2pdf().set(options).from(content).save();
+    };
+
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
@@ -30,12 +50,10 @@ function MonthlyChartAllAgent() {
     const [showSessionDetailsModal, setShowSessionDetailsModal] = useState(false);
     const [selectedDateSessionDetails, setSelectedDateSessionDetails] = useState([]);
 
-
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(5);
 
     const [isLoading, setIsLoading] = useState(true);
-
 
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
         const agentSessions = [];
@@ -53,13 +71,12 @@ function MonthlyChartAllAgent() {
                 });
 
                 const sessionCounts = {};
-                const allSessions = sessions.reverse()
+                const allSessions = sessions.reverse();
                 allSessions.forEach((session) => {
-                    const monthYear= formatDate(new Date(session.activated));
+                    const monthYear = formatDate(new Date(session.activated));
                     sessionCounts[monthYear] = (sessionCounts[monthYear] || 0) + 1;
                 });
 
-             
                 agentSessions.push({
                     agentName: agent.agent.name,
                     sessionCounts: sessionCounts,
@@ -108,8 +125,8 @@ function MonthlyChartAllAgent() {
 
         try {
             let agentSessions1;
-    
-            if (selectedAgent === 'all') { 
+
+            if (selectedAgent === 'all') {
                 agentSessions1 = await fetchDataForAgents(formattedFromDate, formattedToDate);
             } else {
                 agentSessions1 = await fetchDataForAgents(
@@ -118,7 +135,7 @@ function MonthlyChartAllAgent() {
                     selectedAgent,
                 );
             }
-    
+
             setChartData(agentSessions1);
         } catch (error) {
             console.error('Error handling dates:', error);
@@ -128,7 +145,7 @@ function MonthlyChartAllAgent() {
     const handleKnowMore = async (date) => {
         try {
             let sessionsOnSelectedDate = [];
-    
+
             if (selectedAgent === 'all') {
                 // If all agents are selected, get sessions for all agents on the selected date
                 sessionsOnSelectedDate = chartData.reduce((acc, agentData) => {
@@ -142,23 +159,20 @@ function MonthlyChartAllAgent() {
                 const selectedAgentData = chartData.find(
                     (agentData) => agentData.agentName === selectedAgent,
                 );
-       
+
                 if (selectedAgentData) {
                     sessionsOnSelectedDate = selectedAgentData.allSessions.filter(
                         (session) => formatDate(new Date(session.activated)) === date,
                     );
                 }
             }
-    
+
             setSelectedDateSessionDetails(sessionsOnSelectedDate);
             setShowSessionDetailsModal(true);
         } catch (error) {
             console.error('Error getting session details:', error);
         }
-
     };
-
-    
 
     const handleAgentChange = (e) => {
         setSelectedAgent(e.target.value);
@@ -188,7 +202,7 @@ function MonthlyChartAllAgent() {
     const endIndex = Math.min(startIndex + itemsPerPage, currentDateCounts.length);
     const currentData = currentDateCounts.slice(startIndex, endIndex);
 
-    console.log("chartdata is ---==-=-=-=-=-=-=", currentData);
+    console.log('chartdata is ---==-=-=-=-=-=-=', currentData);
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
@@ -249,98 +263,103 @@ function MonthlyChartAllAgent() {
                 </form>
             </div>
 
-            <div className='table-div'>
-            {isLoading ? (
-                    <Spinner size="xl"  className='spinner-for-table'/>
+            <>
+                {isLoading ? (
+                    <Spinner size='xl' className='spinner-for-table' />
                 ) : (
-                    <>
-                    <table className='license-table'>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Month</th>
-                        <th>Session Count</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {currentData.map((monthData, index) => {
-                        const date = monthData[0];
-                        const count =  selectedAgent === 'all'
-                                ? monthData[1]
-                                : chartData.find(
-                                      (agentData) => agentData.agentName === selectedAgent,
-                                  ).sessionCounts[date];
+                    <div className='table-div' ref={contentRef}>
+                        <table className='license-table'>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Month</th>
+                                    <th>Session Count</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentData.map((monthData, index) => {
+                                    const date = monthData[0];
+                                    const count =
+                                        selectedAgent === 'all'
+                                            ? monthData[1]
+                                            : chartData.find(
+                                                  (agentData) =>
+                                                      agentData.agentName === selectedAgent,
+                                              ).sessionCounts[date];
 
-                        const itemIndex = startIndex + index + 1;
+                                    const itemIndex = startIndex + index + 1;
 
-                        return (
-                            <tr key={itemIndex}>
-                                <td>{itemIndex}</td>
-                                <td>{date}</td>
-                                <td>{count}</td>
-                                <td>
-                                    <Tooltip
-                                        className='icon'
-                                        label='Sessions Details'
-                                        position='top'
-                                        multiline={false}
-                                    >
-                                        <Icon
-                                            onClick={() => handleKnowMore(date)}
-                                            aria-label='info icon'
-                                            icon='info'
-                                            size='lg'
-                                        />
-                                    </Tooltip>
-                                </td>
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
-            <div className='pagination'>
-                <div>
-                    Rows per page:{' '}
-                    <select
-                        className='select'
-                        value={itemsPerPage}
-                        onChange={handleItemsPerPageChange}
-                    >
-                        <option value={5}>5</option>
-                        <option value={10}>10</option>
-                        <option value={20}>20</option>
-                    </select>
-                </div>
+                                    return (
+                                        <tr key={itemIndex}>
+                                            <td>{itemIndex}</td>
+                                            <td>{date}</td>
+                                            <td>{count}</td>
+                                            <td>
+                                                <Tooltip
+                                                    className='icon'
+                                                    label='Sessions Details'
+                                                    position='top'
+                                                    multiline={false}
+                                                >
+                                                    <Icon
+                                                        onClick={() => handleKnowMore(date)}
+                                                        aria-label='info icon'
+                                                        icon='info'
+                                                        size='lg'
+                                                    />
+                                                </Tooltip>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                        <div className='pagination'>
+                            <div>
+                                Rows per page:{' '}
+                                <select
+                                    className='select'
+                                    value={itemsPerPage}
+                                    onChange={handleItemsPerPageChange}
+                                >
+                                    <option value={5}>5</option>
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                </select>
+                            </div>
 
-                <div className='pagination-button'>
-                    <span>
-                        {currentPage} of {totalPages}
-                    </span>
-                    <button
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                    >
-                        <Icon aria-label='backward-fast' icon='backward-fast' size='sm' />
-                    </button>
+                            <div className='pagination-button'>
+                                <span>
+                                    {currentPage} of {totalPages}
+                                </span>
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                >
+                                    <Icon
+                                        aria-label='backward-fast'
+                                        icon='backward-fast'
+                                        size='sm'
+                                    />
+                                </button>
 
-                    <button
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                    >
-                        <Icon aria-label='forward-fast' icon='forward-fast' size='sm' />
-                    </button>
-                </div>
-            </div>
-                    </>
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    <Icon aria-label='forward-fast' icon='forward-fast' size='sm' />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 )}
+                {showSessionDetailsModal && <KnowMoreMonths data={selectedDateSessionDetails} />}
+            </>
 
-            
-            </div>
-          
-            {showSessionDetailsModal && (
-                <KnowMoreMonths data={selectedDateSessionDetails} />
-            )}
+            <button className='submit-button export' onClick={convertToPdf}>
+                Export to PDF
+            </button>
         </div>
     );
 }

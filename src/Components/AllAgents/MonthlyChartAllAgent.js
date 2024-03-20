@@ -9,14 +9,29 @@ import {
     Tooltip,
 } from 'chart.js';
 import CobrowseAPI from 'cobrowse-agent-sdk';
-import React, { useEffect, useState } from 'react';
+import html2pdf from 'html2pdf.js';
+import React, { useEffect, useRef, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
-import agentdata from "../../utils/licenses.json";
-
+import agentdata from '../../utils/licenses.json';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function MonthlyChartAllAgent() {
+    const contentRef = useRef(null);
+
+    const convertToPdf = () => {
+        const content = contentRef.current;
+        const options = {
+            filename: 'my-document.pdf',
+            margin: 0,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
+        };
+
+        html2pdf().set(options).from(content).save();
+    };
+
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
@@ -41,7 +56,6 @@ function MonthlyChartAllAgent() {
 
     const [isLoading, setIsLoading] = useState(true);
 
-
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
         const agentSessions = [];
         const agentsToFetch = agentName
@@ -58,7 +72,7 @@ function MonthlyChartAllAgent() {
                 });
 
                 const sessionCounts = {};
-                const mainsessions = sessions.reverse()
+                const mainsessions = sessions.reverse();
                 mainsessions.forEach((session) => {
                     const monthYear = formatDate(new Date(session.activated));
                     sessionCounts[monthYear] = (sessionCounts[monthYear] || 0) + 1;
@@ -154,11 +168,13 @@ function MonthlyChartAllAgent() {
 
     const data = {
         labels: months,
-        datasets: [{
-            label: selectedAgent === 'all' ? 'All Agents' : selectedAgent,
-            data: months.map((month) => getChartData()[month] || 0),
-            backgroundColor: customColors[0],
-        }],
+        datasets: [
+            {
+                label: selectedAgent === 'all' ? 'All Agents' : selectedAgent,
+                data: months.map((month) => getChartData()[month] || 0),
+                backgroundColor: customColors[0],
+            },
+        ],
     };
 
     const options = {
@@ -182,7 +198,7 @@ function MonthlyChartAllAgent() {
 
             <div>
                 <form onSubmit={handleSubmitForDates} className='dailycount1'>
-                <div>
+                    <div>
                         <label htmlFor='startDate'>From</label>
                         <input
                             className='input'
@@ -203,37 +219,44 @@ function MonthlyChartAllAgent() {
                         />
                     </div>
                     <div>
-                    <div className='agent-div'>
-              <label htmlFor='agent'>Agent</label>
-                <select
-                   className='agent-label' 
-                    id='agent'
-                    value={selectedAgent}
-                    onChange={handleAgentChange}
-                >
-                    <option value='all'>All</option>
-                    {agentdata.map((agent) => (
-                        <option key={agent.agent.name} value={agent.agent.name}>
-                            {agent.agent.name}
-                        </option>
-                    ))}
-                </select>
-              </div>
-            </div>
+                        <div className='agent-div'>
+                            <label htmlFor='agent'>Agent</label>
+                            <select
+                                className='agent-label'
+                                id='agent'
+                                value={selectedAgent}
+                                onChange={handleAgentChange}
+                            >
+                                <option value='all'>All</option>
+                                {agentdata.map((agent) => (
+                                    <option key={agent.agent.name} value={agent.agent.name}>
+                                        {agent.agent.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
                     <button type='submit' className='submit-button'>
                         Submit
                     </button>
                 </form>
             </div>
-        
+
             {isLoading ? (
-                    <Spinner size="xl"  className='spinner-for-chart'/>
-                ) : (
-                    
-                    <Bar className='daywiseCount' options={options} data={data} />
-                )}
+                <Spinner size='xl' className='spinner-for-chart' />
+            ) : (
+                <>
+                    <div ref={contentRef}>
+                        <Bar className='daywiseCount' options={options} data={data} />
+                    </div>
+                    <button className='submit-button export' onClick={convertToPdf}>
+                        Export to PDF
+                    </button>
+                </>
+            )}
         </div>
     );
 }
 
 export default MonthlyChartAllAgent;
+

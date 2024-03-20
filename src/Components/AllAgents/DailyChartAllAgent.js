@@ -10,16 +10,28 @@ import {
     Tooltip,
 } from 'chart.js';
 import CobrowseAPI from 'cobrowse-agent-sdk';
-import React, { useEffect, useState } from 'react';
+import html2pdf from 'html2pdf.js';
+import React, { useEffect, useRef, useState } from 'react';
 import { Line } from 'react-chartjs-2';
-
-
-import agentdata from "../../utils/licenses.json";
+import agentdata from '../../utils/licenses.json';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-
 function DailyChartAllAgent() {
+    const contentRef = useRef(null);
+
+    const convertToPdf = () => {
+        const content = contentRef.current;
+        const options = {
+            filename: 'my-document.pdf',
+            margin: 0,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
+        };
+
+        html2pdf().set(options).from(content).save();
+    };
 
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
@@ -44,8 +56,7 @@ function DailyChartAllAgent() {
     const [selectedAgent, setSelectedAgent] = useState('all');
     const [chartData, setChartData] = useState([]);
 
-  const [isLoading, setIsLoading] = useState(true);
-
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
         const agentSessions = [];
@@ -63,7 +74,7 @@ function DailyChartAllAgent() {
                 });
 
                 const sessionCounts = {};
-                const mainsessions = sessions.reverse()
+                const mainsessions = sessions.reverse();
                 mainsessions.forEach((session) => {
                     const date = formatDate(new Date(session.activated));
                     sessionCounts[date] = (sessionCounts[date] || 0) + 1;
@@ -151,7 +162,7 @@ function DailyChartAllAgent() {
     };
 
     // const customColors = [
-      
+
     //     // 'rgb(55, 140, 231)',
     //     // 'rgb(103, 198, 227)'
     // ];
@@ -160,11 +171,13 @@ function DailyChartAllAgent() {
 
     const data = {
         labels: dates,
-        datasets: [{
-            label: selectedAgent === 'all' ? 'All Agents' : selectedAgent,
-            data: dates.map((date) => getChartData()[date] || 0),
-            backgroundColor:   'rgb(83, 86, 255)',
-        }],
+        datasets: [
+            {
+                label: selectedAgent === 'all' ? 'All Agents' : selectedAgent,
+                data: dates.map((date) => getChartData()[date] || 0),
+                backgroundColor: 'rgb(83, 86, 255)',
+            },
+        ],
     };
 
     const options = {
@@ -209,38 +222,44 @@ function DailyChartAllAgent() {
                         />
                     </div>
                     <div>
-              <div className='agent-div'>
-              <label htmlFor='agent'>Agent</label>
-                <select
-                   className='agent-label' 
-                    id='agent'
-                    value={selectedAgent}
-                    onChange={handleAgentChange}
-                >
-                    <option value='all'>All</option>
-                    {agentdata.map((agent) => (
-                        <option key={agent.agent.name} value={agent.agent.name}>
-                            {agent.agent.name}
-                        </option>
-                    ))}
-                </select>
-              </div>
-            </div>
+                        <div className='agent-div'>
+                            <label htmlFor='agent'>Agent</label>
+                            <select
+                                className='agent-label'
+                                id='agent'
+                                value={selectedAgent}
+                                onChange={handleAgentChange}
+                            >
+                                <option value='all'>All</option>
+                                {agentdata.map((agent) => (
+                                    <option key={agent.agent.name} value={agent.agent.name}>
+                                        {agent.agent.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
                     <button type='submit' className='submit-button'>
                         Submit
                     </button>
                 </form>
             </div>
-            {
-                isLoading ? (
-                    <Spinner size="xl"  className='spinner-for-chart'/>
-                ) : (
-
-                    <Line className='daywiseCount' options={options} data={data} />
-                )
-            }
+            {isLoading ? (
+                <Spinner size='xl' className='spinner-for-chart' />
+            ) : (
+                <>
+                    <div ref={contentRef}>
+                        <Line className='daywiseCount' options={options} data={data} />
+                    </div>
+                    <button className='submit-button export' onClick={convertToPdf}>
+                        Export to PDF
+                    </button>
+                </>
+            )}
         </div>
     );
 }
 
 export default DailyChartAllAgent;
+
+//daywiseCount

@@ -1,9 +1,32 @@
 import { Spinner } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
-import React, { useEffect, useState } from 'react';
+import html2pdf from 'html2pdf.js';
+import React, { useEffect, useRef, useState } from 'react';
 import agentdata from '../../utils/licenses.json';
 
+
 function AverageDurationAllAgent() {
+
+    const contentRef = useRef(null);
+
+    const convertToPdf = () => {
+        const content = contentRef.current;
+        const options = {
+            filename: 'my-chart.pdf',
+            margin: 1,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 4 },
+            jsPDF: {
+                unit: 'cm',
+                format: 'letter',
+                orientation: 'landscape',
+            },
+        };
+
+        html2pdf().set(options).from(content).save();
+    };
+
+
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
@@ -217,7 +240,7 @@ function AverageDurationAllAgent() {
             </div>
 
             <div className='dateTable1'>
-                <div className='table-div'>
+                <div className='table-div' ref={contentRef}>
                     {isLoading ? (
                         <Spinner size='xl' className='spinner-for-table' />
                     ) : (
@@ -264,6 +287,9 @@ function AverageDurationAllAgent() {
                     )}
                 </div>
             </div>
+            <button className='submit-button export' onClick={convertToPdf}>
+                        Export to PDF
+                    </button>
         </div>
     );
 }

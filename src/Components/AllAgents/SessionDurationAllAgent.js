@@ -4,18 +4,39 @@ import {
     Chart as ChartJS,
     Legend,
     LineElement,
-    LinearScale, PointElement,
-    Title, Tooltip,
+    LinearScale,
+    PointElement,
+    Title,
+    Tooltip,
 } from 'chart.js';
 import CobrowseAPI from 'cobrowse-agent-sdk';
-import { React, useEffect, useState } from 'react';
+import html2pdf from 'html2pdf.js';
+import React, { useEffect, useRef, useState } from 'react';
 import { Line } from 'react-chartjs-2';
-import agentdata from "../../utils/licenses.json";
+import agentdata from '../../utils/licenses.json';
 
-
-ChartJS.register(CategoryScale,LinearScale,PointElement,LineElement,Title,Tooltip,Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 function SessionDurationAllAgent() {
+    const contentRef = useRef(null);
+
+    const convertToPdf = () => {
+        const content = contentRef.current;
+        const options = {
+            filename: 'my-chart.pdf',
+            margin: 1,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 4 },
+            jsPDF: {
+                unit: 'cm',
+                format: 'letter',
+                orientation: 'landscape',
+            },
+        };
+
+        html2pdf().set(options).from(content).save();
+    };
+
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
@@ -41,7 +62,6 @@ function SessionDurationAllAgent() {
 
     const [isLoading, setIsLoading] = useState(true);
 
-
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
         const agentSessions = [];
         const agentsToFetch = agentName
@@ -55,13 +75,13 @@ function SessionDurationAllAgent() {
                     activated_before: endDate,
                     limit: 10000,
                 });
-    
-                const mainsessions  = sessions.reverse()
-                const agentSessionData = mainsessions.map(session => ({
+
+                const mainsessions = sessions.reverse();
+                const agentSessionData = mainsessions.map((session) => ({
                     duration: calculateSessionDuration(session),
-                    startDate: formatDate(session.activated)
+                    startDate: formatDate(session.activated),
                 }));
-                console.log("agentSessionData is -=-=---==---->", agentSessionData);
+                console.log('agentSessionData is -=-=---==---->', agentSessionData);
                 agentSessions.push({
                     agentName: agent.agent.name,
                     sessionDurations: agentSessionData,
@@ -73,8 +93,6 @@ function SessionDurationAllAgent() {
         setIsLoading(false);
         return agentSessions;
     };
-    
-
 
     useEffect(() => {
         const fetchAndProcessData = async () => {
@@ -88,9 +106,9 @@ function SessionDurationAllAgent() {
                 console.error('Error fetching and processing data for all agents:', error);
             }
         };
-        fetchAndProcessData()
+        fetchAndProcessData();
     }, [formattedtwoMonthsAgo, formattedToday]);
-    
+
     // console.log("chartData-=-=-=-=-=-=-=-=", chartData);
 
     const handleAgentChange = (e) => {
@@ -104,16 +122,15 @@ function SessionDurationAllAgent() {
         if (selectedAgent === 'all') {
             const agentSessions1 = await fetchDataForAgents(formattedStartDate, formattedEndDate);
             setChartData(agentSessions1);
-        }
-        else {
+        } else {
             const agentSessions1 = await fetchDataForAgents(
                 formattedStartDate,
                 formattedEndDate,
                 selectedAgent,
             );
-            setChartData(agentSessions1); 
+            setChartData(agentSessions1);
         }
-      };
+    };
 
     const calculateSessionDuration = (session) => {
         const activatedTime = new Date(session.activated);
@@ -122,7 +139,7 @@ function SessionDurationAllAgent() {
         const durationInMinutes = durationInMilliseconds / (1000 * 60);
         return {
             minutes: durationInMinutes,
-            formatted: formatDuration(durationInMinutes)
+            formatted: formatDuration(durationInMinutes),
         };
     };
 
@@ -145,36 +162,35 @@ function SessionDurationAllAgent() {
         return durationString.trim();
     };
 
-    
     // const customColors = [
     //     'rgba(255, 99, 132, 0.5)',
     //     'rgba(53, 162, 235, 0.5)',
     //     'rgba(255, 244, 136, 0.8)'
     //   ];
 
-      const bgColor = [
-          'rgba(255, 244, 136, 0.8)',
-          'rgba(53, 162, 235, 0.5)',
-          'rgba(255, 99, 132, 0.5)',
-      ];
+    const bgColor = [
+        'rgba(255, 244, 136, 0.8)',
+        'rgba(53, 162, 235, 0.5)',
+        'rgba(255, 99, 132, 0.5)',
+    ];
 
-      const labels = chartData.length > 0 && chartData[0].sessionDurations ? 
-      chartData[0].sessionDurations.map((_, index) => `Session ${index + 1}`) : [];
-  
+    const labels =
+        chartData.length > 0 && chartData[0].sessionDurations
+            ? chartData[0].sessionDurations.map((_, index) => `Session ${index + 1}`)
+            : [];
 
-  
-const data = {
-    labels: labels,
-    datasets: chartData.map((agentData, index) => ({
-        label: agentData.agentName,
-        data: agentData.sessionDurations.map(session => session.duration.minutes),
-        hoverText: agentData.sessionDurations.map(session => `${formatDate(session.startDate)}: ${session.duration.formatted}`),
-        // borderColor: customColors[index % customColors.length],
-        backgroundColor: bgColor[index % bgColor.length],
-    })),
-  };
-  
-
+    const data = {
+        labels: labels,
+        datasets: chartData.map((agentData, index) => ({
+            label: agentData.agentName,
+            data: agentData.sessionDurations.map((session) => session.duration.minutes),
+            hoverText: agentData.sessionDurations.map(
+                (session) => `${formatDate(session.startDate)}: ${session.duration.formatted}`,
+            ),
+            // borderColor: customColors[index % customColors.length],
+            backgroundColor: bgColor[index % bgColor.length],
+        })),
+    };
 
     const options = {
         responsive: true,
@@ -189,21 +205,19 @@ const data = {
             },
             tooltip: {
                 callbacks: {
-                    label: function(context) {
+                    label: function (context) {
                         const hoverText = context.dataset.hoverText[context.dataIndex];
                         return hoverText;
-                    }
-                }
-            }
+                    },
+                },
+            },
         },
     };
     return (
         <div className='main-header'>
             <h3>DURATION SUMMARY CHART</h3>
             <div>
-                <form className='dailycount1'
-                 onSubmit={handleFormSubmit}
-                 >
+                <form className='dailycount1' onSubmit={handleFormSubmit}>
                     <div>
                         <label htmlFor='startDate'>From </label>
 
@@ -211,7 +225,7 @@ const data = {
                             type='date'
                             required
                             value={startDate}
-                            className="input"
+                            className='input'
                             onChange={(e) => {
                                 setStartDate(e.target.value);
                             }}
@@ -223,43 +237,46 @@ const data = {
                             type='date'
                             value={endDate}
                             required
-                            className="input"
+                            className='input'
                             onChange={(e) => {
                                 setEndDate(e.target.value);
                             }}
                         />
                     </div>
                     <div className='agent-div'>
-              <label htmlFor='agent'>Agent</label>
-                <select
-                   className='agent-label' 
-                    id='agent'
-                    value={selectedAgent}
-                    onChange={handleAgentChange}
-                >
-                    <option value='all'>All</option>
-                    {agentdata.map((agent) => (
-                        <option key={agent.agent.name} value={agent.agent.name}>
-                            {agent.agent.name}
-                        </option>
-                    ))}
-                </select>
-              </div>
+                        <label htmlFor='agent'>Agent</label>
+                        <select
+                            className='agent-label'
+                            id='agent'
+                            value={selectedAgent}
+                            onChange={handleAgentChange}
+                        >
+                            <option value='all'>All</option>
+                            {agentdata.map((agent) => (
+                                <option key={agent.agent.name} value={agent.agent.name}>
+                                    {agent.agent.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                     <button type='submit' className='submit-button' value='Submit'>
                         Submit
                     </button>
                 </form>
             </div>
-        
-
 
             {isLoading ? (
-                    <Spinner size="xl"  className='spinner-for-chart'/>
-                ) : (
-                    
-                    <Line  className="daywiseCount" data={data} options={options} />
-
-                )}
+                <Spinner size='xl' className='spinner-for-chart' />
+            ) : (
+                <>
+                    <div ref={contentRef}>
+                        <Line className='daywiseCount' data={data} options={options} />
+                    </div>
+                    <button className='submit-button export' onClick={convertToPdf}>
+                        Export to PDF
+                    </button>
+                </>
+            )}
         </div>
     );
 }

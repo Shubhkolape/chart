@@ -1,10 +1,26 @@
 import { Icon, Spinner, Tooltip } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
-import React, { useEffect, useState } from 'react';
+import html2pdf from 'html2pdf.js';
+import React, { useEffect, useRef, useState } from 'react';
 import SessionDetailsModal from '../../Components/DateWiseReports/SessionDetailsModal';
 import agentdata from '../../utils/licenses.json';
 
 function DateWiseTable() {
+    const contentRef = useRef(null);
+
+    const convertToPdf = () => {
+        const content = contentRef.current;
+        const options = {
+            filename: 'my-document.pdf',
+            margin: 0,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
+        };
+
+        html2pdf().set(options).from(content).save();
+    };
+
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
@@ -246,94 +262,104 @@ function DateWiseTable() {
                     </button>
                 </form>
             </div>
-            <div className='table-div'>
+            <>
                 {isLoading ? (
-                    <Spinner size="xl"  className='spinner-for-table'/>
+                    <Spinner size='xl' className='spinner-for-table' />
                 ) : (
-                    <>
-                    <table className='license-table'>
-                        <thead>
-                            <tr>
-                                <th className='centered-header'>#</th>
-                                <th className='centered-header'>Date</th>
-                                <th className='centered-header'>Count</th>
-                                <th className='centered-header'>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {currentData.map((dateData, index) => {
-                                const date = dateData[0];
-                                const count =
-                                    selectedAgent === 'all'
-                                        ? dateData[1]
-                                        : chartData.find(
-                                              (agentData) => agentData.agentName === selectedAgent,
-                                          ).sessionCounts[date];
+                    <div className='table-div' ref={contentRef}>
 
-                                const itemIndex = startIndex + index + 1;
 
-                                return (
-                                    <tr key={itemIndex}>
-                                        <td>{itemIndex}</td>
-                                        <td>{date}</td>
-                                        <td>{count}</td>
-                                        <td>
-                                            <Tooltip
-                                                className='icon'
-                                                label='Sessions Details'
-                                                position='top'
-                                                multiline={false}
-                                            >
-                                                <Icon
-                                                    onClick={() => handleKnowMore(date)}
-                                                    aria-label='info icon'
-                                                    icon='info'
-                                                    size='lg'
-                                                />
-                                            </Tooltip>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                     <div className='pagination'>
-                     <div>
-                         Rows per page:{' '}
-                         <select
-                             className='select'
-                             value={itemsPerPage}
-                             onChange={handleItemsPerPageChange}
-                         >
-                             <option value={5}>5</option>
-                             <option value={10}>10</option>
-                             <option value={20}>20</option>
-                         </select>
-                     </div>
-                     <div className='pagination-button'>
-                         <span>
-                             {currentPage} of {totalPages}
-                         </span>
-                         <button
-                             onClick={() => handlePageChange(currentPage - 1)}
-                             disabled={currentPage === 1}
-                         >
-                             <Icon aria-label='backward-fast' icon='backward-fast' size='sm' />
-                         </button>
-                         <button
-                             onClick={() => handlePageChange(currentPage + 1)}
-                             disabled={currentPage === totalPages}
-                         >
-                             <Icon aria-label='forward-fast' icon='forward-fast' size='sm' />
-                         </button>
-                     </div>
-                 </div>
-                 </>
+                        <table className='license-table'>
+                            <thead>
+                                <tr>
+                                    <th className='centered-header'>#</th>
+                                    <th className='centered-header'>Date</th>
+                                    <th className='centered-header'>Count</th>
+                                    <th className='centered-header'>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentData.map((dateData, index) => {
+                                    const date = dateData[0];
+                                    const count =
+                                        selectedAgent === 'all'
+                                            ? dateData[1]
+                                            : chartData.find(
+                                                  (agentData) =>
+                                                      agentData.agentName === selectedAgent,
+                                              ).sessionCounts[date];
+
+                                    const itemIndex = startIndex + index + 1;
+
+                                    return (
+                                        <tr key={itemIndex}>
+                                            <td>{itemIndex}</td>
+                                            <td>{date}</td>
+                                            <td>{count}</td>
+                                            <td>
+                                                <Tooltip
+                                                    className='icon'
+                                                    label='Sessions Details'
+                                                    position='top'
+                                                    multiline={false}
+                                                >
+                                                    <Icon
+                                                        onClick={() => handleKnowMore(date)}
+                                                        aria-label='info icon'
+                                                        icon='info'
+                                                        size='lg'
+                                                    />
+                                                </Tooltip>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                        <div className='pagination'>
+                            <div>
+                                Rows per page:{' '}
+                                <select
+                                    className='select'
+                                    value={itemsPerPage}
+                                    onChange={handleItemsPerPageChange}
+                                >
+                                    <option value={5}>5</option>
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                </select>
+                            </div>
+                            <div className='pagination-button'>
+                                <span>
+                                    {currentPage} of {totalPages}
+                                </span>
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                >
+                                    <Icon
+                                        aria-label='backward-fast'
+                                        icon='backward-fast'
+                                        size='sm'
+                                    />
+                                </button>
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    <Icon aria-label='forward-fast' icon='forward-fast' size='sm' />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 )}
-
-               
-            </div>
-            {showSessionDetailsModal && <SessionDetailsModal data={selectedDateSessionDetails} />}
+                {showSessionDetailsModal && (
+                    <SessionDetailsModal data={selectedDateSessionDetails} />
+                )}
+            </>
+            <button className='submit-button export' onClick={convertToPdf}>
+                Export to PDF
+            </button>
         </div>
     );
 }

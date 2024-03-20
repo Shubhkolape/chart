@@ -1,4 +1,3 @@
-import { StyledEngineProvider } from '@mui/material/styles';
 import React from 'react';
 import CustomTab from '../../Components/CustomTab';
 import WidgetApiProvider from '../../contexts/WidgetApiContext';
@@ -8,10 +7,8 @@ const CobrowseReports = ({ interactionId }) => {
     return (
         <WidgetApiProvider interactionId={interactionId}>
             <div className='cobrowse-reports-widget-container'>
-                <StyledEngineProvider injectFirst>
-                    {/* <Demo /> */}
-                    <CustomTab />
-                </StyledEngineProvider>
+                {/* <Demo /> */}
+                <CustomTab />
             </div>
         </WidgetApiProvider>
     );

@@ -1,20 +1,40 @@
 import { Spinner } from '@avaya/neo-react';
 import {
-  BarElement,
-  CategoryScale,
-  Chart as ChartJS,
-  Legend,
-  LinearScale,
-  Title,
-  Tooltip,
+    BarElement,
+    CategoryScale,
+    Chart as ChartJS,
+    Legend,
+    LinearScale,
+    Title,
+    Tooltip,
 } from 'chart.js';
 import CobrowseAPI from 'cobrowse-agent-sdk';
-import React, { useEffect, useState } from 'react';
+import html2pdf from 'html2pdf.js';
+import React, { useEffect, useRef, useState } from 'react';
 import agentdata from '../../utils/licenses.json';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function MultiAgentDailyTable() {
+    const contentRef = useRef(null);
+
+    const convertToPdf = () => {
+        const content = contentRef.current;
+        const options = {
+            filename: 'my-chart.pdf',
+            margin: 1,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 4 },
+            jsPDF: {
+                unit: 'cm',
+                format: 'letter',
+                orientation: 'landscape',
+            },
+        };
+
+        html2pdf().set(options).from(content).save();
+    };
+
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
@@ -151,39 +171,44 @@ function MultiAgentDailyTable() {
             </div>
 
             <div className='dateTable1'>
-                {isLoading ? (
-                    <Spinner size='xl' className='spinner-for-table' />
-                ) : (
-                    <>
-                        <table className='Month-table'>
-                            <thead>
-                                <tr>
-                                    <th className='centered-header'>#</th>
-                                    <th className='centered-header'>Agent Name</th>
-                                    {dates.map((month) => (
-                                        <th className='centered-header' key={month}>
-                                            {month}
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {chartData.map((agentData, index) => (
-                                    <tr key={index}>
-                                        <td>{index + 1}</td>
-                                        <td>{agentData.agentName}</td>
+                <>
+                    {isLoading ? (
+                        <Spinner size='xl' className='spinner-for-table' />
+                    ) : (
+                        <>
+                            <table className='Month-table' ref={contentRef}>
+                                <thead>
+                                    <tr>
+                                        <th className='centered-header'>#</th>
+                                        <th className='centered-header'>Agent Name</th>
                                         {dates.map((month) => (
-                                            <td key={`${agentData.agentName}-${month}`}>
-                                                {agentData.sessionCounts[month] || 0}
-                                            </td>
+                                            <th className='centered-header' key={month}>
+                                                {month}
+                                            </th>
                                         ))}
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </>
-                )}
+                                </thead>
+                                <tbody>
+                                    {chartData.map((agentData, index) => (
+                                        <tr key={index}>
+                                            <td>{index + 1}</td>
+                                            <td>{agentData.agentName}</td>
+                                            {dates.map((month) => (
+                                                <td key={`${agentData.agentName}-${month}`}>
+                                                    {agentData.sessionCounts[month] || 0}
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </>
+                    )}
+                </>
             </div>
+            <button className='submit-button export1' onClick={convertToPdf}>
+                Export to PDF
+            </button>
         </div>
     );
 }

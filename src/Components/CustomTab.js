@@ -6,6 +6,7 @@ import MonthlyChartAllAgent from './AllAgents/MonthlyChartAllAgent';
 import SessionDurationAllAgent from './AllAgents/SessionDurationAllAgent';
 import DateWiseTable from './DateWiseReports/DateWiseTable';
 import License from './License/License';
+import LicenseInfo from './Licenses/LicenseInfo';
 import MonthWiseTable from './MonthWiseReport/MonthWiseTable';
 import MultiAgentDailyChart2 from './MultipleAgent/MultiAgentDailyChart2';
 import MultiAgentDailyTable from './MultipleAgent/MultiAgentDailyTable';
@@ -23,13 +24,16 @@ const Tabs = () => {
         { id: 'licenses', label: 'LICENSES', subTabs: ['table'] },
         { id: 'agent_session', label: 'AGENT SESSION', subTabs: ['chart', 'table'] },
         { id: 'day_details', label: 'DAY SESSION', subTabs: ['chart', 'table'] },
+        { id: 'licenses_details', label: 'LICENSES DETAILS', subTabs: ['table'] },
+
     ];
 
     const handleMainTabClick = (tabId) => {
         setActiveMainTab(tabId);
-        if (tabId === 'licenses') {
+        if (tabId === 'licenses' ||   tabId ===  'licenses_details') {
             setActiveSubTab('table');
-        } else {
+        } 
+        else {
             setActiveSubTab('chart');
         }
     };
@@ -42,32 +46,33 @@ const Tabs = () => {
         <div className='tabs-container'>
             <div className='main-tabs'>
                 {mainTabs.map((tab) => (
-
-                    <div 
+                    <div
                         key={tab.id}
                         className={`tab ${tab.id === activeMainTab ? 'active' : ''}`}
                         onClick={() => handleMainTabClick(tab.id)}
-                       >{tab.label}</div>
+                    >
+                        {tab.label}
+                    </div>
                 ))}
             </div>
             <div className='sub-tabs'>
-                {mainTabs.find(tab => tab.id === activeMainTab).subTabs.map(subTab => (
-                    <div
-                        key={subTab}
-                        className={`sub-tab ${subTab === activeSubTab ? 'active' : ''}`}
-                        onClick={() => handleSubTabClick(subTab)}
-                    >
-                        {subTab.charAt(0).toUpperCase() + subTab.slice(1)}
-                    </div>
-                ))}
+                {mainTabs
+                    .find((tab) => tab.id === activeMainTab)
+                    .subTabs.map((subTab) => (
+                        <div
+                            key={subTab}
+                            className={`sub-tab ${subTab === activeSubTab ? 'active' : ''}`}
+                            onClick={() => handleSubTabClick(subTab)}
+                        >
+                            {subTab.charAt(0).toUpperCase() + subTab.slice(1)}
+                        </div>
+                    ))}
             </div>
             <div className='content'>
                 {activeMainTab === 'day_summary' && activeSubTab === 'chart' && (
                     <DailyChartAllAgent />
                 )}
-                {activeMainTab === 'day_summary' && activeSubTab === 'table' && (
-                    <DateWiseTable />
-                )}
+                {activeMainTab === 'day_summary' && activeSubTab === 'table' && <DateWiseTable />}
 
                 {activeMainTab === 'month_summary' && activeSubTab === 'chart' && (
                     <MonthlyChartAllAgent />
@@ -98,6 +103,8 @@ const Tabs = () => {
                 {activeMainTab === 'day_details' && activeSubTab === 'table' && (
                     <MultiAgentDailyTable />
                 )}
+
+                {activeMainTab === 'licenses_details'&& activeSubTab === 'table' &&  <LicenseInfo />}
             </div>
         </div>
     );
