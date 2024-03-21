@@ -2,6 +2,7 @@ import { Spinner } from '@avaya/neo-react';
 import { faEye, faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import html2pdf from 'html2pdf.js';
+// import jsPDF from 'jspdf';
 import React, { useEffect, useRef, useState } from 'react';
 import AddNewAgent from './AddNewAgent';
 import DeleteData from './DeleteData';
@@ -9,6 +10,10 @@ import EditData from './EditData';
 import PopUp from './PopUp';
 
 function LicenseInfo() {
+
+
+  
+
     const contentRef = useRef(null);
 
     const convertToPdf = () => {
@@ -68,7 +73,7 @@ function LicenseInfo() {
     };
 
     return (
-        <div className='main-header'>
+        <div className='main-header' >
             <h1>LICENSES ALL INFO </h1>
 
             {isLoading ? (

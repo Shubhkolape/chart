@@ -14,7 +14,7 @@ function DateWiseTable() {
             filename: 'my-document.pdf',
             margin: 0,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
+            html2canvas: { scale: 1 },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
         };
 
@@ -262,13 +262,12 @@ function DateWiseTable() {
                     </button>
                 </form>
             </div>
-            <>
+
+            <div className='new-div' ref={contentRef}>
                 {isLoading ? (
                     <Spinner size='xl' className='spinner-for-table' />
                 ) : (
-                    <div className='table-div' ref={contentRef}>
-
-
+                    <div   className='table-div' >
                         <table className='license-table'>
                             <thead>
                                 <tr>
@@ -356,7 +355,7 @@ function DateWiseTable() {
                 {showSessionDetailsModal && (
                     <SessionDetailsModal data={selectedDateSessionDetails} />
                 )}
-            </>
+            </div>
             <button className='submit-button export' onClick={convertToPdf}>
                 Export to PDF
             </button>

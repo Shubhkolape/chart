@@ -11,15 +11,11 @@ function MonthlyChartAllAgent() {
     const convertToPdf = () => {
         const content = contentRef.current;
         const options = {
-            filename: 'my-chart.pdf',
-            margin: 1,
+            filename: 'my-document.pdf',
+            margin: 0,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 4 },
-            jsPDF: {
-                unit: 'cm',
-                format: 'letter',
-                orientation: 'landscape',
-            },
+            html2canvas: { scale: 1 },
+            jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
         };
 
         html2pdf().set(options).from(content).save();
@@ -263,18 +259,18 @@ function MonthlyChartAllAgent() {
                 </form>
             </div>
 
-            <>
+            <div className='new-div' ref={contentRef}>
                 {isLoading ? (
                     <Spinner size='xl' className='spinner-for-table' />
                 ) : (
-                    <div className='table-div' ref={contentRef}>
+                    <div className='table-div'>
                         <table className='license-table'>
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Month</th>
-                                    <th>Session Count</th>
-                                    <th>Action</th>
+                                    <th className='centered-header'>#</th>
+                                    <th className='centered-header'>Month</th>
+                                    <th className='centered-header'>Session Count</th>
+                                    <th className='centered-header'>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -355,7 +351,7 @@ function MonthlyChartAllAgent() {
                     </div>
                 )}
                 {showSessionDetailsModal && <KnowMoreMonths data={selectedDateSessionDetails} />}
-            </>
+            </div>
 
             <button className='submit-button export' onClick={convertToPdf}>
                 Export to PDF

@@ -8,7 +8,6 @@ function AddNewAgent({ showForm, setShowForm, handleClosePopUp }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
         const newAgent = {
             agentName,
             licenseKey,
@@ -25,14 +24,14 @@ function AddNewAgent({ showForm, setShowForm, handleClosePopUp }) {
         })
             .then((response) => {
                 if (response.ok) {
-                    console.log('Agent added successfully');
                     setAgentName('');
                     setLicenseKey('');
                     setAccountId('');
                     setToken('');
+                    handleClosePopUp();
                     setShowForm(false);
                 } else {
-                    throw new Error('Failed to add agent');
+                    throw new Error('Failed to update data');
                 }
             })
             .catch((error) => {
@@ -80,7 +79,7 @@ function AddNewAgent({ showForm, setShowForm, handleClosePopUp }) {
                     <div className='input-filed'>
                         <label className='input-label'>Token:</label>
                         <textarea
-                        rows={5}
+                            rows={5}
                             className='box-input'
                             type='text'
                             value={token}

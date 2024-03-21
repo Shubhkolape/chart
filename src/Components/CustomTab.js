@@ -69,40 +69,28 @@ const Tabs = () => {
                     ))}
             </div>
             <div className='content'>
-                {activeMainTab === 'day_summary' && activeSubTab === 'chart' && (
-                    <DailyChartAllAgent />
-                )}
+                {activeMainTab === 'day_summary' && activeSubTab === 'chart' && (<DailyChartAllAgent /> )}
                 {activeMainTab === 'day_summary' && activeSubTab === 'table' && <DateWiseTable />}
 
-                {activeMainTab === 'month_summary' && activeSubTab === 'chart' && (
-                    <MonthlyChartAllAgent />
-                )}
-                {activeMainTab === 'month_summary' && activeSubTab === 'table' && (
-                    <MonthWiseTable />
-                )}
 
-                {activeMainTab === 'duration' && activeSubTab === 'chart' && (
-                    <SessionDurationAllAgent />
-                )}
-                {activeMainTab === 'duration' && activeSubTab === 'table' && (
-                    <AverageDurationAllAgent />
-                )}
+                {activeMainTab === 'month_summary' && activeSubTab === 'chart' && (<MonthlyChartAllAgent />)}
+                {activeMainTab === 'month_summary' && activeSubTab === 'table' && ( <MonthWiseTable /> )}
+
+
+                {activeMainTab === 'duration' && activeSubTab === 'chart' && ( <SessionDurationAllAgent />)}
+                {activeMainTab === 'duration' && activeSubTab === 'table' && (<AverageDurationAllAgent />)}
+
 
                 {activeMainTab === 'licenses' && activeSubTab === 'table' && <License />}
 
-                {activeMainTab === 'agent_session' && activeSubTab === 'chart' && (
-                    <MultiAgentMonthlyChart2 />
-                )}
-                {activeMainTab === 'agent_session' && activeSubTab === 'table' && (
-                    <MultiAgentMonthTable />
-                )}
 
-                {activeMainTab === 'day_details' && activeSubTab === 'chart' && (
-                    <MultiAgentDailyChart2 />
-                )}
-                {activeMainTab === 'day_details' && activeSubTab === 'table' && (
-                    <MultiAgentDailyTable />
-                )}
+                {activeMainTab === 'agent_session' && activeSubTab === 'chart' && (<MultiAgentMonthlyChart2 />)}
+                {activeMainTab === 'agent_session' && activeSubTab === 'table' && (<MultiAgentMonthTable />)}
+
+
+                {activeMainTab === 'day_details' && activeSubTab === 'chart' && ( <MultiAgentDailyChart2 /> )}
+                {activeMainTab === 'day_details' && activeSubTab === 'table' && (<MultiAgentDailyTable />)}
+
 
                 {activeMainTab === 'licenses_details'&& activeSubTab === 'table' &&  <LicenseInfo />}
             </div>

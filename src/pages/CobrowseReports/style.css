@@ -160,13 +160,20 @@ align-items: self-start;
 }
 
 .table-div {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    /* display: flex;
+    flex-direction: column; */
+    /* justify-content: center;
+    align-items: center; */
     /* height: 100vh;  */
     padding: 0 20px;
     margin-top: 30px;
+}
+
+.new-div{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
 }
 
 .averge-table {
