@@ -2,15 +2,13 @@ import { Spinner } from '@avaya/neo-react';
 import { faEye, faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import html2pdf from 'html2pdf.js';
-import React, { useEffect, useRef, useState } from 'react';
+import { default as React, useEffect, useRef, useState } from 'react';
 import AddNewAgent from './AddNewAgent';
 import DeleteData from './DeleteData';
 import PopUp from './PopUp';
 import UpdatData from './UpdatData';
 
 function LicenseInfo() {
-    
-    
     // function for export in pdf
     const contentRef = useRef(null);
     const convertToPdf = () => {
@@ -43,8 +41,6 @@ function LicenseInfo() {
             .then((data) => SetLicensesData(data));
         setIsLoading(false);
     }, []);
-
-    // const [NewpopUp, SetNewpopUp] = useState(false);
 
     const handleViewAgent = (agent) => {
         setSelectedAgent(agent);
@@ -132,11 +128,11 @@ function LicenseInfo() {
             )}
 
             {isDelete && (
-                <DeleteData selectedAgent={selectedAgent} handleClosePopUp={handleClosePopUp} />
+                <DeleteData selectedAgent={selectedAgent} SetLicensesData={SetLicensesData} handleClosePopUp={handleClosePopUp} />
             )}
 
             {showForm && (
-                <AddNewAgent setShowForm={setShowForm} handleClosePopUp={handleClosePopUp} />
+                <AddNewAgent SetLicensesData={SetLicensesData} setShowForm={setShowForm} handleClosePopUp={handleClosePopUp} />
             )}
             <button className='submit-button export2' onClick={convertToPdf}>
                 Export to PDF
