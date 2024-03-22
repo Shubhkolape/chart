@@ -2,20 +2,17 @@ import { Spinner } from '@avaya/neo-react';
 import { faEye, faPenToSquare, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import html2pdf from 'html2pdf.js';
-// import jsPDF from 'jspdf';
 import React, { useEffect, useRef, useState } from 'react';
 import AddNewAgent from './AddNewAgent';
 import DeleteData from './DeleteData';
-import EditData from './EditData';
 import PopUp from './PopUp';
+import UpdatData from './UpdatData';
 
 function LicenseInfo() {
-
-
-  
-
+    
+    
+    // function for export in pdf
     const contentRef = useRef(null);
-
     const convertToPdf = () => {
         const content = contentRef.current;
         const options = {
@@ -33,17 +30,17 @@ function LicenseInfo() {
         html2pdf().set(options).from(content).save();
     };
 
-    const [data, setData] = useState([]);
+    const [LicensesData, SetLicensesData] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [selectedAgent, setSelectedAgent] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [isDelete, setisDelete] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
 
     useEffect(() => {
         fetch('https://rahul.lab.bravishma.com/cobrowse/accounts')
             .then((response) => response.json())
-            .then((data) => setData(data));
+            .then((data) => SetLicensesData(data));
         setIsLoading(false);
     }, []);
 
@@ -73,7 +70,7 @@ function LicenseInfo() {
     };
 
     return (
-        <div className='main-header' >
+        <div className='main-header'>
             <h1>LICENSES ALL INFO </h1>
 
             {isLoading ? (
@@ -96,13 +93,14 @@ function LicenseInfo() {
                             </tr>
                         </thead>
                         <tbody>
-                            {data.map((agent, index) => (
+                            {LicensesData.map((agent, index) => (
                                 <tr key={index}>
                                     <td>{index + 1}</td>
                                     <td>{agent.agentName}</td>
                                     <td>{agent.licenseKey}</td>
                                     <td>{agent._id}</td>
                                     <td className='token'>{agent.token}</td>
+
                                     <td>
                                         <div className='icon-list'>
                                             <span onClick={() => handleViewAgent(agent)}>
@@ -130,7 +128,7 @@ function LicenseInfo() {
                 <PopUp selectedAgent={selectedAgent} handleClosePopUp={handleClosePopUp} />
             )}
             {selectedAgent && isEditing && (
-                <EditData selectedAgent={selectedAgent} handleClosePopUp={handleClosePopUp} />
+                <UpdatData LicensesData={LicensesData} SetLicensesData={SetLicensesData} selectedAgent={selectedAgent} handleClosePopUp={handleClosePopUp} />
             )}
 
             {isDelete && (

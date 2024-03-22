@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
 
-function AddNewAgent({ showForm, setShowForm, handleClosePopUp }) {
+function AddNewAgent({ setShowForm, handleClosePopUp }) {
     const [agentName, setAgentName] = useState('');
     const [licenseKey, setLicenseKey] = useState('');
     const [accountId, setAccountId] = useState('');
     const [token, setToken] = useState('');
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const newAgent = {
-            agentName,
-            licenseKey,
-            accountId,
-            token,
-        };
+        const handleSubmit = (e) => {
+            e.preventDefault();
+            const newAgent = {
+                agentName,
+                licenseKey,
+                accountId,
+                token,
+            };
 
-        fetch('https://rahul.lab.bravishma.com/cobrowse/accounts', {
-            method: 'POST',
-            headers: {
+            fetch('https://rahul.lab.bravishma.com/cobrowse/accounts', {
+                method: 'POST',
+                headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(newAgent),
@@ -72,7 +72,7 @@ function AddNewAgent({ showForm, setShowForm, handleClosePopUp }) {
                             className='box-input'
                             type='text'
                             value={accountId}
-                            required
+                            required 
                             onChange={(e) => setAccountId(e.target.value)}
                         />
                     </div>
