@@ -2,10 +2,8 @@ import { Icon, Spinner, Tooltip } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import html2pdf from 'html2pdf.js';
 import React, { useEffect, useRef, useState } from 'react';
-import KnowMoreMonths from '../../Components/MonthWiseReport/KnowMoreMonths';
-import agentdata from '../../utils/licenses.json';
-
-function MonthlyChartAllAgent() {
+import MonthSummaryDetailModel from '../MainSupprotTableComponents/MonthSummaryDetailModel';
+function MonthSummaryTable({startDate, endDate, handleStartDateChange, handleEndDateChange}) {
     const contentRef = useRef(null);
 
     const convertToPdf = () => {
@@ -29,17 +27,8 @@ function MonthlyChartAllAgent() {
         return formattedDate;
     };
 
-    const formatedDate = (date) => {
-        return date.toISOString().split('T')[0];
-    };
 
-    const today = new Date();
-    const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1);
-    const formattedSixMonthsAgo = formatedDate(sixMonthsAgo);
-    const formattedToday = formatedDate(today);
 
-    const [startDate, setStartDate] = useState(formattedSixMonthsAgo);
-    const [endDate, setEndDate] = useState(formattedToday);
     const [selectedAgent, setSelectedAgent] = useState('all');
     const [chartData, setChartData] = useState([]);
 
@@ -53,34 +42,40 @@ function MonthlyChartAllAgent() {
 
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
         const agentSessions = [];
-        const agentsToFetch = agentName
-            ? [agentdata.find((agent) => agent.agent.name === agentName)]
-            : agentdata;
 
-        for (const agent of agentsToFetch) {
-            const cobrowse = new CobrowseAPI(agent.agent.token);
-            try {
-                const sessions = await cobrowse.sessions.list({
-                    activated_after: startDate,
-                    activated_before: endDate,
-                    limit: 10000,
-                });
+        try {
+            const response = await fetch('https://rahul.lab.bravishma.com/cobrowse/accounts');
+            const agentData = await response.json();
 
-                const sessionCounts = {};
-                const allSessions = sessions.reverse();
-                allSessions.forEach((session) => {
-                    const monthYear = formatDate(new Date(session.activated));
-                    sessionCounts[monthYear] = (sessionCounts[monthYear] || 0) + 1;
-                });
+            const agentsToFetch = agentName
+                ? agentData.filter((agent) => agent.agentName === agentName)
+                : agentData;
 
-                agentSessions.push({
-                    agentName: agent.agent.name,
-                    sessionCounts: sessionCounts,
-                    allSessions: allSessions,
-                });
-            } catch (error) {
-                console.error(`Error fetching cobrowse data for agent:`, error);
+            for (const agent of agentsToFetch) {
+                const cobrowse = new CobrowseAPI(agent.token);
+                try {
+                    const sessions = await cobrowse.sessions.list({
+                        activated_after: startDate,
+                        activated_before: endDate,
+                        limit: 10000,
+                    });
+                    const sessionCounts = {};
+                    const allSessions = sessions.reverse();
+                    allSessions.forEach((session) => {
+                        const monthYear = formatDate(new Date(session.activated));
+                        sessionCounts[monthYear] = (sessionCounts[monthYear] || 0) + 1;
+                    });
+                    agentSessions.push({
+                        agentName: agent.agentName,
+                        sessionCounts: sessionCounts,
+                        allSessions: allSessions,
+                    });
+                } catch (error) {
+                    console.error(`Error fetching cobrowse data for agent:`, error);
+                }
             }
+        } catch (error)  {
+            console.error('Error fetching agent data:', error);
         }
         setIsLoading(false);
         return agentSessions;
@@ -90,8 +85,8 @@ function MonthlyChartAllAgent() {
         const fetchAndProcessData = async () => {
             try {
                 const agentSessions = await fetchDataForAgents(
-                    formattedSixMonthsAgo,
-                    formattedToday,
+                    startDate,
+                    endDate,
                 );
                 setChartData(agentSessions);
             } catch (error) {
@@ -100,7 +95,7 @@ function MonthlyChartAllAgent() {
         };
 
         fetchAndProcessData();
-    }, [formattedSixMonthsAgo, formattedToday]);
+    }, [startDate, endDate]);
 
     const convertAndFormatDate = (userInputDate) => {
         const date = new Date(userInputDate);
@@ -143,7 +138,6 @@ function MonthlyChartAllAgent() {
             let sessionsOnSelectedDate = [];
 
             if (selectedAgent === 'all') {
-                // If all agents are selected, get sessions for all agents on the selected date
                 sessionsOnSelectedDate = chartData.reduce((acc, agentData) => {
                     const agentSessions = agentData.allSessions.filter(
                         (session) => formatDate(new Date(session.activated)) === date,
@@ -151,7 +145,6 @@ function MonthlyChartAllAgent() {
                     return acc.concat(agentSessions);
                 }, []);
             } else {
-                // If a specific agent is selected, get sessions only for that agent on the selected date
                 const selectedAgentData = chartData.find(
                     (agentData) => agentData.agentName === selectedAgent,
                 );
@@ -222,7 +215,8 @@ function MonthlyChartAllAgent() {
                             type='date'
                             id='startDate'
                             value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
+                            onChange={(e) => handleStartDateChange(e.target.value)}
+
                         />
                     </div>
                     <div>
@@ -232,7 +226,8 @@ function MonthlyChartAllAgent() {
                             type='date'
                             id='endDate'
                             value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
+                            onChange={(e) => handleEndDateChange(e.target.value)}
+
                         />
                     </div>
                     <div>
@@ -245,9 +240,9 @@ function MonthlyChartAllAgent() {
                                 onChange={handleAgentChange}
                             >
                                 <option value='all'>All</option>
-                                {agentdata.map((agent) => (
-                                    <option key={agent.agent.name} value={agent.agent.name}>
-                                        {agent.agent.name}
+                                {chartData.map((agent) => (
+                                    <option key={agent.agentName} value={agent.agentName}>
+                                        {agent.agentName}
                                     </option>
                                 ))}
                             </select>
@@ -350,7 +345,7 @@ function MonthlyChartAllAgent() {
                         </div>
                     </div>
                 )}
-                {showSessionDetailsModal && <KnowMoreMonths data={selectedDateSessionDetails} />}
+                {showSessionDetailsModal && <MonthSummaryDetailModel data={selectedDateSessionDetails} />}
             </div>
 
             <button className='submit-button export' onClick={convertToPdf}>
@@ -360,4 +355,4 @@ function MonthlyChartAllAgent() {
     );
 }
 
-export default MonthlyChartAllAgent;
+export default MonthSummaryTable;

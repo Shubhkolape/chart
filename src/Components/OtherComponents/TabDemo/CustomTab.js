@@ -1,12 +1,11 @@
 import '@avaya/neo-react/avaya-neo-react.css';
 import React, { useState } from 'react';
+import LicenseInfo from '../../Licenses/LicenseInfo';
 import AverageDurationAllAgent from './AllAgents/AverageDurationAllAgent';
 import DailyChartAllAgent from './AllAgents/DailyChartAllAgent';
 import MonthlyChartAllAgent from './AllAgents/MonthlyChartAllAgent';
 import SessionDurationAllAgent from './AllAgents/SessionDurationAllAgent';
 import DateWiseTable from './DateWiseReports/DateWiseTable';
-import License from './License/License';
-import LicenseInfo from './Licenses/LicenseInfo';
 import MonthWiseTable from './MonthWiseReport/MonthWiseTable';
 import MultiAgentDailyChart2 from './MultipleAgent/MultiAgentDailyChart2';
 import MultiAgentDailyTable from './MultipleAgent/MultiAgentDailyTable';
@@ -21,7 +20,7 @@ const Tabs = () => {
         { id: 'day_summary', label: 'DAY SUMMARY', subTabs: ['chart', 'table'] },
         { id: 'month_summary', label: 'MONTH SUMMARY', subTabs: ['chart', 'table'] },
         { id: 'duration', label: 'DURATION', subTabs: ['chart', 'table'] },
-        { id: 'licenses', label: 'LICENSES', subTabs: ['table'] },
+        // { id: 'licenses', label: 'LICENSES', subTabs: ['table'] },
         { id: 'agent_session', label: 'AGENT SESSION', subTabs: ['chart', 'table'] },
         { id: 'day_details', label: 'DAY SESSION', subTabs: ['chart', 'table'] },
         { id: 'licenses_details', label: 'LICENSES DETAILS', subTabs: ['table'] },
@@ -81,7 +80,7 @@ const Tabs = () => {
                 {activeMainTab === 'duration' && activeSubTab === 'table' && (<AverageDurationAllAgent />)}
 
 
-                {activeMainTab === 'licenses' && activeSubTab === 'table' && <License />}
+                {/* {activeMainTab === 'licenses' && activeSubTab === 'table' && <LicenseInfo />} */}
 
 
                 {activeMainTab === 'agent_session' && activeSubTab === 'chart' && (<MultiAgentMonthlyChart2 />)}

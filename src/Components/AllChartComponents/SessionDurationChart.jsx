@@ -13,11 +13,10 @@ import CobrowseAPI from 'cobrowse-agent-sdk';
 import html2pdf from 'html2pdf.js';
 import React, { useEffect, useRef, useState } from 'react';
 import { Line } from 'react-chartjs-2';
-import agentdata from '../../utils/licenses.json';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-
-function SessionDurationAllAgent() {
+// SessionDurationChart
+function SessionDurationChart({startDate, endDate, handleStartDateChange, handleEndDateChange}) {
     const contentRef = useRef(null);
 
     const convertToPdf = () => {
@@ -46,68 +45,82 @@ function SessionDurationAllAgent() {
         return formattedDate;
     };
 
-    const formatedDate = (date) => {
-        return date.toISOString().split('T')[0];
-    };
+    // const formatedDate = (date) => {
+    //     return date.toISOString().split('T')[0];
+    // };
 
-    const today = new Date();
-    const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
-    const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
-    const formattedToday = formatedDate(today);
+    // const today = new Date();
+    // const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
+    // const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
+    // const formattedToday = formatedDate(today);
 
-    const [startDate, setStartDate] = useState(formattedtwoMonthsAgo);
-    const [endDate, setEndDate] = useState(formattedToday);
+    // const [startDate, setStartDate] = useState(formattedtwoMonthsAgo);
+    // const [endDate, setEndDate] = useState(formattedToday);
+
+
     const [selectedAgent, setSelectedAgent] = useState('all');
     const [chartData, setChartData] = useState([]);
-
+    const [allAgents, setAllAgents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
-        const agentSessions = [];
-        const agentsToFetch = agentName
-            ? [agentdata.find((agent) => agent.agent.name === agentName)]
-            : agentdata;
-        for (const agent of agentsToFetch) {
-            const cobrowse = new CobrowseAPI(agent.agent.token);
-            try {
-                const sessions = await cobrowse.sessions.list({
-                    activated_after: startDate,
-                    activated_before: endDate,
-                    limit: 10000,
-                });
+        try {
+            const response = await fetch('https://rahul.lab.bravishma.com/cobrowse/accounts');
+            const agentData = await response.json();
+            const fetchedAgentSessions = [];
 
-                const mainsessions = sessions.reverse();
-                const agentSessionData = mainsessions.map((session) => ({
-                    duration: calculateSessionDuration(session),
-                    startDate: formatDate(session.activated),
-                }));
-                console.log('agentSessionData is -=-=---==---->', agentSessionData);
-                agentSessions.push({
-                    agentName: agent.agent.name,
-                    sessionDurations: agentSessionData,
-                });
-            } catch (error) {
-                console.error(`Error fetching cobrowse data for agent:`, error);
+            const agentsToFetch = agentName
+                ? agentData.filter((agent) => agent.agentName === agentName)
+                : agentData;
+
+
+            for (const agent of agentsToFetch) {
+                const cobrowse = new CobrowseAPI(agent.token);
+                try {
+                    const sessions = await cobrowse.sessions.list({
+                        activated_after: startDate,
+                        activated_before: endDate,
+                        limit: 10000,
+                    });
+                    const mainSessions = sessions.reverse();
+                    const agentSessionData = mainSessions.map((session) => ({
+                        duration: calculateSessionDuration(session),
+                        startDate: formatDate(session.activated),
+                    }));
+                    fetchedAgentSessions.push({
+                        agentName: agent.agentName,
+                        sessionDurations: agentSessionData,
+                    });
+                } catch (error) {
+                    console.error(`Error fetching cobrowse data for agent:`, error);
+                }
             }
+            return fetchedAgentSessions;
+        } catch (error) {
+            console.error(`Error fetching cobrowse data:`, error);
+            
         }
-        setIsLoading(false);
-        return agentSessions;
     };
+
+
 
     useEffect(() => {
         const fetchAndProcessData = async () => {
             try {
                 const agentSessions = await fetchDataForAgents(
-                    formattedtwoMonthsAgo,
-                    formattedToday,
+                    startDate,
+                    endDate,
                 );
                 setChartData(agentSessions);
+                setAllAgents(agentSessions.map((agent) => agent.agentName));
+                setIsLoading(false);
             } catch (error) {
-                console.error('Error fetching and processing data for all agents:', error);
+                console.error('Error fetching and processing data:', error);
+                setIsLoading(false);
             }
         };
         fetchAndProcessData();
-    }, [formattedtwoMonthsAgo, formattedToday]);
+    }, [startDate, endDate]);
 
     // console.log("chartData-=-=-=-=-=-=-=-=", chartData);
 
@@ -119,16 +132,15 @@ function SessionDurationAllAgent() {
         e.preventDefault();
         const formattedStartDate = formatDate(startDate);
         const formattedEndDate = formatDate(endDate);
-        if (selectedAgent === 'all') {
-            const agentSessions1 = await fetchDataForAgents(formattedStartDate, formattedEndDate);
-            setChartData(agentSessions1);
-        } else {
+        try {
             const agentSessions1 = await fetchDataForAgents(
                 formattedStartDate,
                 formattedEndDate,
-                selectedAgent,
+                selectedAgent === 'all' ? null : selectedAgent,
             );
             setChartData(agentSessions1);
+        } catch (error) {
+            console.error('Error handling form submit:', error);
         }
     };
 
@@ -161,12 +173,6 @@ function SessionDurationAllAgent() {
 
         return durationString.trim();
     };
-
-    // const customColors = [
-    //     'rgba(255, 99, 132, 0.5)',
-    //     'rgba(53, 162, 235, 0.5)',
-    //     'rgba(255, 244, 136, 0.8)'
-    //   ];
 
     const bgColor = [
         'rgba(255, 244, 136, 0.8)',
@@ -226,9 +232,8 @@ function SessionDurationAllAgent() {
                             required
                             value={startDate}
                             className='input'
-                            onChange={(e) => {
-                                setStartDate(e.target.value);
-                            }}
+                            onChange={(e) => handleStartDateChange(e.target.value)}
+
                         />
                     </div>
                     <div>
@@ -238,9 +243,8 @@ function SessionDurationAllAgent() {
                             value={endDate}
                             required
                             className='input'
-                            onChange={(e) => {
-                                setEndDate(e.target.value);
-                            }}
+                            onChange={(e) => handleEndDateChange(e.target.value)}
+
                         />
                     </div>
                     <div className='agent-div'>
@@ -252,9 +256,9 @@ function SessionDurationAllAgent() {
                             onChange={handleAgentChange}
                         >
                             <option value='all'>All</option>
-                            {agentdata.map((agent) => (
-                                <option key={agent.agent.name} value={agent.agent.name}>
-                                    {agent.agent.name}
+                            {allAgents.map((agentName, index) => (
+                                <option key={index} value={agentName}>
+                                    {agentName}
                                 </option>
                             ))}
                         </select>
@@ -281,4 +285,4 @@ function SessionDurationAllAgent() {
     );
 }
 
-export default SessionDurationAllAgent;
+export default SessionDurationChart;

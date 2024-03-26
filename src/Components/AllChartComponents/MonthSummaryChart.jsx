@@ -1,23 +1,21 @@
 import { Spinner } from '@avaya/neo-react';
 import {
+    BarElement,
     CategoryScale,
     Chart as ChartJS,
     Legend,
-    LineElement,
     LinearScale,
-    PointElement,
     Title,
     Tooltip,
 } from 'chart.js';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import html2pdf from 'html2pdf.js';
 import React, { useEffect, useRef, useState } from 'react';
-import { Line } from 'react-chartjs-2';
-import agentdata from '../../utils/licenses.json';
+import { Bar } from 'react-chartjs-2';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-
-function DailyChartAllAgent() {
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+// MonthSummaryCHart
+function MonthSummaryChart({startDate, endDate, handleStartDateChange, handleEndDateChange}) {
     const contentRef = useRef(null);
 
     const convertToPdf = () => {
@@ -26,7 +24,7 @@ function DailyChartAllAgent() {
             filename: 'my-document.pdf',
             margin: 0,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2  },
+            html2canvas: { scale: 2 },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' },
         };
 
@@ -37,22 +35,23 @@ function DailyChartAllAgent() {
         const date = new Date(inputDate);
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const formattedDate = `${year}-${month}-${day}`;
+        const formattedDate = `${year}-${month}`;
         return formattedDate;
     };
 
-    const formatedDate = (date) => {
-        return date.toISOString().split('T')[0];
-    };
+    // const formatedDate = (date) => {
+    //     return date.toISOString().split('T')[0];
+    // };
 
-    const today = new Date();
-    const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
-    const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
-    const formattedToday = formatedDate(today);
+    // const today = new Date();
+    // const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, 1);
+    // const formattedSixMonthsAgo = formatedDate(sixMonthsAgo);
+    // const formattedToday = formatedDate(today);
 
-    const [startDate, setStartDate] = useState(formattedtwoMonthsAgo);
-    const [endDate, setEndDate] = useState(formattedToday);
+    // const [startDate, setStartDate] = useState(formattedSixMonthsAgo);
+    // const [endDate, setEndDate] = useState(formattedToday);
+
+
     const [selectedAgent, setSelectedAgent] = useState('all');
     const [chartData, setChartData] = useState([]);
 
@@ -60,35 +59,44 @@ function DailyChartAllAgent() {
 
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
         const agentSessions = [];
-        const agentsToFetch = agentName
-            ? [agentdata.find((agent) => agent.agent.name === agentName)]
-            : agentdata;
 
-        for (const agent of agentsToFetch) {
-            const cobrowse = new CobrowseAPI(agent.agent.token);
-            try {
-                const sessions = await cobrowse.sessions.list({
-                    activated_after: startDate,
-                    activated_before: endDate,
-                    limit: 10000,
-                });
+        try {
+            const response = await fetch('https://rahul.lab.bravishma.com/cobrowse/accounts');
+            const agentData = await response.json();
 
-                const sessionCounts = {};
-                const mainsessions = sessions.reverse();
-                mainsessions.forEach((session) => {
-                    const date = formatDate(new Date(session.activated));
-                    sessionCounts[date] = (sessionCounts[date] || 0) + 1;
-                });
+            const agentsToFetch = agentName
+                ? agentData.filter((agent) => agent.agentName === agentName)
+                : agentData;
 
-                agentSessions.push({
-                    agentName: agent.agent.name,
-                    sessionCounts: sessionCounts,
-                });
-                setIsLoading(false);
-            } catch (error) {
-                console.error(`Error fetching cobrowse data for agent:`, error);
+            for (const agent of agentsToFetch) {
+                const cobrowse = new CobrowseAPI(agent.token);
+                try {
+                    const sessions = await cobrowse.sessions.list({
+                        activated_after: startDate,
+                        activated_before: endDate,
+                        limit: 10000,
+                    });
+
+                    const sessionCounts = {};
+                    const mainsessions = sessions.reverse();
+                    mainsessions.forEach((session) => {
+                        const monthYear = formatDate(new Date(session.activated));
+                        sessionCounts[monthYear] = (sessionCounts[monthYear] || 0) + 1;
+                    });
+
+                    agentSessions.push({
+                        agentName: agent.agentName, 
+                        sessionCounts: sessionCounts,
+                    });
+                } catch (error) {
+                    console.error(`Error fetching cobrowse data for agent:`, error);
+                }
             }
+        } catch (error) {
+            console.error('Error fetching agent data:', error);
         }
+
+        setIsLoading(false);
         return agentSessions;
     };
 
@@ -96,8 +104,8 @@ function DailyChartAllAgent() {
         const fetchAndProcessData = async () => {
             try {
                 const agentSessions = await fetchDataForAgents(
-                    formattedtwoMonthsAgo,
-                    formattedToday,
+                    startDate,
+                    endDate,
                 );
                 setChartData(agentSessions);
             } catch (error) {
@@ -106,18 +114,17 @@ function DailyChartAllAgent() {
         };
 
         fetchAndProcessData();
-    }, [formattedtwoMonthsAgo, formattedToday]);
+    }, [startDate, endDate]);
 
     const convertAndFormatDate = (userInputDate) => {
         const date = new Date(userInputDate);
         if (!isNaN(date.getTime())) {
             const year = date.getFullYear();
             const month = `0${date.getMonth() + 1}`.slice(-2);
-            const day = `0${date.getDate()}`.slice(-2);
-            const newDate = `${year}-${month}-${day}`;
+            const newDate = `${year}-${month}`;
             return newDate;
         } else {
-            throw new Error('Invalid date format. Please enter a date in MM/DD/YYYY format.');
+            throw new Error('Invalid date format. Please enter a date in MM/YYYY format.');
         }
     };
 
@@ -135,19 +142,19 @@ function DailyChartAllAgent() {
                 formattedToDate,
                 selectedAgent,
             );
-            setChartData(agentSessions1); // Update chartData with data for selected agent
+            setChartData(agentSessions1); 
         }
     };
 
     const handleAgentChange = (e) => {
-        setSelectedAgent(e.target.value); // Update selectedAgent state
+        setSelectedAgent(e.target.value); 
     };
 
     const getChartData = () => {
         const totalSessionCounts = {};
         chartData.forEach((agentData) => {
-            Object.entries(agentData.sessionCounts).forEach(([date, count]) => {
-                totalSessionCounts[date] = (totalSessionCounts[date] || 0) + count;
+            Object.entries(agentData.sessionCounts).forEach(([monthYear, count]) => {
+                totalSessionCounts[monthYear] = (totalSessionCounts[monthYear] || 0) + count;
             });
         });
 
@@ -161,21 +168,21 @@ function DailyChartAllAgent() {
         }
     };
 
-    // const customColors = [
+    const customColors = [
+        'rgba(255, 99, 132, 0.5)',
+        'rgba(53, 162, 235, 0.5)',
+        'rgba(255, 244, 136, 0.8)',
+    ];
 
-    //     // 'rgb(55, 140, 231)',
-    //     // 'rgb(103, 198, 227)'
-    // ];
-
-    const dates = Object.keys(getChartData());
+    const months = Object.keys(getChartData());
 
     const data = {
-        labels: dates,
+        labels: months,
         datasets: [
             {
                 label: selectedAgent === 'all' ? 'All Agents' : selectedAgent,
-                data: dates.map((date) => getChartData()[date] || 0),
-                backgroundColor: 'rgb(83, 86, 255)',
+                data: months.map((month) => getChartData()[month] || 0),
+                backgroundColor: customColors[0],
             },
         ],
     };
@@ -186,7 +193,7 @@ function DailyChartAllAgent() {
         plugins: {
             title: {
                 display: true,
-                text: 'Session Count by Date and Agent',
+                text: 'Session Count by Month and Agent',
             },
             legend: {
                 display: true,
@@ -197,7 +204,7 @@ function DailyChartAllAgent() {
 
     return (
         <div className='main-header'>
-            <h3>DAY SUMMARY CHART</h3>
+            <h3>MONTH SUMMARY CHART </h3>
 
             <div>
                 <form onSubmit={handleSubmitForDates} className='dailycount1'>
@@ -208,7 +215,8 @@ function DailyChartAllAgent() {
                             type='date'
                             id='startDate'
                             value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
+                            onChange={(e) => handleStartDateChange(e.target.value)}
+
                         />
                     </div>
                     <div>
@@ -218,7 +226,8 @@ function DailyChartAllAgent() {
                             type='date'
                             id='endDate'
                             value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
+                            onChange={(e) => handleEndDateChange(e.target.value)}
+
                         />
                     </div>
                     <div>
@@ -231,9 +240,9 @@ function DailyChartAllAgent() {
                                 onChange={handleAgentChange}
                             >
                                 <option value='all'>All</option>
-                                {agentdata.map((agent) => (
-                                    <option key={agent.agent.name} value={agent.agent.name}>
-                                        {agent.agent.name}
+                                {chartData.map((agent) => (
+                                    <option key={agent.agentName} value={agent.agentName}>
+                                        {agent.agentName}
                                     </option>
                                 ))}
                             </select>
@@ -244,12 +253,13 @@ function DailyChartAllAgent() {
                     </button>
                 </form>
             </div>
+
             {isLoading ? (
                 <Spinner size='xl' className='spinner-for-chart' />
             ) : (
                 <>
                     <div ref={contentRef}>
-                        <Line className='daywiseCount' options={options} data={data} />
+                        <Bar className='daywiseCount' options={options} data={data} />
                     </div>
                     <button className='submit-button export' onClick={convertToPdf}>
                         Export to PDF
@@ -260,6 +270,4 @@ function DailyChartAllAgent() {
     );
 }
 
-export default DailyChartAllAgent;
-
-//daywiseCount
+export default MonthSummaryChart;

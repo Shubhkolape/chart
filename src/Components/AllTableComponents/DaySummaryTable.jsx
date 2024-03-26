@@ -2,11 +2,13 @@ import { Icon, Spinner, Tooltip } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import html2pdf from 'html2pdf.js';
 import React, { useEffect, useRef, useState } from 'react';
-import SessionDetailsModal from '../../Components/DateWiseReports/SessionDetailsModal';
-import agentdata from '../../utils/licenses.json';
+import DaySummaryDetailsModel from '../MainSupprotTableComponents/DaySummaryDetailsModel';
 
-function DateWiseTable() {
+
+function DaySummaryTable({startDate, endDate, handleStartDateChange, handleEndDateChange}) {
     const contentRef = useRef(null);
+
+
 
     const convertToPdf = () => {
         const content = contentRef.current;
@@ -30,58 +32,54 @@ function DateWiseTable() {
         return formattedDate;
     };
 
-    const formatedDate = (date) => {
-        return date.toISOString().split('T')[0];
-    };
+    // const [totalSessionCounts, setTotalSessionC  ounts] = useState({});
+    // const [sessionDetails, setSessionDetails] = useState([]);
+    // const [startDate, setStartDate] = useState(formattedtwoMonthsAgo);
+    // const [endDate, setEndDate] = useState(formattedToday);
 
-    const today = new Date();
-    const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
-    const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
-    const formattedToday = formatedDate(today);
-
-    const [startDate, setStartDate] = useState(formattedtwoMonthsAgo);
-    const [endDate, setEndDate] = useState(formattedToday);
     const [selectedAgent, setSelectedAgent] = useState('all');
     const [chartData, setChartData] = useState([]);
-    // const [totalSessionCounts, setTotalSessionCounts] = useState({});
-    // const [sessionDetails, setSessionDetails] = useState([]);
     const [itemsPerPage, setItemsPerPage] = useState(5);
     const [currentPage, setCurrentPage] = useState(1);
     const [showSessionDetailsModal, setShowSessionDetailsModal] = useState(false);
     const [selectedDateSessionDetails, setSelectedDateSessionDetails] = useState([]);
-
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
         const agentSessions = [];
-        const agentsToFetch = agentName
-            ? [agentdata.find((agent) => agent.agent.name === agentName)]
-            : agentdata;
+        try {
+            const response = await fetch('https://rahul.lab.bravishma.com/cobrowse/accounts');
+            const agentData = await response.json();
 
-        for (const agent of agentsToFetch) {
-            const cobrowse = new CobrowseAPI(agent.agent.token);
-            try {
-                const sessions = await cobrowse.sessions.list({
-                    activated_after: startDate,
-                    activated_before: endDate,
-                    limit: 10000,
-                });
+            const agentsToFetch = agentName
+                ? agentData.filter((agent) => agent.agentName === agentName)
+                : agentData;
 
-                const sessionCounts = {};
-                const allSessions = sessions.reverse();
-                allSessions.forEach((session) => {
-                    const date = formatDate(new Date(session.activated));
-                    sessionCounts[date] = (sessionCounts[date] || 0) + 1;
-                });
-
-                agentSessions.push({
-                    agentName: agent.agent.name,
-                    sessionCounts: sessionCounts,
-                    allSessions: allSessions,
-                });
-            } catch (error) {
-                console.error(`Error fetching cobrowse data for agent:`, error);
+            for (const agent of agentsToFetch) {
+                const cobrowse = new CobrowseAPI(agent.token);
+                try {
+                    const sessions = await cobrowse.sessions.list({
+                        activated_after: startDate,
+                        activated_before: endDate,
+                        limit: 10000,
+                    });
+                    const sessionCounts = {};
+                    const allSessions = sessions.reverse();
+                    allSessions.forEach((session) => {
+                        const date = formatDate(new Date(session.activated));
+                        sessionCounts[date] = (sessionCounts[date] || 0) + 1;
+                    });
+                    agentSessions.push({
+                        agentName: agent.agentName,
+                        sessionCounts: sessionCounts,
+                        allSessions: allSessions,
+                    });
+                } catch (error) {
+                    console.error(`Error fetching cobrowse data for agent:`, error);
+                }
             }
+        } catch (error) {
+            console.error('Error fetching agent data:', error);
         }
         setIsLoading(false);
         return agentSessions;
@@ -90,10 +88,7 @@ function DateWiseTable() {
     useEffect(() => {
         const fetchAndProcessData = async () => {
             try {
-                const agentSessions = await fetchDataForAgents(
-                    formattedtwoMonthsAgo,
-                    formattedToday,
-                );
+                const agentSessions = await fetchDataForAgents(startDate, endDate);
                 setChartData(agentSessions);
                 console.log('chartData is -=-=-=-=', chartData);
             } catch (error) {
@@ -102,7 +97,7 @@ function DateWiseTable() {
         };
 
         fetchAndProcessData();
-    }, [formattedtwoMonthsAgo, formattedToday]);
+    }, [startDate, endDate]);
 
     const convertAndFormatDate = (userInputDate) => {
         const date = new Date(userInputDate);
@@ -216,7 +211,7 @@ function DateWiseTable() {
 
     return (
         <div className='main-header'>
-            <h3>DAY SUMMARY CHART</h3>
+            <h3>DAY SUMMARY TABLE</h3>
             <div>
                 <form onSubmit={handleSubmitForDates} className='dailycount1'>
                     <div>
@@ -226,7 +221,7 @@ function DateWiseTable() {
                             type='date'
                             id='startDate'
                             value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
+                            onChange={(e) => handleStartDateChange(e.target.value)}
                         />
                     </div>
                     <div>
@@ -236,7 +231,7 @@ function DateWiseTable() {
                             type='date'
                             id='endDate'
                             value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
+                            onChange={(e) => handleEndDateChange(e.target.value)}
                         />
                     </div>
                     <div>
@@ -249,9 +244,9 @@ function DateWiseTable() {
                                 onChange={handleAgentChange}
                             >
                                 <option value='all'>All</option>
-                                {agentdata.map((agent) => (
-                                    <option key={agent.agent.name} value={agent.agent.name}>
-                                        {agent.agent.name}
+                                {chartData.map((agent) => (
+                                    <option key={agent.agentName} value={agent.agentName}>
+                                        {agent.agentName}
                                     </option>
                                 ))}
                             </select>
@@ -267,7 +262,7 @@ function DateWiseTable() {
                 {isLoading ? (
                     <Spinner size='xl' className='spinner-for-table' />
                 ) : (
-                    <div   className='table-div' >
+                    <div className='table-div'>
                         <table className='license-table'>
                             <thead>
                                 <tr>
@@ -353,9 +348,10 @@ function DateWiseTable() {
                     </div>
                 )}
                 {showSessionDetailsModal && (
-                    <SessionDetailsModal data={selectedDateSessionDetails} />
+                    <DaySummaryDetailsModel data={selectedDateSessionDetails} />
                 )}
             </div>
+
             <button className='submit-button export' onClick={convertToPdf}>
                 Export to PDF
             </button>
@@ -363,4 +359,4 @@ function DateWiseTable() {
     );
 }
 
-export default DateWiseTable;
+export default DaySummaryTable;

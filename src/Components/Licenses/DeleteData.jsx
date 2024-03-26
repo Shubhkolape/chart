@@ -1,6 +1,6 @@
 import React from 'react';
 
-function DeleteData({ selectedAgent, handleClosePopUp, setLicensesData }) {
+function DeleteData({ selectedAgent, handleClosePopUp, SetLicensesData }) {
     const handleDelete = (event) => {
         event.preventDefault()
         
@@ -12,7 +12,7 @@ function DeleteData({ selectedAgent, handleClosePopUp, setLicensesData }) {
         })  
         .then(response => {
             if (response.ok) {
-                setLicensesData(prevData => prevData.filter(agent => agent._id !== selectedAgent._id));
+                SetLicensesData(prevData => prevData.filter(agent => agent._id !== selectedAgent._id));
                 handleClosePopUp();
             } else {
                 throw new Error('Failed to delete data');

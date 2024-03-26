@@ -2,11 +2,13 @@ import { Spinner } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import html2pdf from 'html2pdf.js';
 import React, { useEffect, useRef, useState } from 'react';
-import agentdata from '../../utils/licenses.json';
-
-
-function AverageDurationAllAgent() {
-
+// SessionDurationTable
+function SessionDurationTable({
+    startDate,
+    endDate,
+    handleStartDateChange,
+    handleEndDateChange,
+}) {
     const contentRef = useRef(null);
 
     const convertToPdf = () => {
@@ -26,7 +28,6 @@ function AverageDurationAllAgent() {
         html2pdf().set(options).from(content).save();
     };
 
-
     const formatDate = (inputDate) => {
         const date = new Date(inputDate);
         const year = date.getFullYear();
@@ -36,83 +37,70 @@ function AverageDurationAllAgent() {
         return formattedDate;
     };
 
-    const formatedDate = (date) => {
-        return date.toISOString().split('T')[0];
-    };
-
-    const today = new Date();
-    const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
-    const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
-    const formattedToday = formatedDate(today);
-
-    const [startDate, setStartDate] = useState(formattedtwoMonthsAgo);
-    const [endDate, setEndDate] = useState(formattedToday);
-    const [selectedAgent, setSelectedAgent] = useState('all'); // State to keep track of selected agent
+    const [selectedAgent, setSelectedAgent] = useState('all');
     const [chartData, setChartData] = useState([]);
-
-    // const [sessionDetails, setSessionDetails] = useState([]);
-
     const [isLoading, setIsLoading] = useState(true);
-
-    // const [showSessionDetailsModal, setShowSessionDetailsModal] = useState(false);
-    // const [selectedDateSessionDetails, setSelectedDateSessionDetails] = useState([]);
+    const [allAgents, setAllAgents] = useState([]);
 
     const fetchDataForAgents = async (startDate, endDate, agentName = null) => {
-        const agentSessions = [];
-        const agentsToFetch = agentName
-            ? [agentdata.find((agent) => agent.agent.name === agentName)]
-            : agentdata;
+        try {
+            const response = await fetch('https://rahul.lab.bravishma.com/cobrowse/accounts');
+            const agentdata = await response.json();
+            const agentSessions = [];
 
-        for (const agent of agentsToFetch) {
-            const cobrowse = new CobrowseAPI(agent.agent.token);
-            try {
-                const sessions = await cobrowse.sessions.list({
-                    activated_after: startDate,
-                    activated_before: endDate,
-                    limit: 10000,
-                });
+            const agentsToFetch = agentName
+                ? agentdata.filter((agent) => agent.agentName === agentName)
+                : agentdata;
 
-                const sessionCounts = {};
-                // setSessionDetails(sessions.reverse())
-                const mainsession = sessions.reverse();
-                let totalDuration = 0;
+            for (const agent of agentsToFetch) {
+                const cobrowse = new CobrowseAPI(agent.token);
+                try {
+                    const sessions = await cobrowse.sessions.list({
+                        activated_after: startDate,
+                        activated_before: endDate,
+                        limit: 10000,
+                    });
+                    const sessionCounts = {};
+                    let totalDuration = 0;
 
-                mainsession.forEach((session) => {
-                    const date = formatDate(new Date(session.activated));
-                    sessionCounts[date] = (sessionCounts[date] || 0) + 1;
-                    totalDuration += calculateSessionDuration(session);
-                });
+                    sessions.forEach((session) => {
+                        const date = formatDate(new Date(session.activated));
+                        sessionCounts[date] = (sessionCounts[date] || 0) + 1;
+                        totalDuration += calculateSessionDuration(session);
+                    });
 
-                agentSessions.push({
-                    agentName: agent.agent.name,
-                    sessionCounts: sessionCounts,
-                    totalSessions: sessions.length,
-                    totalDuration: totalDuration,
-                    averageDuration: sessions.length > 0 ? totalDuration / sessions.length : 0,
-                });
-            } catch (error) {
-                console.error(`Error fetching cobrowse data for agent:`, error);
+                    agentSessions.push({
+                        agentName: agent.agentName,
+                        sessionCounts: sessionCounts,
+                        totalSessions: sessions.length,
+                        totalDuration: totalDuration,
+                        averageDuration: sessions.length > 0 ? totalDuration / sessions.length : 0,
+                    });
+                } catch (error) {
+                    console.error(`Error fetching cobrowse data for agent:`, error);
+                }
             }
+            setIsLoading(false);
+            return agentSessions;
+        } catch (error) {
+            console.error('Error fetching agent data:', error);
         }
-        setIsLoading(false);
-        return agentSessions;
     };
 
     useEffect(() => {
         const fetchAndProcessData = async () => {
             try {
-                const agentSessions = await fetchDataForAgents(
-                    formattedtwoMonthsAgo,
-                    formattedToday,
-                );
+                const agentSessions = await fetchDataForAgents(startDate, endDate);
                 setChartData(agentSessions);
+                setAllAgents(agentSessions.map((agent) => agent.agentName));
+                setIsLoading(false);
             } catch (error) {
                 console.error('Error fetching and processing data for all agents:', error);
             }
         };
 
         fetchAndProcessData();
-    }, [formattedtwoMonthsAgo, formattedToday]);
+    }, [startDate, endDate]);
 
     const convertAndFormatDate = (userInputDate) => {
         const date = new Date(userInputDate);
@@ -204,7 +192,7 @@ function AverageDurationAllAgent() {
                             type='date'
                             id='startDate'
                             value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
+                            onChange={(e) => handleStartDateChange(e.target.value)}
                         />
                     </div>
                     <div>
@@ -214,7 +202,7 @@ function AverageDurationAllAgent() {
                             type='date'
                             id='endDate'
                             value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
+                            onChange={(e) => handleEndDateChange(e.target.value)}
                         />
                     </div>
                     <div className='agent-div'>
@@ -226,9 +214,9 @@ function AverageDurationAllAgent() {
                             onChange={handleAgentChange}
                         >
                             <option value='all'>All</option>
-                            {agentdata.map((agent) => (
-                                <option key={agent.agent.name} value={agent.agent.name}>
-                                    {agent.agent.name}
+                            {allAgents.map((agentName, index) => (
+                                <option key={index} value={agentName}>
+                                    {agentName}
                                 </option>
                             ))}
                         </select>
@@ -288,10 +276,10 @@ function AverageDurationAllAgent() {
                 </div>
             </div>
             <button className='submit-button export' onClick={convertToPdf}>
-                        Export to PDF
-                    </button>
+                Export to PDF
+            </button>
         </div>
     );
 }
 
-export default AverageDurationAllAgent;
+export default SessionDurationTable;

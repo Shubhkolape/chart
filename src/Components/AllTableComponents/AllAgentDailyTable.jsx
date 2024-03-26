@@ -11,11 +11,16 @@ import {
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import html2pdf from 'html2pdf.js';
 import React, { useEffect, useRef, useState } from 'react';
-import agentdata from '../../utils/licenses.json';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-function MultiAgentDailyTable() {
+function AllAgentDailyTable({
+    startDate,
+    endDate,
+    handleStartDateChange,
+    handleEndDateChange,
+}
+) {
     const contentRef = useRef(null);
 
     const convertToPdf = () => {
@@ -45,60 +50,71 @@ function MultiAgentDailyTable() {
         return formattedDate;
     };
 
-    const formatedDate = (date) => {
-        return date.toISOString().split('T')[0];
-    };
+    // const formatedDate = (date) => {
+    //     return date.toISOString().split('T')[0];
+    // };
 
-    const today = new Date();
-    const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
-    const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
-    const formattedToday = formatedDate(today);
+    // const today = new Date();
+    // const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 0);
+    // const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
+    // const formattedToday = formatedDate(today);
 
-    const [startDate, setStartDate] = useState(formattedtwoMonthsAgo);
-    const [endDate, setEndDate] = useState(formattedToday);
+    // const [startDate, setStartDate] = useState(formattedtwoMonthsAgo);
+    // const [endDate, setEndDate] = useState(formattedToday);
+    // const [dateCounts, setDateCounts] = useState({});
+
+
 
     const [chartData, setChartData] = useState([]);
-    // const [dateCounts, setDateCounts] = useState({});
 
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchDataForAgents = async (startDate, endDate) => {
         const agentSessions = [];
-
-        for (const agent of agentdata) {
-            const cobrowse = new CobrowseAPI(agent.agent.token);
-            try {
-                const sessions = await cobrowse.sessions.list({
-                    activated_after: startDate,
-                    activated_before: endDate,
-                    limit: 10000,
-                });
-
-                const sessionCounts = {};
-                const mainsessions = sessions.reverse();
-                mainsessions.forEach((session) => {
-                    const date = formatDate(new Date(session.activated));
-                    sessionCounts[date] = (sessionCounts[date] || 0) + 1;
-                });
-
-                agentSessions.push({
-                    agentName: agent.agent.name,
-                    sessionCounts: sessionCounts,
-                });
-            } catch (error) {
-                console.error(`Error fetching cobrowse data for agent :`, error);
+    
+        try {
+            const response = await fetch('https://rahul.lab.bravishma.com/cobrowse/accounts');
+            const agentData = await response.json();
+    
+            for (const agent of agentData) {
+                const cobrowse = new CobrowseAPI(agent.token);
+                try {
+                    const sessions = await cobrowse.sessions.list({
+                        activated_after: startDate,
+                        activated_before: endDate,
+                        limit: 10000,
+                    });
+    
+                    const sessionCounts = {};
+    
+                    sessions.forEach((session) => {
+                        const date = formatDate(new Date(session.activated));
+                        sessionCounts[date] = (sessionCounts[date] || 0) + 1;
+                    });
+    
+                    agentSessions.push({
+                        agentName: agent.agentName, 
+                        sessionCounts: sessionCounts,
+                    });
+                } catch (error) {
+                    console.error(`Error fetching cobrowse data for agent:`, error);
+                }
             }
+        } catch (error) {
+            console.error('Error fetching agent data:', error);
         }
+    
         setIsLoading(false);
         return agentSessions;
     };
+    
 
     useEffect(() => {
         const fetchAndProcessData = async () => {
             try {
                 const agentSessions = await fetchDataForAgents(
-                    formattedtwoMonthsAgo,
-                    formattedToday,
+                    startDate,
+                    endDate,
                 );
                 setChartData(agentSessions);
             } catch (error) {
@@ -107,7 +123,7 @@ function MultiAgentDailyTable() {
         };
 
         fetchAndProcessData();
-    }, [formattedtwoMonthsAgo, formattedToday]);
+    }, [startDate, endDate]);
 
     const convertAndFormatDate = (userInputDate) => {
         const date = new Date(userInputDate);
@@ -151,7 +167,8 @@ function MultiAgentDailyTable() {
                             type='date'
                             id='startDate'
                             value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
+                            onChange={(e) => handleStartDateChange(e.target.value)}
+
                         />
                     </div>
                     <div>
@@ -161,7 +178,8 @@ function MultiAgentDailyTable() {
                             type='date'
                             id='endDate'
                             value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
+                            onChange={(e) => handleEndDateChange(e.target.value)}
+
                         />
                     </div>
                     <button type='submit' className='submit-button'>
@@ -213,4 +231,4 @@ function MultiAgentDailyTable() {
     );
 }
 
-export default MultiAgentDailyTable;
+export default AllAgentDailyTable;

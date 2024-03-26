@@ -12,12 +12,15 @@ import {
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import html2pdf from 'html2pdf.js';
 import React, { useEffect, useRef, useState } from 'react';
-
-import agentdata from '../../utils/licenses.json';
-
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-
-function MultiAgentMonthTable() {
+// AllAgentMonthlyTable  
+function AllAgentMonthlyTable({
+    startDate,
+    endDate,
+    handleStartDateChange,
+    handleEndDateChange,
+}
+) {
     const contentRef = useRef(null);
 
     const convertToPdf = () => {
@@ -37,20 +40,22 @@ function MultiAgentMonthTable() {
         html2pdf().set(options).from(content).save();
     };
 
-    const formatedDate = (date) => {
-        return date.toISOString().split('T')[0];
-    };
+    // const formatedDate = (date) => {
+    //     return date.toISOString().split('T')[0];
+    // };
 
-    const today = new Date();
-    const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 5, 0);
+    // const today = new Date();
+    // const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 5, 0);
 
-    const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
-    const formattedToday = formatedDate(today);
+    // const formattedtwoMonthsAgo = formatedDate(twoMonthsAgo);
+    // const formattedToday = formatedDate(today);
+
+
+    
+    // const [fromDate, setFroDate] = useState(formattedtwoMonthsAgo);
+    // const [toDate, seToDate] = useState(formattedToday);
+    
     const [chartData, setChartData] = useState([]);
-
-    const [fromDate, setFroDate] = useState(formattedtwoMonthsAgo);
-    const [toDate, seToDate] = useState(formattedToday);
-
     const [isLoading, setIsLoading] = useState(true);
 
     const formatDate = (inputDate) => {
@@ -65,43 +70,51 @@ function MultiAgentMonthTable() {
 
     const fetchDataForAgents = async (startDate, endDate) => {
         const agentSessions = [];
-
-        for (const agent of agentdata) {
-            const cobrowse = new CobrowseAPI(agent.agent.token);
-            try {
-                const sessions = await cobrowse.sessions.list({
-                    activated_after: startDate,
-                    activated_before: endDate,
-                    limit: 10000,
-                });
-
-                const sessionCounts = {};
-                const mainsessions = sessions.reverse();
-
-                mainsessions.forEach((session) => {
-                    const date = formatDate(new Date(session.activated));
-                    const month = date.slice(0, 7);
-                    sessionCounts[month] = (sessionCounts[month] || 0) + 1;
-                });
-
-                agentSessions.push({
-                    agentName: agent.agent.name,
-                    sessionCounts: sessionCounts,
-                });
-            } catch (error) {
-                console.error(`Error fetching cobrowse data for agent :`, error);
+    
+        try {
+            const response = await fetch('https://rahul.lab.bravishma.com/cobrowse/accounts'); 
+            const agentData = await response.json();
+    
+            for (const agent of agentData) {
+                const cobrowse = new CobrowseAPI(agent.token);
+                try {
+                    const sessions = await cobrowse.sessions.list({
+                        activated_after: startDate,
+                        activated_before: endDate,
+                        limit: 10000,
+                    });
+    
+                    const sessionCounts = {};
+    
+                    sessions.forEach((session) => {
+                        const date = formatDate(new Date(session.activated));
+                        const month = date.slice(0, 7);
+                        sessionCounts[month] = (sessionCounts[month] || 0) + 1;
+                    });
+    
+                    agentSessions.push({
+                        agentName: agent.agentName,
+                        sessionCounts: sessionCounts,
+                    });
+                } catch (error) {
+                    console.error(`Error fetching cobrowse data for agent:`, error);
+                }
             }
+        } catch (error) {
+            console.error('Error fetching agent data:', error);
         }
+    
         setIsLoading(false);
         return agentSessions;
     };
+    
 
     useEffect(() => {
         const fetchAndProcessData = async () => {
             try {
                 const agentSessions = await fetchDataForAgents(
-                    formattedtwoMonthsAgo,
-                    formattedToday,
+                    startDate,
+                    endDate,
                 );
                 setChartData(agentSessions);
             } catch (error) {
@@ -110,12 +123,12 @@ function MultiAgentMonthTable() {
         };
 
         fetchAndProcessData();
-    }, [formattedtwoMonthsAgo, formattedToday]);
+    }, [startDate, endDate]);
 
     const handleFormSubmit = async (event) => {
         event.preventDefault();
-        const formattedFromDate = formatDate(fromDate);
-        const formattedToday = formatDate(toDate);
+        const formattedFromDate = formatDate(startDate);
+        const formattedToday = formatDate(endDate);
         const agentSessions1 = await fetchDataForAgents(formattedFromDate, formattedToday);
         setChartData(agentSessions1);
         //   setPage(1);
@@ -134,10 +147,9 @@ function MultiAgentMonthTable() {
                             type='date'
                             required
                             className='input'
-                            value={fromDate}
-                            onChange={(e) => {
-                                setFroDate(e.target.value);
-                            }}
+                            value={startDate}
+                            onChange={(e) => handleStartDateChange(e.target.value)}
+
                         />
                     </div>
                     <div>
@@ -145,11 +157,10 @@ function MultiAgentMonthTable() {
                         <input
                             type='date'
                             className='input'
-                            value={toDate}
+                            value={endDate}
                             required
-                            onChange={(e) => {
-                                seToDate(e.target.value);
-                            }}
+                            onChange={(e) => handleEndDateChange(e.target.value)}
+
                         />
                     </div>
                     <button type='submit' className='submit-button' value='Submit'>
@@ -198,4 +209,4 @@ function MultiAgentMonthTable() {
     );
 }
 
-export default MultiAgentMonthTable;
+export default AllAgentMonthlyTable;

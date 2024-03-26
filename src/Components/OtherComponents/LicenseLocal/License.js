@@ -1,6 +1,6 @@
 import html2pdf from 'html2pdf.js';
 import React, { useRef } from 'react';
-import agentData from '../../utils/licenses.json';
+import agentData from '../../../utils/licenses.json';
 
 // npm install @avaya/neo-react --force
 

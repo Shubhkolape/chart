@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-
-function AddNewAgent({ setShowForm, handleClosePopUp, setLicensesData }) {
+function AddNewAgent({ setShowForm, handleClosePopUp, SetLicensesData }) { // Changed setLicensesData to SetLicensesData
     const [agentName, setAgentName] = useState('');
     const [licenseKey, setLicenseKey] = useState('');
     const [accountId, setAccountId] = useState('');
@@ -30,7 +29,7 @@ function AddNewAgent({ setShowForm, handleClosePopUp, setLicensesData }) {
             }
         })
         .then((data) => {
-            setLicensesData(prevData => [...prevData, data]);
+            SetLicensesData(prevData => [...prevData, data]); // Changed to SetLicensesData
             setAgentName('');
             setLicenseKey('');
             setAccountId('');
@@ -55,7 +54,6 @@ function AddNewAgent({ setShowForm, handleClosePopUp, setLicensesData }) {
                         <input
                             className='box-input'
                             type='text'
-                            required
                             value={agentName}
                             onChange={(e) => setAgentName(e.target.value)}
                         />

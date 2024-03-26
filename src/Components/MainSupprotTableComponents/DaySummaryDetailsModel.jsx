@@ -1,7 +1,7 @@
 import { Icon } from '@avaya/neo-react';
 import React, { useState } from 'react';
 
-function SessionDetailsModal({ data }) {
+function DaySummaryDetailsModel({ data }) {
     const calculateDuration = (session) => {
         const activatedTime = new Date(session.activated);
         const endedTime = new Date(session.ended);
@@ -155,4 +155,4 @@ function SessionDetailsModal({ data }) {
     );
 }
 
-export default SessionDetailsModal;
+export default DaySummaryDetailsModel;

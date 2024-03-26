@@ -29,9 +29,9 @@ function LicenseInfo() {
     };
 
     const [LicensesData, SetLicensesData] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [selectedAgent, setSelectedAgent] = useState(null);
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(true);
     const [isDelete, setisDelete] = useState(false);
     const [showForm, setShowForm] = useState(false);
 
@@ -74,7 +74,7 @@ function LicenseInfo() {
             ) : (
                 <>
                     <button onClick={() => setShowForm(true)} className='submit-button'>
-                        Add New Agent
+                        Add New License
                     </button>
 
                     <table ref={contentRef}>

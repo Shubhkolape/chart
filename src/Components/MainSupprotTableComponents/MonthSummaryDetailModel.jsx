@@ -2,7 +2,7 @@ import { Icon } from '@avaya/neo-react';
 import React, { useState } from "react";
 
 
-function KnowMoreMonths({ data }) {
+function MonthSummaryDetailModel({ data }) {
 
 
   const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -182,6 +182,6 @@ function KnowMoreMonths({ data }) {
   );
 }
 
-export default KnowMoreMonths;
+export default MonthSummaryDetailModel;
 
 

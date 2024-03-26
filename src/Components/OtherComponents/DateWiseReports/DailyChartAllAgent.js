@@ -1,7 +1,7 @@
 import { Icon, Tooltip } from '@avaya/neo-react';
 import CobrowseAPI from 'cobrowse-agent-sdk';
 import React, { useEffect, useState } from 'react';
-import agentdata from '../../utils/licenses.json';
+import agentdata from '../../../utils/licenses.json';
 import SessionDetailsModal from './SessionDetailsModal';
 
 
