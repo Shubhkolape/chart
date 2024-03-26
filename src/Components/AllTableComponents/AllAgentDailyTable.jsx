@@ -87,7 +87,7 @@ function AllAgentDailyTable({
     
                     const sessionCounts = {};
     
-                    sessions.forEach((session) => {
+                    sessions.reverse().forEach((session) => {
                         const date = formatDate(new Date(session.activated));
                         sessionCounts[date] = (sessionCounts[date] || 0) + 1;
                     });

@@ -81,7 +81,7 @@ function DaySummaryChart({startDate, endDate, handleStartDateChange, handleEndDa
                     });
     
                     const sessionCounts = {};
-                    sessions.forEach((session) => {
+                    sessions.reverse().forEach((session) => {
                         const date = formatDate(new Date(session.activated));
                         sessionCounts[date] = (sessionCounts[date] || 0) + 1;
                     });
@@ -109,6 +109,7 @@ function DaySummaryChart({startDate, endDate, handleStartDateChange, handleEndDa
                     endDate,
                 );
                 setChartData(agentSessions);
+                console.log("chartData is -=-=-=-=-", chartData);
             } catch (error) {
                 console.error('Error fetching and processing data for all agents:', error);
             }

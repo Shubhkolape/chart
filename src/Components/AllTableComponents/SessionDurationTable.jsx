@@ -63,7 +63,7 @@ function SessionDurationTable({
                     const sessionCounts = {};
                     let totalDuration = 0;
 
-                    sessions.forEach((session) => {
+                    sessions.reverse().forEach((session) => {
                         const date = formatDate(new Date(session.activated));
                         sessionCounts[date] = (sessionCounts[date] || 0) + 1;
                         totalDuration += calculateSessionDuration(session);

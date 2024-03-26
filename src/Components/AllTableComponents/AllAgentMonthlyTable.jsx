@@ -86,7 +86,7 @@ function AllAgentMonthlyTable({
     
                     const sessionCounts = {};
     
-                    sessions.forEach((session) => {
+                    sessions.reverse().forEach((session) => {
                         const date = formatDate(new Date(session.activated));
                         const month = date.slice(0, 7);
                         sessionCounts[month] = (sessionCounts[month] || 0) + 1;
